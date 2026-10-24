@@ -10,7 +10,7 @@ def walk(v):
         for x in v:
             yield from walk(x)
 
-for path in Path('data/inspection').glob('*.json'):
+for path in (Path(__file__).resolve().parents[1]/'data/inspection').glob('*.json'):
     if path.name not in ('next.json',) and not path.name.startswith('detail-'):
         continue
     data = json.loads(path.read_text(encoding='utf-8'))

@@ -22,7 +22,7 @@ report={'summary':summary,'sqlite_integrity':integrity,
         'without_photos':sum(not d['photos'] for d in documents),
         'field_errors':sum(len(d['errors']) for d in documents),
         'non_single_attempt_jobs':attempts,'error_events':errors}
-out=Path('data/verification')
+out=Path(__file__).resolve().parents[1]/'data/verification'
 out.mkdir(parents=True,exist_ok=True)
 (out/'integrity.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
 print(json.dumps(report,ensure_ascii=False,indent=2))

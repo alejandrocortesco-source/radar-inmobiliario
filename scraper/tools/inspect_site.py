@@ -9,7 +9,7 @@ from playwright.async_api import async_playwright
 URL = 'https://www.metrocuadrado.com/inmuebles/venta/bogota/la-carolina?search=form'
 
 async def main():
-    out = Path('data/inspection')
+    out = Path(__file__).resolve().parents[1]/'data/inspection'
     out.mkdir(parents=True, exist_ok=True)
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)

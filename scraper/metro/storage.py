@@ -3,6 +3,7 @@ import sqlite3
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
+from .paths import DEFAULT_DB
 
 
 def now():
@@ -14,7 +15,7 @@ def dumps(value):
 
 
 class Store:
-    def __init__(self, path='data/metro.sqlite'):
+    def __init__(self, path=DEFAULT_DB):
         self.path = str(path)
         Path(path).parent.mkdir(parents=True, exist_ok=True)
         with self.connect() as db:

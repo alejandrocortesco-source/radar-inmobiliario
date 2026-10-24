@@ -6,7 +6,7 @@ from urllib.parse import urlsplit
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from metro.extraction import sanitize
 
-for file in Path('data/inspection').glob('*.json'):
+for file in (Path(__file__).resolve().parents[1]/'data/inspection').glob('*.json'):
     data=sanitize(json.loads(file.read_text(encoding='utf-8')))
     if file.name=='listing.json':
         data['scripts']=[{**s,'src':urlsplit(s['src']).path} for s in data.get('scripts',[])

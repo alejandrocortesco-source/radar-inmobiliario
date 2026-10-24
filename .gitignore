@@ -28,3 +28,9 @@ service-account*.json
 *.key
 *.p12
 *.pfx
+
+# Temporales locales, también dentro de cada componente
+.tmp/
+tmp/
+*.tmp
+*.bak

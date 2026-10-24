@@ -5,6 +5,7 @@ No ejecuta JavaScript incrustado. Lee JSON y selecciona objetos de datos públic
 import hashlib
 import json
 import re
+import math
 from decimal import Decimal, InvalidOperation
 from urllib.parse import urljoin, urlsplit, urlunsplit, parse_qsl, urlencode
 
@@ -168,6 +169,44 @@ def detail_from_records(records, property_id):
     return sanitize(max(candidates, key=lambda x: sum(isinstance(v, (dict,list)) for v in x.values())))
 
 
+def add_location_fields(document, url):
+    """Enlaces derivados de las coordenadas públicas; no infiere una dirección.
+
+    El mapa Leaflet del portal no publica un href propio para el marcador.
+    Su sección #location-section se inspeccionó en una ficha real.
+    """
+    raw = document.get('sources', {}).get('flight_property') or document.get('extra') or {}
+    coords = raw.get('coordinates')
+    evidence = {'coordinates': coords, 'ubicacionaproximada': raw.get('ubicacionaproximada')}
+    status, error = 'absent', None
+    map_url = portal_map_url = None
+    if isinstance(coords, dict) and coords.get('lat') is not None and coords.get('lon') is not None:
+        try:
+            lat, lon = number(coords['lat']), number(coords['lon'])
+            if isinstance(lat, bool) or isinstance(lon, bool) or not math.isfinite(lat) or not math.isfinite(lon) or not -90 <= lat <= 90 or not -180 <= lon <= 180:
+                raise ValueError('Coordenadas fuera del intervalo válido')
+            lat_text, lon_text = str(lat), str(lon)
+            map_url = f'https://www.openstreetmap.org/?mlat={lat_text}&mlon={lon_text}#map=16/{lat_text}/{lon_text}'
+            portal_map_url = canonical(url) + '#location-section'
+            status = 'present'
+        except (ValueError, TypeError) as exc:
+            status, error = 'error', str(exc)
+    elif coords is not None and not isinstance(coords, dict):
+        status, error = 'error', 'Objeto de coordenadas no válido'
+    normalized = document.setdefault('normalized', {})
+    fields = document.setdefault('fields', {})
+    for name, value, source in (
+        ('map_url', map_url, 'derived: flight.coordinates → OpenStreetMap'),
+        ('portal_map_url', portal_map_url, 'derived: canonical URL + observed #location-section'),
+    ):
+        normalized[name] = value
+        fields[name] = {'status': status, 'raw': evidence, 'source': source, 'derived': True}
+        if error:
+            fields[name]['error'] = error
+    # No altera los originales ni vuelve a fechar la captura de un anuncio enriquecido.
+    return document
+
+
 def normalize_detail(raw, url, visible_text='', ld=None, dom_media=None):
     normalized = {'id': raw['propertyId'], 'url': canonical(url)}
     fields = {}
@@ -232,9 +271,14 @@ def normalize_detail(raw, url, visible_text='', ld=None, dom_media=None):
     if raw.get('imageLink'):
         photos.append(raw['imageLink'])
     photos.extend((dom_media or {}).get('photos',[]))
-    return {'schema_version':1, 'normalized':normalized, 'fields':fields,
+    document = {'schema_version':1, 'normalized':normalized, 'fields':fields,
             'features':features, 'photos':list(dict.fromkeys(photos)),
             'media':dom_media or {}, 'extra':raw,
             'sources':{'flight_property':raw,'json_ld':sanitize(ld or [])},
             'visible_text':visible_text, 'errors':errors,
             'quality':'partial' if errors else 'success'}
+    add_location_fields(document, url)
+    if document['fields']['map_url']['status'] == 'error':
+        document['errors'].append({'field':'map_url','error':document['fields']['map_url']['error']})
+        document['quality'] = 'partial'
+    return document

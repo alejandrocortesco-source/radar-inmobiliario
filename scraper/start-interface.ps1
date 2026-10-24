@@ -1,6 +1,10 @@
 $ErrorActionPreference = 'Stop'
 $projectRoot = $PSScriptRoot
 $pythonPath = Join-Path $projectRoot '.venv\Scripts\python.exe'
+if (-not (Test-Path -LiteralPath $pythonPath)) {
+    # Conserva la compatibilidad con el entorno creado antes de la reorganización.
+    $pythonPath = Join-Path (Split-Path -Parent $projectRoot) '.venv\Scripts\python.exe'
+}
 $dataPath = Join-Path $projectRoot 'data'
 $baseUrl = 'http://127.0.0.1:8000'
 
@@ -21,7 +25,8 @@ if (-not (Test-Path -LiteralPath $pythonPath)) {
     throw 'No se encontró .venv. Instala las dependencias siguiendo el README.'
 }
 New-Item -ItemType Directory -Path $dataPath -Force | Out-Null
-$serverProcess = Start-Process -FilePath $pythonPath -ArgumentList '-m', 'metro', 'serve' `
+$entryPath = Join-Path $projectRoot 'run.py'
+$serverProcess = Start-Process -FilePath $pythonPath -ArgumentList ('"{0}" serve' -f $entryPath) `
     -WorkingDirectory $projectRoot -WindowStyle Hidden -PassThru `
     -RedirectStandardOutput (Join-Path $dataPath 'interface.stdout.log') `
     -RedirectStandardError (Join-Path $dataPath 'interface.stderr.log')

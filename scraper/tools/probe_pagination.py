@@ -28,7 +28,9 @@ async def main():
         await page.wait_for_function("document.querySelector('.rc-pagination-item-active')?.textContent === '2'")
         await page.wait_for_timeout(3000)
         print('AFTER',page.url,await page.locator('.rc-pagination-item-active').inner_text())
-        Path('data/inspection/pagination.json').write_text(json.dumps(captures,ensure_ascii=False,indent=2),encoding='utf-8')
+        out=Path(__file__).resolve().parents[1]/'data/inspection'
+        out.mkdir(parents=True,exist_ok=True)
+        (out/'pagination.json').write_text(json.dumps(captures,ensure_ascii=False,indent=2),encoding='utf-8')
         print([(x['path'], list(x['data']),len(x['data'].get('results',[]))) for x in captures])
         await browser.close()
 

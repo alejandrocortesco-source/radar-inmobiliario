@@ -7,11 +7,12 @@ from pathlib import Path
 
 from .scraper import Config, Scraper, DEFAULT_URL
 from .storage import Store
+from .paths import DEFAULT_DB
 
 
 def main():
     parser = argparse.ArgumentParser(description='Scraper público de Metrocuadrado')
-    parser.add_argument('--db',default=os.getenv('METRO_DB','data/metro.sqlite'))
+    parser.add_argument('--db',default=os.getenv('METRO_DB',str(DEFAULT_DB)))
     sub = parser.add_subparsers(dest='command',required=True)
     scrape = sub.add_parser('scrape',help='Descubrir y procesar fichas sin servidor web')
     scrape.add_argument('--url',default=DEFAULT_URL)

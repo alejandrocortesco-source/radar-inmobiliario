@@ -4,14 +4,16 @@ from pathlib import Path
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
+from . import __version__
 from .storage import Store
+from .paths import DEFAULT_DB
 
-app = FastAPI(title='Metrocuadrado · Revisión local',version='1.0.0')
+app = FastAPI(title='Metrocuadrado · Revisión local',version=__version__)
 templates = Jinja2Templates(directory=str(Path(__file__).parent/'templates'))
 templates.env.filters['from_json'] = json.loads
 
 def store():
-    return Store(os.getenv('METRO_DB','data/metro.sqlite'))
+    return Store(os.getenv('METRO_DB',str(DEFAULT_DB)))
 
 def rows(run_id=None,q='',status='',property_type='',limit=30,offset=0):
     filters, args = ['1=1'], []
@@ -28,7 +30,7 @@ def rows(run_id=None,q='',status='',property_type='',limit=30,offset=0):
     sql = ' FROM jobs j JOIN properties p ON p.id=j.property_id WHERE '+' AND '.join(filters)
     with store().connect() as db:
         total=db.execute('SELECT count(*)'+sql,args).fetchone()[0]
-        result=[dict(r) for r in db.execute("SELECT p.id,p.url,json_extract(j.data_json,'$.normalized.title') title,json_extract(j.data_json,'$.normalized.price') price,json_extract(j.data_json,'$.normalized.city') city,json_extract(j.data_json,'$.normalized.property_type') property_type,j.status,j.attempts,j.error,j.updated,j.run_id"+sql+' ORDER BY p.id LIMIT ? OFFSET ?',(*args,limit,offset))]
+        result=[dict(r) for r in db.execute("SELECT p.id,p.url,json_extract(j.data_json,'$.normalized.title') title,json_extract(j.data_json,'$.normalized.price') price,json_extract(j.data_json,'$.normalized.city') city,json_extract(j.data_json,'$.normalized.property_type') property_type,json_extract(j.data_json,'$.normalized.map_url') map_url,json_extract(j.data_json,'$.normalized.portal_map_url') portal_map_url,j.status,j.attempts,j.error,j.updated,j.run_id"+sql+' ORDER BY p.id LIMIT ? OFFSET ?',(*args,limit,offset))]
     return {'total':total,'items':result,'limit':limit,'offset':offset}
 
 @app.get('/health')

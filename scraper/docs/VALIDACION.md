@@ -1,5 +1,7 @@
 # Validación realizada — 24 de octubre de 2026
 
+Este informe describe la ejecución original del componente. Tras su reorganización, las rutas de datos, código, herramientas y pruebas indicadas aquí son relativas a `scraper/`. Los datos originales se conservaron en `scraper/data/`, excluidos de Git. Para comandos desde la raíz con el entorno existente, usar `.venv\Scripts\python.exe scraper\run.py`; las instrucciones actuales están en [el README del scraper](../README.md).
+
 ## Resultado real
 
 Búsqueda: https://www.metrocuadrado.com/inmuebles/venta/bogota/la-carolina?search=form
@@ -53,3 +55,23 @@ Los campos no publicados permanecen ausentes. «Ficha correcta» significa que e
 * Navegación y errores: tablas `pages` y `events`, y `data/scraper.log`.
 * Inspecciones: `data/inspection/`; muestras mínimas: `tests/fixtures/`.
 * Capturas de interfaz: `data/verification/dashboard.png`, `detail.png`, `mobile.png`.
+
+## Comprobación tras reorganizar Radar Inmobiliario
+
+El 24/10/2026 se movió el componente a `scraper/`, conservando `.git` en la raíz, el commit `646bf7be11addc9a852b90b7eff8631c742f38c9` y la etiqueta `v0.1.0`. No se modificó la configuración de remotos ni se hizo commit o push de la reorganización.
+
+* **17 pruebas aprobadas** desde la raíz (`.venv\Scripts\python.exe -m pytest -c scraper/pytest.ini -q`) y desde `scraper/` (`..\.venv\Scripts\python.exe -m pytest -q`). Incluyen la ejecución del punto de entrada desde una carpeta ajena y la resolución de rutas de datos.
+* `scraper/run.py status 1` y `python -m metro status 1` desde el componente acceden a los **427 anuncios originales**. La base trasladada conserva `integrity_check = ok`, 427 fichas correctas y ninguna fallida.
+* Una nueva prueba real limitada a una página y una ficha guardó **51 enlaces** y **1 ficha correcta**, en `scraper/data/reorganization-check.sqlite`. Su estado `incomplete` y salida 2 son los esperados por los límites de prueba; no alteró la ejecución original.
+* El lanzador `scraper/start-interface.ps1` inició FastAPI desde su nueva ubicación con el entorno existente de la raíz. Chromium verificó listado y detalle, vistas de escritorio y móvil, sin errores JavaScript; el documento móvil mantuvo 390 px de ancho.
+* Se comprobaron las exclusiones Git de datos, bases de prueba, `.venv`, `.env` y cachés. Los 30 archivos de la versión anterior se conservaron en sus ubicaciones correspondientes. No hay repositorios Git anidados.
+
+No se volvió a recorrer toda la búsqueda durante esta comprobación ni se repitieron las pruebas de Docker o Chromium visible; permanecen los límites documentados anteriormente. El entorno virtual existente se mantiene en la raíz, ignorado por Git, para evitar romper las rutas de Windows. Las instalaciones nuevas pueden crear su entorno dentro de `scraper/`.
+
+## Campo de ubicación en mapa
+
+Se inspeccionó `#location-section` en el consultorio `3312-M7166280`, activando la carga diferida de la sección como hace el botón «Ver lugares cercanos». El mapa Leaflet usa las coordenadas públicas de la ficha; sus enlaces de atribución no son enlaces al inmueble y el botón de nueva búsqueda abre el mapa general. Por ello `map_url` es un enlace derivado a OpenStreetMap y `portal_map_url` apunta a la sección original. Ambos conservan evidencia y `derived: true` en `fields`.
+
+El enriquecimiento local dejó **425 anuncios con mapa y 2 ausentes por falta de coordenadas**, sin modificar fechas ni estados originales. SQLite mantuvo `integrity_check = ok`. La exportación local también se regeneró con los campos nuevos. Una extracción real limitada a una página y una ficha, en `data/location-check.sqlite`, confirmó que las nuevas capturas los guardan automáticamente.
+
+**28 pruebas aprobadas**, incluidos datos reales, coordenadas ausentes e inválidas, indicación de ubicación aproximada, persistencia, API y exportación. Chromium comprobó el botón de mapa en la interfaz del consultorio señalado; captura en `data/verification/location.png`. No se hizo commit ni push.

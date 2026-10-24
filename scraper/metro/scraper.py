@@ -13,6 +13,7 @@ from .extraction import (ExtractionError, Restricted, detail_from_records, finge
                          flight_records, listing_from_records, listing_links,
                          normalize_detail, sanitize)
 from .storage import Store, dumps, now
+from .paths import DEFAULT_DB
 
 log = logging.getLogger('metro')
 DEFAULT_URL = 'https://www.metrocuadrado.com/inmuebles/venta/bogota/la-carolina?search=form'
@@ -21,7 +22,7 @@ DEFAULT_URL = 'https://www.metrocuadrado.com/inmuebles/venta/bogota/la-carolina?
 @dataclass
 class Config:
     url: str = DEFAULT_URL
-    db: str = 'data/metro.sqlite'
+    db: str = str(DEFAULT_DB)
     headed: bool = False
     concurrency: int = 2
     delay: float = 1.5
