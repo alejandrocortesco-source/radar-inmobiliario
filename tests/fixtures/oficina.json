@@ -1,0 +1,243 @@
+{
+  "raw": {
+    "propertyId": "3220-M4843647",
+    "publicationId": null,
+    "propertyType": {
+      "id": "3",
+      "nombre": "Oficina"
+    },
+    "businessType": "venta",
+    "businessTypeId": "1",
+    "publicationStatus": "S",
+    "salePrice": 1300000000,
+    "rentPrice": null,
+    "rentTotalPrice": 0,
+    "area": 222,
+    "areac": 222,
+    "areaPrivada": null,
+    "rooms": null,
+    "bathrooms": "2",
+    "garages": "4",
+    "city": {
+      "id": "1",
+      "nombre": "Bogotá D.C."
+    },
+    "zone": {
+      "id": "1",
+      "nombre": "Norte"
+    },
+    "sector": {
+      "nombre": "Country"
+    },
+    "ptags": null,
+    "neighborhood": "PELODO DEL CONTRY",
+    "commonNeighborhood": "La Carolina",
+    "comment": "LA CAROLINA OFICINA EN VENTA \n\nAMPLIA OFICINA 222M2, TOTALMENTE REMODELADA, 2 BAÑOS, COCINA AMPLIA\n\n4 PARQUEADEROS CUBIERTOS, NDEPENDIENTES CON FACIL ACCESO, BAÑOS PLUBLICOS\n\nVIGILANCIA 24 HORA, CAMARA DE SEGURIDAD PRECIO DE VENTA $1.300.000.000 NEGOCIABLE \n\nADMIRELA, AGENDE VISITA CON NOSOTROS. CEL. 318. TRES NOVENTA TREINTA SEIS UNO \n",
+    "detail": {
+      "firstImage": "3220-M4843647_41",
+      "adminPrice": null,
+      "urlDetail": "/inmueble/venta-oficina-bogota-pelodo-del-contry-2-banos-4-garajes/3220-M4843647",
+      "micrositeId": null
+    },
+    "companyId": "2558",
+    "projectName": null,
+    "salesRoomAddress": null,
+    "salesRoomSchedule": [],
+    "companyName": "IBS INVERSIONES BUITRAGO SERRANO SAS",
+    "companyAddress": "SANTA ANA ORIENTAL ",
+    "companyImage": "https://www.metrocuadrado.com/files/logos/company/2558/company2558.jpeg",
+    "projectLogo": null,
+    "companyLink": "https://www.metrocuadrado.com/inmobiliaria/ibs-inversiones-buitrago-serrano-sas/2558",
+    "companySeoUrl": "ibs-inversiones-buitrago-serrano-sas",
+    "contactPhone": "3204935678",
+    "whatsapp": "3204935678",
+    "propertyState": "Usado",
+    "coordinates": {
+      "lon": -74.03288,
+      "lat": 4.7033367
+    },
+    "title": "Oficina en Venta, La Carolina, Bogotá D.C.",
+    "shortTitle": "Oficina en Venta, La Carolina",
+    "subtitle": "Sector Country, Bogotá D.C.",
+    "link": "https://www.metrocuadrado.com/inmueble/venta-oficina-bogota-pelodo-del-contry-2-banos-4-garajes/3220-M4843647",
+    "imageLink": "https://multimedia.metrocuadrado.com/3220-M4843647/3220-M4843647_41_h.jpg",
+    "whatsappMessage": "Hola, estoy interesado en el anuncio con ID: 3220-M4843647 que encontré en Metrocuadrado. Oficina en Venta, La Carolina, Bogotá D.C. ",
+    "images": [
+      {
+        "id": "3220-M4843647_41",
+        "image": "https://multimedia.metrocuadrado.com/3220-M4843647/3220-M4843647_41_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3220-M4843647/3220-M4843647_41_x.jpg"
+      },
+      {
+        "id": "3220-M4843647_42",
+        "image": "https://multimedia.metrocuadrado.com/3220-M4843647/3220-M4843647_42_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3220-M4843647/3220-M4843647_42_x.jpg"
+      },
+      {
+        "id": "3220-M4843647_43",
+        "image": "https://multimedia.metrocuadrado.com/3220-M4843647/3220-M4843647_43_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3220-M4843647/3220-M4843647_43_x.jpg"
+      },
+      {
+        "id": "3220-M4843647_44",
+        "image": "https://multimedia.metrocuadrado.com/3220-M4843647/3220-M4843647_44_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3220-M4843647/3220-M4843647_44_x.jpg"
+      },
+      {
+        "id": "3220-M4843647_45",
+        "image": "https://multimedia.metrocuadrado.com/3220-M4843647/3220-M4843647_45_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3220-M4843647/3220-M4843647_45_x.jpg"
+      },
+      {
+        "id": "3220-M4843647_46",
+        "image": "https://multimedia.metrocuadrado.com/3220-M4843647/3220-M4843647_46_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3220-M4843647/3220-M4843647_46_x.jpg"
+      },
+      {
+        "id": "3220-M4843647_47",
+        "image": "https://multimedia.metrocuadrado.com/3220-M4843647/3220-M4843647_47_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3220-M4843647/3220-M4843647_47_x.jpg"
+      },
+      {
+        "id": "3220-M4843647_48",
+        "image": "https://multimedia.metrocuadrado.com/3220-M4843647/3220-M4843647_48_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3220-M4843647/3220-M4843647_48_x.jpg"
+      },
+      {
+        "id": "3220-M4843647_49",
+        "image": "https://multimedia.metrocuadrado.com/3220-M4843647/3220-M4843647_49_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3220-M4843647/3220-M4843647_49_x.jpg"
+      },
+      {
+        "id": "3220-M4843647_50",
+        "image": "https://multimedia.metrocuadrado.com/3220-M4843647/3220-M4843647_50_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3220-M4843647/3220-M4843647_50_x.jpg"
+      },
+      {
+        "id": "3220-M4843647_51",
+        "image": "https://multimedia.metrocuadrado.com/3220-M4843647/3220-M4843647_51_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3220-M4843647/3220-M4843647_51_x.jpg"
+      },
+      {
+        "id": "3220-M4843647_52",
+        "image": "https://multimedia.metrocuadrado.com/3220-M4843647/3220-M4843647_52_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3220-M4843647/3220-M4843647_52_x.jpg"
+      },
+      {
+        "id": "3220-M4843647_53",
+        "image": "https://multimedia.metrocuadrado.com/3220-M4843647/3220-M4843647_53_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3220-M4843647/3220-M4843647_53_x.jpg"
+      },
+      {
+        "id": "3220-M4843647_54",
+        "image": "https://multimedia.metrocuadrado.com/3220-M4843647/3220-M4843647_54_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3220-M4843647/3220-M4843647_54_x.jpg"
+      },
+      {
+        "id": "3220-M4843647_55",
+        "image": "https://multimedia.metrocuadrado.com/3220-M4843647/3220-M4843647_55_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3220-M4843647/3220-M4843647_55_x.jpg"
+      },
+      {
+        "id": "3220-M4843647_56",
+        "image": "https://multimedia.metrocuadrado.com/3220-M4843647/3220-M4843647_56_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3220-M4843647/3220-M4843647_56_x.jpg"
+      },
+      {
+        "id": "3220-M4843647_57",
+        "image": "https://multimedia.metrocuadrado.com/3220-M4843647/3220-M4843647_57_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3220-M4843647/3220-M4843647_57_x.jpg"
+      },
+      {
+        "id": "3220-M4843647_58",
+        "image": "https://multimedia.metrocuadrado.com/3220-M4843647/3220-M4843647_58_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3220-M4843647/3220-M4843647_58_x.jpg"
+      },
+      {
+        "id": "3220-M4843647_59",
+        "image": "https://multimedia.metrocuadrado.com/3220-M4843647/3220-M4843647_59_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3220-M4843647/3220-M4843647_59_x.jpg"
+      },
+      {
+        "id": "3220-M4843647_60",
+        "image": "https://multimedia.metrocuadrado.com/3220-M4843647/3220-M4843647_60_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3220-M4843647/3220-M4843647_60_x.jpg"
+      }
+    ],
+    "featured": [
+      {
+        "title": "Interiores",
+        "items": [
+          "Alarma",
+          "Número de piso 4"
+        ]
+      },
+      {
+        "title": "Exteriores",
+        "items": [
+          "Vigilancia"
+        ]
+      }
+    ],
+    "builtTime": "Más de 20 años",
+    "stratum": "6",
+    "isOcasional": false,
+    "isProject": false,
+    "isUsed": true,
+    "isSale": true,
+    "isLease": false,
+    "priceFrom": null,
+    "priceUp": null,
+    "fee": null,
+    "areacFrom": null,
+    "areacUp": null,
+    "areaFrom": null,
+    "areaUp": null,
+    "video": "https://youtu.be/mIODGeGTaj8",
+    "deliverDate": null,
+    "breadcrumb": {
+      "h1": "Oficinas en Venta en La carolina, Bogotá D.C.",
+      "links": [
+        {
+          "text": "Oficinas",
+          "url": "/oficinas/"
+        },
+        {
+          "text": "Venta",
+          "url": "/oficinas/venta/"
+        },
+        {
+          "text": "Bogotá D.C.",
+          "url": "/oficinas/venta/bogota/"
+        },
+        {
+          "text": "La carolina",
+          "url": "/oficinas/venta/bogota/la-carolina/"
+        }
+      ]
+    },
+    "backUrl": "/oficinas/venta/",
+    "titleSeo": "Venta de Oficina en La carolina - Bogotá D.C. - 3220-M4843647",
+    "descriptionSeo": "Oficina en venta en La carolina, Bogotá D.C., 2 baños, 4 garajes, Estrato 6, al mejor precio, vea las fotos. 3220-M4843647",
+    "linkSeo": "https://www.metrocuadrado.com/inmueble/venta-oficina-bogota-pelodo-del-contry-2-banos-4-garajes/3220-M4843647",
+    "roomsFrom": null,
+    "roomsTo": null,
+    "bathroomsFrom": null,
+    "bathroomsTo": null,
+    "localPhone": null,
+    "mcontactosucursal_celular1": "3204935678W",
+    "signwall": "N",
+    "codigoexterno": null,
+    "haswhatsappbot": "S",
+    "campaign": null,
+    "destacadopro": "I",
+    "packages": null,
+    "cobertura": [],
+    "ubicacionaproximada": "N",
+    "typeHousingProject": null,
+    "feria": null,
+    "highlight": false
+  },
+  "text": "1 / 21\nOficina En Venta, La Carolina\nLa Carolina, Bogotá D.C.\nOficina\nUsado\nAcerca de este inmueble\nLA CAROLINA OFICINA EN VENTA AMPLIA OFICINA 222M2, TOTALMENTE REMODELADA, 2 BAÑOS, COCINA AMPLIA 4 PARQUEADEROS CUBIERTOS, NDEPENDIENTES CON FACIL ACCESO, BAÑOS PLUBLICOS VIGILANCIA 24 HORA, CAMARA DE SEGURIDAD PRECIO DE VENTA $1.300.000.000 NEGOCIABLE ADMIRELA, AGENDE VISITA CON NOSOTROS. CEL. 318. TRES NOVENTA TREINTA SEIS UNO\nVer lugares cercanos\nIBS INVERSIONES BUITRAGO SERRANO SAS\nAntigüedad: Más de 20 años\nBarrio común: La Carolina\nCódigo: 3220-M4843647\nReportar anuncio\nCaracterísticas del inmueble\nAlarma\nNúmero de piso 4\nVigilancia\n¿Aún no encuentras tu lugar ideal?\nInicia tu búsqueda personalizada\nIniciar\nResultados de búsqueda\n$ 1.300.000.000\nÁrea Construida 222m²\nÁrea Privada 222m²\nEstrato 6\n¿Te interesa este inmueble?\nWhatsApp\nLlamar\nContactar\nAl hacer clic en Contactar por WhatsApp, la información que intercambies por ese medio será responsabilidad del anunciante.\nSimula y solicita tu crédito para vivienda\nSolicitar\nCotiza el sistema de alarma para este inmueble con Prosegur.\nCotiza\nUtilizamos ‘cookies‘ propias y de terceros para gestionar el portal, elaborar información estadística, optimizar la funcionalidad del sitio y mostrar publicidad relacionada con sus preferencias a través del análisis de la navegación. Más información.\nAceptar",
+  "url": "https://www.metrocuadrado.com/inmueble/venta-oficina-bogota-pelodo-del-contry-2-banos-4-garajes/3220-M4843647"
+}

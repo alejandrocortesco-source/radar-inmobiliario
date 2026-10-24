@@ -1,0 +1,294 @@
+{
+  "raw": {
+    "propertyId": "3604-M6687194",
+    "publicationId": null,
+    "propertyType": {
+      "id": "1",
+      "nombre": "Apartamento"
+    },
+    "businessType": "venta",
+    "businessTypeId": "1",
+    "publicationStatus": "S",
+    "salePrice": 3800000000,
+    "rentPrice": 0,
+    "rentTotalPrice": 0,
+    "area": 400,
+    "areac": 400,
+    "areaPrivada": null,
+    "rooms": "4",
+    "bathrooms": "4",
+    "garages": "3",
+    "city": {
+      "id": "1",
+      "nombre": "Bogotá D.C."
+    },
+    "zone": {
+      "id": "1",
+      "nombre": "Norte"
+    },
+    "sector": {
+      "nombre": "Country"
+    },
+    "ptags": null,
+    "neighborhood": "LA CAROLINA",
+    "commonNeighborhood": "LA CAROLINA USAQUEN",
+    "comment": "Hermoso apartamento ubicado en el Barrio La Carolina, uno de los sectores más cotizados del norte de Bogotá, cuenta con 400 m²  y esta totalmente remodelado. cuenta con espacios amplios y llenos de luz natural.\n\nLo que lo hace destacar:\n\n-400 m² totalmente remodelados\n-Diseño interior contemporáneo con mobiliario de alto nivel\n-Iluminación arquitectónica cálida en todos los ambientes\n-4 habitaciones | 4 baños\n-Sala y comedor independientes\n-Walk-in closet de gran tamaño\n-Baños tipo spa con tina y enchapes premium\n-Cocina abierta con barra y electrodomésticos de alta gama\n-3 parqueaderos\n-Cuarto y baño de servicio\n\nUbicado en una zona privilegiada de Usaquén, cerca de centros comerciales, parques, restaurantes y con excelentes vías de acceso.\n\nSe vende a puerta cerrada (con mobiliario incluido). Opción de venta sin muebles.",
+    "detail": {
+      "firstImage": "3604-M6687194_1",
+      "adminPrice": 990000,
+      "urlDetail": "/inmueble/venta-apartamento-bogota-la-carolina-4-habitaciones-4-banos-3-garajes/3604-M6687194",
+      "micrositeId": null
+    },
+    "companyId": "2893",
+    "projectName": null,
+    "salesRoomAddress": null,
+    "salesRoomSchedule": [],
+    "companyName": "LILIANA MEDINA",
+    "companyAddress": "Carrera 78A # 6B-28",
+    "companyImage": "/microsites/lilianamedinam2/img/logo.gif",
+    "projectLogo": null,
+    "companyLink": "https://www.metrocuadrado.com/inmobiliaria/liliana-medina/2893",
+    "companySeoUrl": "liliana-medina",
+    "contactPhone": "3103076663",
+    "whatsapp": "3103076663",
+    "propertyState": "Usado",
+    "coordinates": {
+      "lon": -74.04062,
+      "lat": 4.7078457
+    },
+    "title": "Apartamento en Venta, LA CAROLINA USAQUEN, Bogotá D.C.",
+    "shortTitle": "Apartamento en Venta, LA CAROLINA USAQUEN",
+    "subtitle": "Sector Country, Bogotá D.C.",
+    "link": "https://www.metrocuadrado.com/inmueble/venta-apartamento-bogota-la-carolina-4-habitaciones-4-banos-3-garajes/3604-M6687194",
+    "imageLink": "https://multimedia.metrocuadrado.com/3604-M6687194/3604-M6687194_1_h.jpg",
+    "whatsappMessage": "Hola, estoy interesado en el anuncio con ID: 3604-M6687194 que encontré en Metrocuadrado. Apartamento en Venta, LA CAROLINA USAQUEN, Bogotá D.C. ",
+    "images": [
+      {
+        "id": "3604-M6687194_1",
+        "image": "https://multimedia.metrocuadrado.com/3604-M6687194/3604-M6687194_1_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3604-M6687194/3604-M6687194_1_x.jpg"
+      },
+      {
+        "id": "3604-M6687194_2",
+        "image": "https://multimedia.metrocuadrado.com/3604-M6687194/3604-M6687194_2_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3604-M6687194/3604-M6687194_2_x.jpg"
+      },
+      {
+        "id": "3604-M6687194_3",
+        "image": "https://multimedia.metrocuadrado.com/3604-M6687194/3604-M6687194_3_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3604-M6687194/3604-M6687194_3_x.jpg"
+      },
+      {
+        "id": "3604-M6687194_4",
+        "image": "https://multimedia.metrocuadrado.com/3604-M6687194/3604-M6687194_4_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3604-M6687194/3604-M6687194_4_x.jpg"
+      },
+      {
+        "id": "3604-M6687194_5",
+        "image": "https://multimedia.metrocuadrado.com/3604-M6687194/3604-M6687194_5_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3604-M6687194/3604-M6687194_5_x.jpg"
+      },
+      {
+        "id": "3604-M6687194_6",
+        "image": "https://multimedia.metrocuadrado.com/3604-M6687194/3604-M6687194_6_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3604-M6687194/3604-M6687194_6_x.jpg"
+      },
+      {
+        "id": "3604-M6687194_7",
+        "image": "https://multimedia.metrocuadrado.com/3604-M6687194/3604-M6687194_7_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3604-M6687194/3604-M6687194_7_x.jpg"
+      },
+      {
+        "id": "3604-M6687194_8",
+        "image": "https://multimedia.metrocuadrado.com/3604-M6687194/3604-M6687194_8_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3604-M6687194/3604-M6687194_8_x.jpg"
+      },
+      {
+        "id": "3604-M6687194_9",
+        "image": "https://multimedia.metrocuadrado.com/3604-M6687194/3604-M6687194_9_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3604-M6687194/3604-M6687194_9_x.jpg"
+      },
+      {
+        "id": "3604-M6687194_10",
+        "image": "https://multimedia.metrocuadrado.com/3604-M6687194/3604-M6687194_10_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3604-M6687194/3604-M6687194_10_x.jpg"
+      },
+      {
+        "id": "3604-M6687194_11",
+        "image": "https://multimedia.metrocuadrado.com/3604-M6687194/3604-M6687194_11_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3604-M6687194/3604-M6687194_11_x.jpg"
+      },
+      {
+        "id": "3604-M6687194_12",
+        "image": "https://multimedia.metrocuadrado.com/3604-M6687194/3604-M6687194_12_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3604-M6687194/3604-M6687194_12_x.jpg"
+      },
+      {
+        "id": "3604-M6687194_13",
+        "image": "https://multimedia.metrocuadrado.com/3604-M6687194/3604-M6687194_13_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3604-M6687194/3604-M6687194_13_x.jpg"
+      },
+      {
+        "id": "3604-M6687194_14",
+        "image": "https://multimedia.metrocuadrado.com/3604-M6687194/3604-M6687194_14_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3604-M6687194/3604-M6687194_14_x.jpg"
+      },
+      {
+        "id": "3604-M6687194_15",
+        "image": "https://multimedia.metrocuadrado.com/3604-M6687194/3604-M6687194_15_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3604-M6687194/3604-M6687194_15_x.jpg"
+      },
+      {
+        "id": "3604-M6687194_16",
+        "image": "https://multimedia.metrocuadrado.com/3604-M6687194/3604-M6687194_16_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3604-M6687194/3604-M6687194_16_x.jpg"
+      },
+      {
+        "id": "3604-M6687194_17",
+        "image": "https://multimedia.metrocuadrado.com/3604-M6687194/3604-M6687194_17_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3604-M6687194/3604-M6687194_17_x.jpg"
+      },
+      {
+        "id": "3604-M6687194_18",
+        "image": "https://multimedia.metrocuadrado.com/3604-M6687194/3604-M6687194_18_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3604-M6687194/3604-M6687194_18_x.jpg"
+      },
+      {
+        "id": "3604-M6687194_19",
+        "image": "https://multimedia.metrocuadrado.com/3604-M6687194/3604-M6687194_19_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3604-M6687194/3604-M6687194_19_x.jpg"
+      },
+      {
+        "id": "3604-M6687194_20",
+        "image": "https://multimedia.metrocuadrado.com/3604-M6687194/3604-M6687194_20_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3604-M6687194/3604-M6687194_20_x.jpg"
+      }
+    ],
+    "featured": [
+      {
+        "title": "Interiores",
+        "items": [
+          "Apto para niños",
+          "Citófonos",
+          "Estudio o biblioteca",
+          "Hall de Alcobas",
+          "Zona de lavanderia",
+          "Extractor",
+          "Horno",
+          "Tipo instalación de gas natural",
+          "Lavaplatos",
+          "Luz en la mañana",
+          "Luz en la tarde",
+          "Número de Closets 4",
+          "Número de piso 00",
+          "Tipo de calentador gas",
+          "Tipo de Cocina isla",
+          "Tipo comedor comedor independiente",
+          "Depósito 1",
+          "Tipo de estufa gas",
+          "Vista interior",
+          "Walking closet"
+        ]
+      },
+      {
+        "title": "Exteriores",
+        "items": [
+          "Acceso para discapacitados",
+          "Circuito cerrado de TV",
+          "Parqueadero cubierto",
+          "Vista panorámica",
+          "Conjunto cerrado",
+          "Tipo de parqueadero propio",
+          "Vigilancia 24hrs"
+        ]
+      },
+      {
+        "title": "Zonas comunes",
+        "items": [
+          "Cerca a gimnasio ",
+          "Cerca a hospitales",
+          "Cerca a Jardines y Colegios",
+          "Cerca a parque industrial",
+          "Cerca a restaurantes",
+          "Cerca a tiendas de barrio",
+          "Salón  comunal",
+          "Zona de BBQ",
+          "Zona para niños",
+          "Zonas verdes"
+        ]
+      },
+      {
+        "title": "Del sector",
+        "items": [
+          "Cerca Centros Comerciales",
+          "Cerca Colegios / Universidades",
+          "Cerca Parques",
+          "Cerca Supermercados",
+          "Cerca Transporte Público",
+          "Sobre vía principal",
+          "Sobre vía secundaria"
+        ]
+      }
+    ],
+    "builtTime": "Entre 10 y 20 años",
+    "stratum": "6",
+    "isOcasional": false,
+    "isProject": false,
+    "isUsed": true,
+    "isSale": true,
+    "isLease": false,
+    "priceFrom": null,
+    "priceUp": null,
+    "fee": null,
+    "areacFrom": null,
+    "areacUp": null,
+    "areaFrom": null,
+    "areaUp": null,
+    "video": null,
+    "deliverDate": null,
+    "breadcrumb": {
+      "h1": "Apartamentos en Venta en La carolina usaquen, Bogotá D.C.",
+      "links": [
+        {
+          "text": "Apartamentos",
+          "url": "/apartamentos/"
+        },
+        {
+          "text": "Venta",
+          "url": "/apartamentos/venta/"
+        },
+        {
+          "text": "Bogotá D.C.",
+          "url": "/apartamentos/venta/bogota/"
+        },
+        {
+          "text": "La carolina usaquen",
+          "url": "/apartamentos/venta/bogota/la-carolina-usaquen/"
+        }
+      ]
+    },
+    "backUrl": "/apartamentos/venta/",
+    "titleSeo": "Venta de Apartamento en La carolina usaquen - Bogotá D.C. - 3604-M6687194",
+    "descriptionSeo": "Apartamento en venta en La carolina usaquen, Bogotá D.C., 4 habitaciones, 4 baños, 3 garajes, Estrato 6, al mejor precio, vea las fotos. 3604-M6687194",
+    "linkSeo": "https://www.metrocuadrado.com/inmueble/venta-apartamento-bogota-la-carolina-4-habitaciones-4-banos-3-garajes/3604-M6687194",
+    "roomsFrom": null,
+    "roomsTo": null,
+    "bathroomsFrom": null,
+    "bathroomsTo": null,
+    "localPhone": "6016099282",
+    "mcontactosucursal_celular1": "3103076663W",
+    "signwall": "N",
+    "codigoexterno": null,
+    "haswhatsappbot": "S",
+    "campaign": null,
+    "destacadopro": "I",
+    "packages": null,
+    "cobertura": [],
+    "ubicacionaproximada": "S",
+    "typeHousingProject": null,
+    "feria": null,
+    "highlight": false
+  },
+  "text": "1 / 21\nApartamento En Venta, LA CAROLINA USAQUEN\nLA CAROLINA USAQUEN, Bogotá D.C.\nApartamento\nUsado\nAcerca de este inmueble\nHermoso apartamento ubicado en el Barrio La Carolina, uno de los sectores más cotizados del norte de Bogotá, cuenta con 400 m² y esta totalmente remodelado. cuenta con espacios amplios y llenos de luz natural. Lo que lo hace destacar: -400 m² totalmente remodelados -Diseño interior contemporáneo con mobiliario de alto nivel -Iluminación arquitectónica cálida en todos los ambientes -4 habitaciones | 4 baños -Sala y comedor independientes -Walk-in closet de gran tamaño -Baños tipo spa con tina y enchapes premium -Cocina abierta con barra y electrodomésticos de alta gama -3 parqueaderos -Cuarto y baño de servicio Ubicado en una zona privilegiada de Usaquén, cerca de centros comerciales, parques, restaurantes y con excelentes vías de acceso. Se vende a puerta cerrada (con mobiliario incluido). Opción de venta sin muebles.\nVer mas\nVer lugares cercanos\nLILIANA MEDINA\nAntigüedad: Entre 10 y 20 años\nBarrio común: LA CAROLINA USAQUEN\nCódigo: 3604-M6687194\nReportar anuncio\nCaracterísticas del inmueble\nApto para niños\nCitófonos\nEstudio o biblioteca\nHall de Alcobas\nZona de lavanderia\nExtractor\nHorno\nTipo instalación de gas natural\nLavaplatos\nLuz en la mañana\nLuz en la tarde\nNúmero de Closets 4\nNúmero de piso 00\nTipo de calentador gas\nTipo de Cocina isla\nTipo comedor comedor independiente\nDepósito 1\nTipo de estufa gas\nVista interior\nWalking closet\nCerca a gimnasio\nCerca a hospitales\nCerca a Jardines y Colegios\nCerca a parque industrial\nCerca a restaurantes\nCerca a tiendas de barrio\nSalón comunal\nZona de BBQ\nZona para niños\nZonas verdes\nAcceso para discapacitados\nCircuito cerrado de TV\nParqueadero cubierto\nVista panorámica\nConjunto cerrado\nTipo de parqueadero propio\nVigilancia 24hrs\nCerca Centros Comerciales\nCerca Colegios / Universidades\nCerca Parques\nCerca Supermercados\nCerca Transporte Público\nSobre vía principal\nSobre vía secundaria\n¿Aún no encuentras tu lugar ideal?\nInicia tu búsqueda personalizada\nIniciar\nResultados de búsqueda\n$ 3.800.000.000\nAdministración: $ 990.000 COP\nÁrea Construida 400m²\nÁrea Privada 400m²\nEstrato 6\n¿Te interesa este inmueble?\nWhatsApp\nLlamar\nContactar\nAl hacer clic en Contactar por WhatsApp, la información que intercambies por ese medio será responsabilidad del anunciante.\nSimula y solicita tu crédito para vivienda\nSolicitar\nCotiza el sistema de alarma para este inmueble con Prosegur.\nCotiza\nUtilizamos ‘cookies‘ propias y de terceros para gestionar el portal, elaborar información estadística, optimizar la funcionalidad del sitio y mostrar publicidad relacionada con sus preferencias a través del análisis de la navegación. Más información.\nAceptar",
+  "url": "https://www.metrocuadrado.com/inmueble/venta-apartamento-bogota-la-carolina-4-habitaciones-4-banos-3-garajes/3604-M6687194?src_url=%2Finmuebles%2Fventa%2Fbogota%2Fla-carolina%3Fsearch%3Dform"
+}

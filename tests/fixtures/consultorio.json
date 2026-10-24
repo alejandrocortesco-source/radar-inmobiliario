@@ -1,0 +1,277 @@
+{
+  "raw": {
+    "propertyId": "3312-M7166280",
+    "publicationId": null,
+    "propertyType": {
+      "id": "5",
+      "nombre": "Consultorio"
+    },
+    "businessType": "venta",
+    "businessTypeId": "1",
+    "publicationStatus": "S",
+    "salePrice": 1100000000,
+    "rentPrice": 0,
+    "rentTotalPrice": 0,
+    "area": 60,
+    "areac": 60,
+    "areaPrivada": null,
+    "rooms": null,
+    "bathrooms": "1",
+    "garages": "1",
+    "city": {
+      "id": "1",
+      "nombre": "Bogotá D.C."
+    },
+    "zone": {
+      "id": "1",
+      "nombre": "Norte"
+    },
+    "sector": {
+      "nombre": "Country"
+    },
+    "ptags": null,
+    "neighborhood": "LA CAROLINA",
+    "commonNeighborhood": "LA CAROLINA",
+    "comment": "!!!!OPORTUNIDADA EXCELENTE Y PRIVILEGIADA UBICACIÓN!!!Consultorio Médico de 60 m2 con excelentes acabados, espacio abierto con bastante iluminación y vista. Con parqueadero  propio, batería de baños por piso y zonas comunes que constan de tres salas de juntas modulares, terraza comunal con cafetería para empleados, lobby amplio con sala de espera, recepción con torniquetes, parqueadero de visitantes. Edificio moderno esquinero en el corazón del norte de la ciudad, frente a Unicentro, en el sector de la Carolina. ",
+    "detail": {
+      "firstImage": "3312-M7166280_13",
+      "adminPrice": 1178000,
+      "urlDetail": "/inmueble/venta-consultorio-bogota-la-carolina-1-banos-1-garajes/3312-M7166280",
+      "micrositeId": null
+    },
+    "companyId": "2332",
+    "projectName": null,
+    "salesRoomAddress": null,
+    "salesRoomSchedule": [],
+    "companyName": "VIVIENDA ACTUAL",
+    "companyAddress": "carrera 22 # 122-90",
+    "companyImage": "https://www.metrocuadrado.com/files/logos/company/2332/company2332.jpeg",
+    "projectLogo": null,
+    "companyLink": "https://www.metrocuadrado.com/inmobiliaria/vivienda-actual/2332",
+    "companySeoUrl": "vivienda-actual",
+    "contactPhone": "3107690839",
+    "whatsapp": "3107690839",
+    "propertyState": "Usado",
+    "coordinates": {
+      "lon": -74.041885,
+      "lat": 4.704409
+    },
+    "title": "Consultorio en Venta, LA CAROLINA, Bogotá D.C.",
+    "shortTitle": "Consultorio en Venta, LA CAROLINA",
+    "subtitle": "Sector Country, Bogotá D.C.",
+    "link": "https://www.metrocuadrado.com/inmueble/venta-consultorio-bogota-la-carolina-1-banos-1-garajes/3312-M7166280",
+    "imageLink": "https://multimedia.metrocuadrado.com/3312-M7166280/3312-M7166280_13_h.jpg",
+    "whatsappMessage": "Hola, estoy interesado en el anuncio con ID: 3312-M7166280 que encontré en Metrocuadrado. Consultorio en Venta, LA CAROLINA, Bogotá D.C. ",
+    "images": [
+      {
+        "id": "3312-M7166280_13",
+        "image": "https://multimedia.metrocuadrado.com/3312-M7166280/3312-M7166280_13_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3312-M7166280/3312-M7166280_13_x.jpg"
+      },
+      {
+        "id": "3312-M7166280_14",
+        "image": "https://multimedia.metrocuadrado.com/3312-M7166280/3312-M7166280_14_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3312-M7166280/3312-M7166280_14_x.jpg"
+      },
+      {
+        "id": "3312-M7166280_18",
+        "image": "https://multimedia.metrocuadrado.com/3312-M7166280/3312-M7166280_18_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3312-M7166280/3312-M7166280_18_x.jpg"
+      },
+      {
+        "id": "3312-M7166280_19",
+        "image": "https://multimedia.metrocuadrado.com/3312-M7166280/3312-M7166280_19_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3312-M7166280/3312-M7166280_19_x.jpg"
+      },
+      {
+        "id": "3312-M7166280_23",
+        "image": "https://multimedia.metrocuadrado.com/3312-M7166280/3312-M7166280_23_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3312-M7166280/3312-M7166280_23_x.jpg"
+      },
+      {
+        "id": "3312-M7166280_4",
+        "image": "https://multimedia.metrocuadrado.com/3312-M7166280/3312-M7166280_4_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3312-M7166280/3312-M7166280_4_x.jpg"
+      },
+      {
+        "id": "3312-M7166280_1",
+        "image": "https://multimedia.metrocuadrado.com/3312-M7166280/3312-M7166280_1_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3312-M7166280/3312-M7166280_1_x.jpg"
+      },
+      {
+        "id": "3312-M7166280_2",
+        "image": "https://multimedia.metrocuadrado.com/3312-M7166280/3312-M7166280_2_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3312-M7166280/3312-M7166280_2_x.jpg"
+      },
+      {
+        "id": "3312-M7166280_8",
+        "image": "https://multimedia.metrocuadrado.com/3312-M7166280/3312-M7166280_8_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3312-M7166280/3312-M7166280_8_x.jpg"
+      },
+      {
+        "id": "3312-M7166280_9",
+        "image": "https://multimedia.metrocuadrado.com/3312-M7166280/3312-M7166280_9_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3312-M7166280/3312-M7166280_9_x.jpg"
+      },
+      {
+        "id": "3312-M7166280_28",
+        "image": "https://multimedia.metrocuadrado.com/3312-M7166280/3312-M7166280_28_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3312-M7166280/3312-M7166280_28_x.jpg"
+      },
+      {
+        "id": "3312-M7166280_20",
+        "image": "https://multimedia.metrocuadrado.com/3312-M7166280/3312-M7166280_20_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3312-M7166280/3312-M7166280_20_x.jpg"
+      },
+      {
+        "id": "3312-M7166280_21",
+        "image": "https://multimedia.metrocuadrado.com/3312-M7166280/3312-M7166280_21_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3312-M7166280/3312-M7166280_21_x.jpg"
+      },
+      {
+        "id": "3312-M7166280_29",
+        "image": "https://multimedia.metrocuadrado.com/3312-M7166280/3312-M7166280_29_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3312-M7166280/3312-M7166280_29_x.jpg"
+      },
+      {
+        "id": "3312-M7166280_22",
+        "image": "https://multimedia.metrocuadrado.com/3312-M7166280/3312-M7166280_22_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3312-M7166280/3312-M7166280_22_x.jpg"
+      },
+      {
+        "id": "3312-M7166280_6",
+        "image": "https://multimedia.metrocuadrado.com/3312-M7166280/3312-M7166280_6_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3312-M7166280/3312-M7166280_6_x.jpg"
+      },
+      {
+        "id": "3312-M7166280_27",
+        "image": "https://multimedia.metrocuadrado.com/3312-M7166280/3312-M7166280_27_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3312-M7166280/3312-M7166280_27_x.jpg"
+      },
+      {
+        "id": "3312-M7166280_16",
+        "image": "https://multimedia.metrocuadrado.com/3312-M7166280/3312-M7166280_16_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3312-M7166280/3312-M7166280_16_x.jpg"
+      },
+      {
+        "id": "3312-M7166280_26",
+        "image": "https://multimedia.metrocuadrado.com/3312-M7166280/3312-M7166280_26_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3312-M7166280/3312-M7166280_26_x.jpg"
+      },
+      {
+        "id": "3312-M7166280_30",
+        "image": "https://multimedia.metrocuadrado.com/3312-M7166280/3312-M7166280_30_x.jpg",
+        "imageMobile": "https://multimedia.metrocuadrado.com/3312-M7166280/3312-M7166280_30_x.jpg"
+      }
+    ],
+    "featured": [
+      {
+        "title": "Interiores",
+        "items": [
+          "Alarma Contra Incendio",
+          "Citófonos",
+          "Detección de humo",
+          "Equipado",
+          "Escalera de Emergencia",
+          "Número de líneas teléfonicas 0",
+          "Número de piso 2",
+          "Puerta de seguridad",
+          "Tipo consultorio médico",
+          "Vista exterior"
+        ]
+      },
+      {
+        "title": "Exteriores",
+        "items": [
+          "Ascensor",
+          "Bahias de parqueo",
+          "Acceso para discapacitados",
+          "Generador eléctrico",
+          "Número de Ascensores 2",
+          "Recepción Lobby",
+          "Sistema contra incendio",
+          "Vigilancia 24hrs"
+        ]
+      },
+      {
+        "title": "Zonas comunes",
+        "items": [
+          "Cerca a gimnasio ",
+          "Cerca a hospitales"
+        ]
+      },
+      {
+        "title": "Del sector",
+        "items": [
+          "Cerca Centros Comerciales",
+          "Cerca Colegios / Universidades",
+          "Cerca Parques",
+          "Cerca Supermercados",
+          "Cerca Transporte Público",
+          "Sobre vía principal",
+          "Sobre vía secundaria"
+        ]
+      }
+    ],
+    "builtTime": "Entre 0 y 5 años",
+    "stratum": "6",
+    "isOcasional": false,
+    "isProject": false,
+    "isUsed": true,
+    "isSale": true,
+    "isLease": false,
+    "priceFrom": null,
+    "priceUp": null,
+    "fee": null,
+    "areacFrom": null,
+    "areacUp": null,
+    "areaFrom": null,
+    "areaUp": null,
+    "video": null,
+    "deliverDate": null,
+    "breadcrumb": {
+      "h1": "Consultorios en Venta en La carolina, Bogotá D.C.",
+      "links": [
+        {
+          "text": "Consultorios",
+          "url": "/consultorios/"
+        },
+        {
+          "text": "Venta",
+          "url": "/consultorios/venta/"
+        },
+        {
+          "text": "Bogotá D.C.",
+          "url": "/consultorios/venta/bogota/"
+        },
+        {
+          "text": "La carolina",
+          "url": "/consultorios/venta/bogota/la-carolina/"
+        }
+      ]
+    },
+    "backUrl": "/consultorios/venta/",
+    "titleSeo": "Venta de Consultorio en La carolina - Bogotá D.C. - 3312-M7166280",
+    "descriptionSeo": "Consultorio en venta en La carolina, Bogotá D.C., 1 baños, 1 garajes, Estrato 6, al mejor precio, vea las fotos. 3312-M7166280",
+    "linkSeo": "https://www.metrocuadrado.com/inmueble/venta-consultorio-bogota-la-carolina-1-banos-1-garajes/3312-M7166280",
+    "roomsFrom": null,
+    "roomsTo": null,
+    "bathroomsFrom": null,
+    "bathroomsTo": null,
+    "localPhone": "6012142188",
+    "mcontactosucursal_celular1": null,
+    "signwall": "N",
+    "codigoexterno": null,
+    "haswhatsappbot": "S",
+    "campaign": null,
+    "destacadopro": "I",
+    "packages": null,
+    "cobertura": [],
+    "ubicacionaproximada": "N",
+    "typeHousingProject": null,
+    "feria": null,
+    "highlight": false
+  },
+  "text": "1 / 21\nConsultorio En Venta, LA CAROLINA\nLA CAROLINA, Bogotá D.C.\nConsultorio\nUsado\nAcerca de este inmueble\n!!!!OPORTUNIDADA EXCELENTE Y PRIVILEGIADA UBICACIÓN!!!Consultorio Médico de 60 m2 con excelentes acabados, espacio abierto con bastante iluminación y vista. Con parqueadero propio, batería de baños por piso y zonas comunes que constan de tres salas de juntas modulares, terraza comunal con cafetería para empleados, lobby amplio con sala de espera, recepción con torniquetes, parqueadero de visitantes. Edificio moderno esquinero en el corazón del norte de la ciudad, frente a Unicentro, en el sector de la Carolina.\nVer lugares cercanos\nVIVIENDA ACTUAL\nAntigüedad: Entre 0 y 5 años\nBarrio común: LA CAROLINA\nCódigo: 3312-M7166280\nReportar anuncio\nCaracterísticas del inmueble\nAlarma Contra Incendio\nCitófonos\nDetección de humo\nEquipado\nEscalera de Emergencia\nNúmero de líneas teléfonicas 0\nNúmero de piso 2\nPuerta de seguridad\nTipo consultorio médico\nVista exterior\nCerca a gimnasio\nCerca a hospitales\nAscensor\nBahias de parqueo\nAcceso para discapacitados\nGenerador eléctrico\nNúmero de Ascensores 2\nRecepción Lobby\nSistema contra incendio\nVigilancia 24hrs\nCerca Centros Comerciales\nCerca Colegios / Universidades\nCerca Parques\nCerca Supermercados\nCerca Transporte Público\nSobre vía principal\nSobre vía secundaria\n¿Aún no encuentras tu lugar ideal?\nInicia tu búsqueda personalizada\nIniciar\nResultados de búsqueda\n$ 1.100.000.000\nAdministración: $ 1.178.000 COP\nÁrea Construida 60m²\nÁrea Privada 60m²\nEstrato 6\n¿Te interesa este inmueble?\nWhatsApp\nLlamar\nContactar\nAl hacer clic en Contactar por WhatsApp, la información que intercambies por ese medio será responsabilidad del anunciante.\nSimula y solicita tu crédito para vivienda\nSolicitar\nCotiza el sistema de alarma para este inmueble con Prosegur.\nCotiza\nUtilizamos ‘cookies‘ propias y de terceros para gestionar el portal, elaborar información estadística, optimizar la funcionalidad del sitio y mostrar publicidad relacionada con sus preferencias a través del análisis de la navegación. Más información.\nAceptar",
+  "url": "https://www.metrocuadrado.com/inmueble/venta-consultorio-bogota-la-carolina-1-banos-1-garajes/3312-M7166280"
+}
