@@ -34,3 +34,8 @@ service-account*.json
 tmp/
 *.tmp
 *.bak
+
+# Mediciones generadas, también si se elige otra carpeta de salida
+resource_usage.csv
+resource_usage.csv.lock
+samples-*.csv

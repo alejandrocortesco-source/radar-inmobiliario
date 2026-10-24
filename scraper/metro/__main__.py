@@ -24,6 +24,8 @@ def main():
     scrape.add_argument('--resume',type=int)
     scrape.add_argument('--max-pages',type=int,help='Límite explícito de prueba; ejecución incompleta')
     scrape.add_argument('--max-details',type=int,help='Límite explícito de prueba; ejecución incompleta')
+    scrape.add_argument('--metrics-dir',help='Carpeta de CSV de recursos; predeterminado: metrics junto a SQLite')
+    scrape.add_argument('--resource-interval',type=float,default=0.2,help='Segundos entre muestras de CPU/RAM (0.05–60)')
     show = sub.add_parser('status')
     show.add_argument('run',type=int)
     web = sub.add_parser('serve')

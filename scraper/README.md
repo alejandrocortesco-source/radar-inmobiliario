@@ -56,6 +56,8 @@ En Windows, desde `scraper/`, usar `.\start-interface.ps1` para dejar la interfa
 
 Opciones del scraper: `--url`, `--headed`, `--concurrency` (1–4, predeterminado 2), `--delay` (pausa mínima global entre inicios de navegación, predeterminada 1.5 s más variación), `--timeout` (milisegundos, 45000), `--retries` (2, es decir hasta 3 intentos). Para una prueba pequeña: `scrape --max-pages 2 --max-details 5`. Los límites de prueba **no** declaran una extracción completa. Cambiar la base con `python -m metro --db otra.sqlite scrape` o con `METRO_DB`.
 
+Cada ejecución mide automáticamente duración en segundos/minutos, CPU y pico RAM observado de Python y todo el árbol de Playwright/Chromium. Imprime un resumen y añade una fila a `data/metrics/resource_usage.csv`, además de un CSV con las muestras temporales; la carpeta queda junto a la base utilizada. No modifica los documentos de resultados. Opciones: `--resource-interval 0.2` (segundos, predeterminado) y `--metrics-dir` para otra carpeta. Detalles, unidades, limitaciones y uso para dimensionar Cloud Run: [monitoreo de recursos](docs/RECURSOS.md).
+
 Código de salida 0: listado terminado y todas las fichas procesadas (correctas o parciales). Código 2: incompleto, bloqueado o fallido. Las fichas parciales siguen identificadas como tales. `Ctrl+C` conserva los checkpoints. Un bloqueo, CAPTCHA visible o HTTP 401/403/429 detiene nuevas solicitudes y conserva el avance; no hay evasión, sesiones persistentes, proxies ni resolución automática de desafíos.
 
 ## Fuentes y selectores inspeccionados

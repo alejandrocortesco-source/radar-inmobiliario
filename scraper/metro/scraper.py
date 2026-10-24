@@ -14,6 +14,7 @@ from .extraction import (ExtractionError, Restricted, detail_from_records, finge
                          normalize_detail, sanitize)
 from .storage import Store, dumps, now
 from .paths import DEFAULT_DB
+from .resource_monitor import ResourceMonitor, print_summary
 
 log = logging.getLogger('metro')
 DEFAULT_URL = 'https://www.metrocuadrado.com/inmuebles/venta/bogota/la-carolina?search=form'
@@ -31,6 +32,8 @@ class Config:
     max_pages: int | None = None
     max_details: int | None = None
     resume: int | None = None
+    metrics_dir: str | None = None
+    resource_interval: float = 0.2
 
     def validate(self):
         if urlsplit(self.url).hostname not in ('www.metrocuadrado.com','metrocuadrado.com'):
@@ -39,6 +42,9 @@ class Config:
             raise ValueError('Concurrencia 1–4, pausa >=0.5, timeout >=1000 y reintentos 0–5')
         if any(v is not None and v < 1 for v in (self.max_pages,self.max_details)):
             raise ValueError('Los límites de prueba deben ser positivos')
+        import math
+        if not math.isfinite(self.resource_interval) or not 0.05 <= self.resource_interval <= 60:
+            raise ValueError('Intervalo de recursos entre 0.05 y 60 segundos')
 
 
 async def check_access(page, response=None):
@@ -263,6 +269,32 @@ class Scraper:
         await asyncio.gather(*(worker() for _ in range(self.cfg.concurrency)))
 
     async def run(self):
+        # Envuelve la ejecución existente; no cambia descubrimiento ni extracción.
+        monitor = None
+        status = 'failed'
+        try:
+            try:
+                monitor = ResourceMonitor(
+                    self.cfg.metrics_dir or Path(self.cfg.db).resolve().parent/'metrics',
+                    interval=self.cfg.resource_interval,
+                ).start()
+            except Exception as exc:
+                log.warning('No se pudo iniciar el monitor de recursos: %s', exc)
+            result = await self._run()
+            status = result['status']
+            return result
+        except (KeyboardInterrupt, asyncio.CancelledError):
+            status = 'interrupted'
+            raise
+        finally:
+            if monitor:
+                try:
+                    self.resource_usage = monitor.finish(run_id=self.run_id, status=status, config=asdict(self.cfg))
+                    print_summary(self.resource_usage, monitor.summary_path)
+                except Exception as exc:
+                    log.warning('No se pudo finalizar el monitor de recursos: %s', exc)
+
+    async def _run(self):
         if self.run_id:
             run = self.store.run(self.run_id)
             self.cfg.url = run['url']

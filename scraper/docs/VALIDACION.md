@@ -75,3 +75,13 @@ Se inspeccionó `#location-section` en el consultorio `3312-M7166280`, activando
 El enriquecimiento local dejó **425 anuncios con mapa y 2 ausentes por falta de coordenadas**, sin modificar fechas ni estados originales. SQLite mantuvo `integrity_check = ok`. La exportación local también se regeneró con los campos nuevos. Una extracción real limitada a una página y una ficha, en `data/location-check.sqlite`, confirmó que las nuevas capturas los guardan automáticamente.
 
 **28 pruebas aprobadas**, incluidos datos reales, coordenadas ausentes e inválidas, indicación de ubicación aproximada, persistencia, API y exportación. Chromium comprobó el botón de mapa en la interfaz del consultorio señalado; captura en `data/verification/location.png`. No se hizo commit ni push.
+
+## Monitor de recursos
+
+Se añadió un envoltorio de `Scraper.run()` y un muestreador independiente con psutil, sin modificar el cuerpo de la ejecución ni la lógica de extracción. La igualdad del cuerpo previo y el actual se verificó comparando sus árboles de sintaxis (AST). Las mediciones se guardan en CSV independientes; no se agregaron campos a los documentos ni tablas de resultados.
+
+Una prueba real limitada a una página y dos fichas en `data/resource-check.sqlite`, el 24/10/2026, registró **23,08 s (0,38 min)**, **11,94 s de CPU**, **51,72 % de uso medio relativo a un núcleo**, **567,10 MiB de pico RSS observado** y **7 procesos simultáneos**, en 194 muestras con espera configurada de 0,1 s. Sus 2 fichas fueron correctas; el estado final incompleto se debe a los límites explícitos de prueba. Esta medición pequeña no estima por sí sola una búsqueda completa.
+
+Los archivos son `data/metrics/resource_usage.csv` y `data/metrics/samples-20261024T181435407670Z-4e044f86.csv`. La suite completa terminó con **41 pruebas aprobadas**, y `pip check` no encontró dependencias incompatibles. Las nuevas pruebas cubren consumo real de un proceso hijo, CPU de procesos que terminan, reutilización de PID, memoria del árbol completo, append de varias invocaciones, accesos denegados, interrupción y fallo de la ejecución, y fallos de escritura que no alteran el resultado del scraper. Se prueban los contadores opcionales de cgroup v2 con archivos simulados; no se ejecutó un contenedor Linux/Cloud Run en este equipo Windows. La base original se verificó en modo de sólo lectura: conserva sus 427 anuncios y `integrity_check = ok`.
+
+Consulta [las unidades, el alcance del muestreo y su uso para dimensionar Cloud Run](RECURSOS.md). No se hace una estimación monetaria ni se modifica el despliegue.
