@@ -238,3 +238,174 @@ def test_importacion_desde_carpeta_scraper_sin_instalar_paquetes():
     )
     assert resultado.returncode == 0, resultado.stderr
     assert 'Metrocuadrado' in resultado.stdout
+
+
+@pytest.fixture
+def catalogo_variado(escenario):
+    store, run, servicio, client = escenario
+    store.save_page(run, 2, '2', A, 'otros', [anuncio('3-M3'), anuncio('4-M4'), anuncio('5-M5')],
+                    None, search_url=A)
+    store.plan_incremental(run)
+    def guardar(pid, normal, extra=None):
+        d = documento()
+        d['normalized'].update(normal)
+        d['extra'] = extra or {}
+        store.result(run, pid, 'success', d)
+    guardar(ID, {
+        'operation': 'Venta y Arriendo', 'price': 1000, 'currency': 'COP',
+        'zone': 'Norte', 'neighborhood': 'Usaquén', 'area': 80, 'area_unit': 'm2',
+        'built_area': 90, 'built_area_unit': 'm²', 'private_area': 70, 'private_area_unit': 'm2',
+        'rooms': 3, 'bathrooms': 2, 'garages': 1, 'stratum': 5,
+        'description': 'Jardín y terraza',
+    }, {'salePrice': 1000, 'rentPrice': 10})
+    guardar('2-M2', {
+        'property_type': 'Apartamento', 'price': 2000, 'city': 'Medellín',
+        'zone': 'Sur', 'neighborhood': 'El Poblado', 'area': 120, 'area_unit': 'm2',
+        'rooms': 2, 'bathrooms': 1, 'garages': 0, 'stratum': 4,
+    })
+    guardar('3-M3', {
+        'price': 500, 'currency': 'USD', 'area': 80, 'area_unit': 'm2',
+        'rooms': 1, 'bathrooms': 1,
+    })
+    guardar('4-M4', {
+        'operation': None, 'price': None, 'currency': None, 'city': None,
+        'property_type': None, 'rooms': None, 'bathrooms': None,
+    })
+    guardar('5-M5', {'price': None})
+    with store.connect() as db:
+        for pid, fecha in (
+            (ID, '2026-10-20T12:00:00+00:00'),
+            ('2-M2', '2026-10-21T12:00:00+00:00'),
+            ('3-M3', '2026-10-24T12:00:00+00:00'),
+            ('4-M4', None), ('5-M5', None),
+        ):
+            db.execute('UPDATE properties SET updated=? WHERE id=?', (fecha, pid))
+        db.execute("UPDATE search_memberships SET state='removed' WHERE search_url=?", (B,))
+    return store, servicio, client
+
+
+@pytest.mark.parametrize('parametros,esperados', [
+    ({'texto': 'JARDIN'}, [ID]),
+    ({'ciudad': 'BOGOTA'}, [ID, '3-M3', '5-M5']),
+    ({'zonas': ['norte', 'sin-zona']}, [ID]),
+    ({'barrios': ['usaquen', 'sin-barrio']}, [ID]),
+    ({'tipos': ['apartamento']}, ['2-M2']),
+    ({'tipos': ['apartamento', 'oficina']}, ['2-M2']),
+    ({'operacion': 'arriendo'}, [ID]),
+    ({'operacion': 'venta', 'moneda': 'COP', 'precio_min': '1000', 'precio_max': '2000'}, [ID, '2-M2']),
+    ({'moneda': 'USD'}, ['3-M3']),
+    ({'area_min_m2': '80', 'area_max_m2': '80'}, [ID, '3-M3']),
+    ({'tipo_area': 'construida', 'area_min_m2': '90'}, [ID]),
+    ({'tipo_area': 'privada', 'area_min_m2': '80'}, []),
+    ({'habitaciones_min': 2, 'habitaciones_max': 2}, ['2-M2']),
+    ({'banos_min': 2, 'parqueaderos_min': 1}, [ID]),
+    ({'parqueaderos_min': 0}, [ID, '2-M2']),
+    ({'estratos': [4]}, ['2-M2']),
+    ({'fuente': 'otro'}, []),
+    ({'disponibilidad': 'retirado'}, []),
+    ({'search_url': B, 'disponibilidad': 'retirado'}, [ID]),
+    ({'fuente': 'metrocuadrado', 'id_busqueda': B, 'disponibilidad': 'retirado'}, [ID]),
+    ({'requiere_revision': False, 'ciudad': 'Medellin'}, ['2-M2']),
+])
+def test_filtros_http_sobre_datos_persistidos(catalogo_variado, parametros, esperados):
+    client = catalogo_variado[2]
+    respuesta = client.get('/api/catalog', params=parametros)
+    assert respuesta.status_code == 200, respuesta.text
+    assert [p['id'] for p in respuesta.json()['items']] == esperados
+    assert respuesta.json()['total'] == len(esperados)
+
+
+def test_rango_de_arriendo_usa_precio_correcto_sin_convertir_moneda(catalogo_variado):
+    client = catalogo_variado[2]
+    parametros = {'operacion': 'arriendo', 'moneda': 'COP', 'precio_max': 10, 'orden': 'precio_asc'}
+    body = client.get('/api/catalog', params=parametros).json()
+    assert body['total'] == 1
+    item = body['items'][0]
+    assert item['price'] == 10 and item['operation'] == 'arriendo' and item['currency'] == 'COP'
+    assert item['ofertas'] == [{'operation': 'arriendo', 'price': 10, 'currency': 'COP'}]
+    parametros['moneda'] = 'USD'
+    assert client.get('/api/catalog', params=parametros).json()['total'] == 0
+    sin_filtros = client.get('/api/catalog').json()['items'][0]
+    assert sin_filtros['price'] == 1000
+    assert 'ofertas' not in sin_filtros
+
+
+def test_filtros_combinados_orden_total_y_paginacion(catalogo_variado):
+    _, servicio, client = catalogo_variado
+    params = {
+        'texto': 'terraza', 'ciudad': 'bogota', 'tipos': ['casa'],
+        'operacion': 'venta', 'moneda': 'COP', 'precio_min': 1000, 'precio_max': 1000,
+        'tipo_area': 'privada', 'area_min_m2': 70, 'area_max_m2': 70,
+        'habitaciones_min': 3, 'banos_min': 2, 'parqueaderos_min': 1,
+        'disponibilidad': 'activo',
+    }
+    assert client.get('/api/catalog', params=params).json()['total'] == 1
+    paginas = []
+    for offset in (0, 1, 2, 3):
+        respuesta = client.get('/api/catalog', params={
+            'operacion': 'venta', 'moneda': 'COP', 'orden': 'precio_desc',
+            'limit': 1, 'offset': offset,
+        }).json()
+        assert respuesta['total'] == 3
+        paginas.extend(respuesta['items'])
+    assert [p['id'] for p in paginas] == ['2-M2', ID, '5-M5']
+    assert len({p['id_interno'] for p in paginas}) == 3
+    assert len(servicio.listar()) == 5  # Varias búsquedas no duplican el inmueble.
+
+
+@pytest.mark.parametrize('orden', ['area_asc', 'area_desc'])
+def test_orden_http_area_empates_y_ausentes(catalogo_variado, orden):
+    client = catalogo_variado[2]
+    body = client.get('/api/catalog', params={'orden': orden}).json()
+    pares = sorted((ID, '3-M3'), key=lambda id: identificar_inmueble('metrocuadrado', id))
+    ausentes = sorted(('4-M4', '5-M5'), key=lambda id: identificar_inmueble('metrocuadrado', id))
+    esperado = pares + ['2-M2'] if orden == 'area_asc' else ['2-M2'] + pares
+    assert [p['id'] for p in body['items']] == esperado + ausentes
+    assert body == client.get('/api/catalog', params={'orden': orden}).json()
+
+
+def test_orden_http_actualizacion_no_confunde_extraccion_y_presencia(catalogo_variado):
+    client = catalogo_variado[2]
+    body = client.get('/api/catalog?orden=actualizacion_desc').json()
+    assert [p['id'] for p in body['items']][:3] == ['3-M3', '2-M2', ID]
+    assert client.get('/api/catalog?orden=actualizacion_asc').json()['items'][0]['id'] == ID
+
+
+def test_paginacion_anterior_hasta_1000_y_offset_vacio(catalogo_variado):
+    client = catalogo_variado[2]
+    body = client.get('/api/catalog?limit=1000&offset=0').json()
+    assert body['total'] == 5 and len(body['items']) == 5 and body['limit'] == 1000
+    vacia = client.get('/api/catalog?limit=2&offset=100').json()
+    assert vacia == {'total': 5, 'items': [], 'limit': 2, 'offset': 100}
+
+
+@pytest.mark.parametrize('query', [
+    'precio_min=10',
+    'precio_min=10&moneda=COP',
+    'orden=precio_desc',
+    'operacion=venta&moneda=COP&precio_min=20&precio_max=10',
+    'area_min_m2=100&area_max_m2=80',
+    'habitaciones_min=3&habitaciones_max=1',
+    'banos_min=-1',
+    'parqueaderos_min=-1',
+    'area_min_m2=NaN',
+    'precio_min=Infinity&operacion=venta&moneda=COP',
+    'moneda=cop',
+    'tipos=desconocido',
+    'operacion=compra',
+    'tipo_area=indefinida',
+    'disponibilidad=vendido',
+    'orden=otro',
+    'id_busqueda=sin-fuente',
+    'texto=%20%20',
+])
+def test_consultas_nuevas_invalidas_dan_422(catalogo_variado, query):
+    assert catalogo_variado[2].get('/api/catalog?' + query).status_code == 422
+
+
+def test_busquedas_contradictorias_no_se_ignoran(catalogo_variado):
+    client = catalogo_variado[2]
+    respuesta = client.get('/api/catalog', params={
+        'search_url': A, 'fuente': 'metrocuadrado', 'id_busqueda': B,
+    })
+    assert respuesta.status_code == 422

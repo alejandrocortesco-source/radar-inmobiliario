@@ -1,4 +1,4 @@
-"""Contrato de consulta v0.1; no ejecuta búsquedas ni conoce almacenamiento."""
+"""Contrato de consulta v0.1; la selección se ejecuta en catalogo.consultas."""
 
 from dataclasses import dataclass
 from decimal import Decimal
@@ -14,6 +14,10 @@ class OrdenCatalogo(StrEnum):
     PRECIO_ASC = 'precio_asc'
     PRECIO_DESC = 'precio_desc'
     ULTIMA_VERIFICACION = 'ultima_verificacion_desc'
+    AREA_ASC = 'area_asc'
+    AREA_DESC = 'area_desc'
+    ACTUALIZACION_ASC = 'actualizacion_asc'
+    ACTUALIZACION_DESC = 'actualizacion_desc'
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)

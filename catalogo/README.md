@@ -1,9 +1,9 @@
 # Catálogo — modelo común, persistencia y servicio
 
-Este componente usa únicamente la biblioteca estándar de Python 3.12. El modelo
-no depende de extracción ni persistencia; el adaptador SQLite abre explícitamente
-una base existente en modo de solo lectura. No importa el scraper ni hace HTTP.
-Las pruebas aprovechan pytest, ya incluido en el proyecto.
+El modelo, el servicio y el adaptador usan la biblioteca estándar de Python 3.12.
+El router reutiliza FastAPI y las pruebas aprovechan pytest, ambos ya existentes.
+El modelo no depende de extracción ni persistencia; el adaptador abre una base
+existente en modo de solo lectura y no importa ni ejecuta el scraper.
 
 ## Identidad y procedencia
 
@@ -57,7 +57,7 @@ Calidad de ficha y revisión pendiente son independientes de disponibilidad.
 
 ## Contrato de filtros v0.1
 
-`FiltrosCatalogo` define una consulta validada, todavía sin ejecutarla:
+`FiltrosCatalogo` define las consultas validadas que ejecuta el servicio común:
 
 - Texto libre: coincidencia parcial en título, descripción e ID original.
 - Ubicación: ciudad, zonas y barrios. Comparación textual sin distinguir
@@ -75,14 +75,12 @@ Calidad de ficha y revisión pendiente son independientes de disponibilidad.
   usa otra clase de área como sustituto. Por defecto selecciona publicada.
 - Búsqueda requiere fuente. Con búsqueda elegida, disponibilidad se evalúa en
   esa búsqueda; sin ella se usa el estado agregado del inmueble.
-- Orden por ID ascendente, precio ascendente/descendente o última verificación
-  descendente. Esta última usa la fecha de presencia del origen, o de la búsqueda
+- Orden por ID, precio, área, última extracción o última verificación. Esta última usa la fecha de presencia del origen, o de la búsqueda
   seleccionada. Ausentes al final y desempate por ID interno ascendente siempre.
 - Paginación por límite (1–200; predeterminado 30) y desplazamiento desde cero.
 
-Estas reglas se validarán con consultas reales al implementar el paso 4.
-Actualmente se verifican la definición de filtros y la compatibilidad con los
-parámetros antiguos de la API; no se implementa el motor nuevo de filtrado.
+Las pruebas de consultas y de integración HTTP verifican estas reglas con modelos
+en memoria y bases sintéticas, incluyendo combinaciones, desconocidos y empates.
 
 ## Adaptador SQLite de solo lectura — paso 2
 
@@ -132,7 +130,7 @@ se recorre la lista de IDs originales (el UUID no es reversible) y se carga solo
 el documento elegido. Es deliberado para no añadir un índice o una tabla al scraper;
 será necesario medir este coste al crecer el catálogo.
 
-No se ejecutan aún los filtros ni la paginación definidos en el paso 1.
+El servicio del paso 4 ejecuta los filtros y la paginación definidos en el paso 1.
 El modelo común contiene las ofertas de la ficha global. La capa opcional de
 revisión del paso 3 conserva además el historial y las evidencias técnicas.
 
@@ -188,9 +186,92 @@ solo si existe el componente hermano `catalogo/`. El servicio web debe ejecutars
 con ambos componentes presentes. El Dockerfile actual sigue siendo un Job de
 extracción; una futura imagen web deberá incluir también el componente compartido.
 
-Los filtros nuevos y la paginación del contrato v0.1 siguen pendientes del paso 4.
-Solo se conserva el comportamiento de los parámetros que ya existían. La lectura
+El paso 4 amplía la selección a través del mismo servicio y router. La lectura
 completa sigue cargándose en memoria; no se añadió caché ni índices ni migraciones.
+
+## Filtros, orden y paginación — paso 4
+
+`ServicioCatalogo.consultar(FiltrosCatalogo(...))` aplica selección, orden y
+paginación sobre los modelos comunes y devuelve `total/items/limit/offset`.
+`catalogo/consultas.py` contiene la única implementación de coincidencias,
+ordenamiento y paginación, compartida por ese método y la API compatible.
+No realiza SQL ni depende de un proveedor de almacenamiento.
+
+Parámetros nuevos de `GET /api/catalog`:
+
+| Grupo | Parámetros |
+|---|---|
+| Texto y ubicación | `texto`, `ciudad`, `zonas`, `barrios` |
+| Tipo | `tipos`: apartamento, casa, oficina, consultorio, local, bodega, lote, finca, otro |
+| Oferta | `operacion`: venta/arriendo; `moneda`: COP, USD u otro código de tres letras mayúsculas |
+| Precio | `precio_min`, `precio_max` |
+| Área en m² | `area_min_m2`, `area_max_m2`, `tipo_area`: publicada/construida/privada |
+| Distribución | `habitaciones_min`, `habitaciones_max`, `banos_min`, `parqueaderos_min` |
+| Otros atributos | `estratos`, `requiere_revision` |
+| Procedencia | `fuente`, `id_busqueda` (requiere fuente; es un identificador opaco) |
+| Disponibilidad | `disponibilidad`: activo/posiblemente_retirado/retirado/desconocida |
+| Orden | `orden`: id, precio_asc, precio_desc, area_asc, area_desc, actualizacion_asc, actualizacion_desc, ultima_verificacion_desc |
+| Paginación existente | `limit` (1–1000, predeterminado 100), `offset` desde cero |
+
+Las listas se envían repitiendo la clave, por ejemplo
+`?tipos=casa&tipos=apartamento&barrios=Usaquén&barrios=La%20Carolina`.
+La ciudad, zonas y barrios se comparan por igualdad sin distinguir mayúsculas,
+tildes ni espacios exteriores. El texto es una coincidencia parcial en título,
+descripción o ID original; no hace búsqueda semántica ni geocodificación.
+
+Filtrar u ordenar por precio requiere **operación y moneda**. Se evalúan sobre
+la misma oferta; no se combinan el precio de venta y la moneda de arriendo.
+Un importe desconocido no cumple un rango. Una operación o moneda conocida puede
+filtrarse aunque su importe sea desconocido, y este se ordena al final.
+
+Sin parámetros nuevos se conserva la respuesta anterior. Al indicar `operacion`,
+`price` corresponde a esa operación, y se agregan `operation`, `currency` y
+`ofertas` con las ofertas compatibles. Si solo se indica `moneda`, el precio
+original permanece sin reinterpretar y `ofertas` identifica los importes y
+operaciones compatibles. Los importes se comparan como Decimal y se serializan
+como números JSON, igual que el campo histórico; no se convierten divisas.
+
+Ejemplos:
+
+- `/api/catalog?texto=terraza&ciudad=Bogota&tipos=apartamento`
+- `/api/catalog?operacion=venta&moneda=COP&precio_max=800000000&orden=precio_asc&limit=20&offset=0`
+- `/api/catalog?tipo_area=construida&area_min_m2=80&habitaciones_min=3&banos_min=2&parqueaderos_min=1`
+
+`state`, `search_url`, `limit` y `offset` mantienen su significado anterior.
+`state` conserva sus valores históricos en inglés y se combina con los filtros
+nuevos mediante AND. Con `search_url` o `id_busqueda`, la disponibilidad y la
+última verificación se evalúan dentro de esa búsqueda. Si se indican ambas,
+deben identificar la misma búsqueda; de lo contrario se responde HTTP 422.
+La normalización antigua de seguimiento en `search_url` se conserva.
+
+`actualizacion_asc/desc` usa la última extracción de la ficha, no una fecha
+inferida del anunciante. `ultima_verificacion_desc` usa la última presencia en
+el listado, o la presencia en la búsqueda seleccionada. El orden de área usa
+la clase de área elegida y no sustituye áreas desconocidas.
+
+El orden por defecto de la API sigue siendo el ID original ascendente; el del
+servicio común usa UUID ascendente. En otros órdenes los empates se resuelven por
+UUID ascendente incluso en orden descendente; los desconocidos quedan al final.
+La deduplicación por UUID, los filtros y el orden se aplican antes de paginar.
+`total` cuenta todas las coincidencias, incluso al pedir una página vacía.
+
+La paginación propia de `FiltrosCatalogo` conserva límite 1–200 y predeterminado
+30 para el servicio común; HTTP mantiene 1–1000 y predeterminado 100 por
+compatibilidad. No hay inferencia de venta a partir de ausencia en una búsqueda.
+
+### Limitaciones actuales
+
+Se carga el catálogo completo en memoria, sin caché ni índices adicionales.
+Cada consulta SQLite tiene una instantánea consistente, pero las páginas pedidas
+en solicitudes separadas pueden cambiar si el scraper actualiza el catálogo entre
+ellas. El orden estable evita saltos por empates cuando los datos no cambian;
+no se han añadido cursores ni sesiones de instantáneas.
+
+Los filtros solo usan atributos conocidos: un área publicada sin unidad confirmada
+queda desconocida aunque exista un número original. En esos casos puede usarse
+`tipo_area=construida` o `privada` si esa unidad sí fue publicada. La API histórica
+continúa excluyendo anuncios sin pertenencia a ninguna búsqueda; el servicio común
+sí permite consultar todos los anuncios mediante `consultar`.
 
 ## Verificación
 
