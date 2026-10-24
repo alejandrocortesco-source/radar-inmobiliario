@@ -1,0 +1,100 @@
+"""Páginas Jinja2 que consumen el servicio común; no contienen consultas SQL."""
+
+from pathlib import Path
+
+from fastapi import APIRouter, Depends, Request
+from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.templating import Jinja2Templates
+from pydantic import ValidationError
+
+from catalogo.filtros import FiltrosCatalogo
+from catalogo.modelos import TipoInmueble
+from catalogo.persistencia.contrato import ErrorLecturaCatalogo
+from .presentacion import (
+    ESTADOS, enlace_publico, fecha, leer_filtros, mensaje_filtros, nombre_busqueda,
+    numero, ofertas_visibles, regreso_seguro, tarjeta, url_catalogo,
+)
+
+RAIZ = Path(__file__).resolve().parent
+ESTATICOS = RAIZ / 'static'
+templates = Jinja2Templates(directory=str(RAIZ / 'templates'))
+templates.env.filters.update(numero=numero, fecha=fecha)
+templates.env.globals.update(enlace_publico=enlace_publico)
+
+
+def crear_router(proveedor_servicio):
+    router = APIRouter()
+
+    def render(request, nombre, status=200, **contexto):
+        base = {'values': request.query_params, 'tipos': tuple(TipoInmueble),
+                'ciudades': (), 'barrios': (), 'error': None, 'total': 0}
+        return templates.TemplateResponse(request=request, name=nombre,
+                                          context={**base, **contexto}, status_code=status)
+
+    @router.get('/consola', include_in_schema=False)
+    def entrada(request: Request):
+        return RedirectResponse('/consola/' + ('?' + request.url.query if request.url.query else ''),
+                                status_code=307)
+
+    @router.get('/consola/', response_class=HTMLResponse, include_in_schema=False)
+    def catalogo(request: Request, servicio=Depends(proveedor_servicio)):
+        try:
+            todos = servicio.listar()
+            ciudades = sorted({i.ciudad for i in todos if i.ciudad})
+            barrios = sorted({i.barrio for i in todos if i.barrio})
+            seleccionada = request.query_params.get('ciudad')
+            if seleccionada and seleccionada not in ciudades:
+                ciudades.append(seleccionada)
+        except (FileNotFoundError, ErrorLecturaCatalogo):
+            return render(request, 'estado.html', 503, titulo='El catálogo no está disponible',
+                          mensaje='No encontramos la información de los inmuebles. Revisa que los datos estén disponibles y vuelve a intentar.',
+                          reintentar='/consola/')
+        try:
+            filtros = leer_filtros(request.query_params)
+        except ValidationError as exc:
+            return render(request, 'catalogo.html', 422, error=mensaje_filtros(exc),
+                          ciudades=ciudades, barrios=barrios, tarjetas=(), resultado=None)
+        try:
+            resultado = servicio.consultar(filtros)
+        except (FileNotFoundError, ErrorLecturaCatalogo):
+            return render(request, 'estado.html', 503, titulo='El catálogo no está disponible',
+                          mensaje='No pudimos consultar los inmuebles en este momento. Inténtalo de nuevo.',
+                          reintentar=url_catalogo(request.query_params))
+        volver = url_catalogo(request.query_params)
+        limite, offset, total = resultado['limit'], resultado['offset'], resultado['total']
+        return render(
+            request, 'catalogo.html', ciudades=ciudades, barrios=barrios, filtros=filtros,
+            tarjetas=[tarjeta(i, filtros, volver) for i in resultado['items']],
+            resultado=resultado, total=total, primero=min(offset + 1, total) if resultado['items'] else 0,
+            ultimo=min(offset + limite, total), pagina=offset // limite + 1,
+            paginas=max(1, (total + limite - 1) // limite),
+            anterior=url_catalogo(request.query_params, offset=max(0, offset - limite)) if offset else None,
+            siguiente=url_catalogo(request.query_params, offset=offset + limite) if offset + limite < total else None,
+            primera=url_catalogo(request.query_params, offset=0),
+        )
+
+    @router.get('/consola/inmuebles/{id_interno}', response_class=HTMLResponse,
+                include_in_schema=False)
+    def ficha(request: Request, id_interno: str, volver: str | None = None,
+              servicio=Depends(proveedor_servicio)):
+        regreso = regreso_seguro(volver)
+        try:
+            inmueble = servicio.obtener(id_interno)
+        except (FileNotFoundError, ErrorLecturaCatalogo):
+            return render(request, 'estado.html', 503, titulo='No pudimos abrir esta ficha',
+                          mensaje='La información del catálogo no está disponible en este momento.',
+                          reintentar=regreso)
+        if inmueble is None:
+            return render(request, 'estado.html', 404, titulo='No encontramos este inmueble',
+                          mensaje='El enlace puede haber cambiado. Regresa al catálogo para continuar.',
+                          reintentar=regreso)
+        datos = tarjeta(inmueble, FiltrosCatalogo(), regreso)
+        busquedas = [{
+            'nombre': nombre_busqueda(p, n), 'url': enlace_publico(p.url),
+            'estado': ESTADOS[p.disponibilidad][0], 'clase': ESTADOS[p.disponibilidad][1],
+            'fecha': p.ultima_verificacion,
+        } for n, p in enumerate(inmueble.origen.busquedas, 1)]
+        return render(request, 'ficha.html', inmueble=inmueble, datos=datos,
+                      ofertas=ofertas_visibles(inmueble), busquedas=busquedas, volver=regreso)
+
+    return router

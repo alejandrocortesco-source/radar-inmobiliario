@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>{% block title %}Radar Inmobiliario{% endblock %}</title>
+  <link rel="stylesheet" href="/consola/static/consola.css">
+  <script src="/consola/static/consola.js" defer></script>
+</head>
+<body>
+<svg class="svg-definitions" aria-hidden="true"><defs>
+  <symbol id="icon-home" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7M5 9v12h14V9M9 21v-8h6v8"/></symbol>
+  <symbol id="icon-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></symbol>
+  <symbol id="icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></symbol>
+  <symbol id="icon-filter" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/><circle cx="8" cy="6" r="2"/><circle cx="16" cy="12" r="2"/><circle cx="10" cy="18" r="2"/></symbol>
+</defs></svg>
+<a class="skip-link" href="#contenido">Ir al contenido</a>
+<header class="site-header">
+  <div class="header-inner"><a class="brand" href="/consola/" aria-label="Radar Inmobiliario, inicio">
+    <span class="brand-mark"><svg class="icon"><use href="#icon-home"/></svg></span>
+    <span>Radar <strong>Inmobiliario</strong></span>
+  </a><nav aria-label="Navegación principal"><a class="nav-active" href="/consola/">Catálogo de inmuebles</a></nav></div>
+</header>
+<main id="contenido" class="shell">{% block content %}{% endblock %}</main>
+<footer class="site-footer"><div><span class="footer-brand">Radar Inmobiliario</span><span>Información de las publicaciones originales. Horas de Colombia (UTC−5).</span></div></footer>
+</body>
+</html>

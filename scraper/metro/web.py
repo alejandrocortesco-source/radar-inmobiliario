@@ -4,6 +4,7 @@ from pathlib import Path
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
 from . import __version__
 from .storage import Store
 from .paths import DEFAULT_DB
@@ -11,6 +12,7 @@ from .prices import search_identity
 from catalogo.api import crear_router, consultar_catalogo, consultar_ficha
 from catalogo.persistencia.sqlite import CatalogoSQLite
 from catalogo.servicio import ServicioCatalogo
+from consola.rutas import crear_router as crear_router_consola, ESTATICOS
 
 app = FastAPI(title='Metrocuadrado · Revisión local',version=__version__)
 templates = Jinja2Templates(directory=str(Path(__file__).parent/'templates'))
@@ -26,6 +28,8 @@ def servicio():
 
 
 app.include_router(crear_router(servicio))
+app.include_router(crear_router_consola(servicio))
+app.mount('/consola/static', StaticFiles(directory=str(ESTATICOS)), name='consola-static')
 
 
 def rows(run_id=None,q='',status='',property_type='',limit=30,offset=0):
