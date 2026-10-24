@@ -15,6 +15,7 @@ from .extraction import (ExtractionError, Restricted, detail_from_records, finge
 from .storage import Store, dumps, now
 from .paths import DEFAULT_DB
 from .resource_monitor import ResourceMonitor, print_summary
+from .prices import search_identity, listing_price, same_price
 
 log = logging.getLogger('metro')
 DEFAULT_URL = 'https://www.metrocuadrado.com/inmuebles/venta/bogota/la-carolina?search=form'
@@ -34,10 +35,15 @@ class Config:
     resume: int | None = None
     metrics_dir: str | None = None
     resource_interval: float = 0.2
+    urls: list[str] | None = None
+    listing_currency: str | None = 'COP'  # Confirmado por el usuario para estas búsquedas.
 
     def validate(self):
-        if urlsplit(self.url).hostname not in ('www.metrocuadrado.com','metrocuadrado.com'):
-            raise ValueError('Sólo URLs de Metrocuadrado')
+        for url in self.urls or [self.url]:
+            if urlsplit(url).hostname not in ('www.metrocuadrado.com','metrocuadrado.com') or urlsplit(url).scheme not in ('http','https'):
+                raise ValueError('Sólo URLs HTTP(S) de Metrocuadrado')
+        if self.listing_currency not in (None,'COP','USD','EUR'):
+            raise ValueError('Moneda de listado no compatible')
         if not 1 <= self.concurrency <= 4 or self.delay < 0.5 or self.timeout < 1000 or not 0 <= self.retries <= 5:
             raise ValueError('Concurrencia 1–4, pausa >=0.5, timeout >=1000 y reintentos 0–5')
         if any(v is not None and v < 1 for v in (self.max_pages,self.max_details)):
@@ -140,9 +146,12 @@ class Scraper:
             await asyncio.sleep(0.3)
         raise ExtractionError('Paginador sin cambio confirmado de página activa e identificadores')
 
-    async def discover(self, context):
-        saved = self.store.pages(self.run_id)
-        if self.store.run(self.run_id)['listing_complete']:
+    async def discover(self, context, source_url=None):
+        source_url = source_url or self.cfg.url
+        search_url = search_identity(source_url)
+        saved = self.store.pages(self.run_id,search_url)
+        search = next(s for s in self.store.searches(self.run_id) if s['search_url']==search_url)
+        if search['listing_complete']:
             return
         page = await context.new_page()
         captures = []
@@ -156,11 +165,19 @@ class Scraper:
                     self.event('response_parse_error',{'error':str(exc)[:500]},'error')
         page.on('response',capture)
         try:
-            await self.goto(page,self.cfg.url)
+            await self.goto(page,source_url)
             batch = await wait_data(page,listing_from_records,self.cfg.timeout)
-            self.store.update_run(self.run_id,advertised_json=dumps({
+            advertised = {
                 'totalHits':batch.get('totalHits'),'totalEntries':batch.get('totalEntries'),
-                'source':'flight.initialResults'}))
+                'source':'flight.initialResults'}
+            self.store.update_search(self.run_id,search_url,advertised=advertised)
+            if batch.get('results') == [] and batch.get('highlights') in (None,[]) and batch.get('totalHits') == batch.get('totalEntries') == 0:
+                if saved:
+                    raise ExtractionError('El listado cambió a vacío desde el checkpoint; cree otra ejecución')
+                self.store.save_page(self.run_id,1,'1',page.url,'empty',[],None,search_url=search_url)
+                self.store.update_search(self.run_id,search_url,complete=True)
+                self.event('empty_search_verified',{'search_url':search_url,'source':'initialResults totals=0'})
+                return
             # El consentimiento observado cubre el paginador. No envía formularios.
             accept = page.get_by_text('Aceptar',exact=True)
             if await accept.count() and await accept.first.is_visible():
@@ -191,14 +208,27 @@ class Scraper:
                 if number <= len(saved):
                     if saved[number-1]['fingerprint'] != fp:
                         raise ExtractionError('La búsqueda cambió desde el checkpoint. Cree una nueva ejecución para evitar omisiones.')
+                    old_links = json.loads(saved[number-1]['links_json'])
+                    old_prices = {x['id']:listing_price(x,self.cfg.listing_currency) for x in old_links}
+                    for item in links:
+                        current = listing_price(item,self.cfg.listing_currency)
+                        previous = old_prices.get(item['id'])
+                        equal = same_price(previous,current) if previous and previous.get('status') == current.get('status') == 'valid' else previous == current
+                        if not equal:
+                            raise ExtractionError('Cambió un precio desde el checkpoint; cree otra ejecución')
                     self.event('checkpoint_replayed',{'page':number})
                 else:
-                    self.store.save_page(self.run_id,number,active,page.url,fp,links,next_action)
+                    self.store.save_page(self.run_id,number,active,page.url,fp,links,next_action,search_url=search_url)
                     self.event('page_saved',{'page':number,'links':len(links),'main_results':len(batch['results']),
                                              'ignored_recommended':len(batch.get('recommended') or [])})
                 if disabled:
                     # Sólo el botón deshabilitado confirmado marca fin del listado.
-                    self.store.update_run(self.run_id,listing_complete=1)
+                    main_ids = {x['id'] for stored in self.store.pages(self.run_id,search_url)
+                                for x in json.loads(stored['links_json']) if x.get('group')=='results'}
+                    expected = advertised['totalHits']
+                    if isinstance(expected,int) and not isinstance(expected,bool) and len(main_ids) != expected:
+                        raise ExtractionError(f'Cobertura incompleta: {len(main_ids)} identificadores principales frente a {expected} anunciados')
+                    self.store.update_search(self.run_id,search_url,complete=True)
                     break
                 if self.cfg.max_pages and number >= self.cfg.max_pages:
                     self.event('page_limit',{'limit':self.cfg.max_pages})
@@ -237,6 +267,7 @@ class Scraper:
                     if not data['normalized']['title'] or not data['normalized']['description']:
                         data['quality']='partial'
                         data['errors'].append({'field':'core','error':'Título o descripción no disponibles'})
+                    self.store.validate_detail_price(self.run_id,job['property_id'],data)
                     self.store.result(self.run_id,job['property_id'],data['quality'],data)
                     self.event('detail_saved',{'id':job['property_id'],'quality':data['quality'],
                                                'photos':len(data['photos'])})
@@ -298,6 +329,10 @@ class Scraper:
         if self.run_id:
             run = self.store.run(self.run_id)
             self.cfg.url = run['url']
+            self.cfg.urls = [s['source_url'] for s in self.store.searches(self.run_id)]
+            previous_config = json.loads(run['config_json'])
+            if 'listing_currency' in previous_config:
+                self.cfg.listing_currency = previous_config['listing_currency']
             # Los intentos previos fallidos siguen contándose al reanudar.
             self.store.update_run(self.run_id,status='running',finished=None)
         else:
@@ -315,21 +350,25 @@ class Scraper:
                         else:
                             await route.continue_()
                     await context.route('**/*',resources)
-                    try:
-                        await self.discover(context)
-                    except Restricted:
-                        raise
-                    except Exception as exc:
-                        # Las fichas ya descubiertas se conservan y se procesan aun si falla paginación.
-                        self.event('listing_incomplete',{'error':str(exc)[:1500]},'error')
+                    for search in self.store.searches(self.run_id):
+                        try:
+                            await self.discover(context,search['source_url'])
+                        except Restricted:
+                            raise
+                        except Exception as exc:
+                            # Una búsqueda incompleta impide contar ausencias en toda la ejecución.
+                            self.event('listing_incomplete',{'search_url':search['search_url'],'error':str(exc)[:1500]},'error')
+                    self.store.plan_incremental(self.run_id)
                     await self.process_details(context)
                 finally:
                     await browser.close()
             summary = self.store.summary(self.run_id)
-            good = summary['statuses'].get('success',0)+summary['statuses'].get('partial',0)
+            good = sum(summary['statuses'].get(s,0) for s in ('success','unchanged'))
             status = 'blocked' if self.stopping.is_set() else (
-                'completed' if summary['listing_complete'] and good == summary['unique'] else 'incomplete')
+                'completed' if summary['listing_complete'] and good == summary['unique'] and not summary['listing_conflicts'] else 'incomplete')
             self.store.update_run(self.run_id,status=status,finished=now())
+            self.store.finalize_absences(self.run_id)
+            self.event('incremental_summary',self.store.summary(self.run_id)['classifications'])
             self.event('run_finished',{'status':status})
         except Restricted as exc:
             self.store.update_run(self.run_id,status='blocked',finished=now())

@@ -1,6 +1,6 @@
 # Scraper de Metrocuadrado — Radar Inmobiliario
 
-Componente de [Radar Inmobiliario](../README.md) para descubrir anuncios, abrir cada ficha pública y revisar los resultados con FastAPI. Puede ejecutarse por consola sin iniciar la interfaz. No necesita Apify, Sheets, Gemini ni WhatsApp. No envía formularios ni contacta anunciantes.
+Componente de [Radar Inmobiliario](../README.md) para descubrir anuncios, mantener un catálogo incremental por cambios de precio y revisar los resultados con FastAPI. Recorre todos los listados y abre las fichas nuevas, con precio modificado o que requieren revisión de integridad. Puede ejecutarse por consola sin iniciar la interfaz. No necesita Apify, Sheets, Gemini ni WhatsApp. No envía formularios ni contacta anunciantes.
 
 ## Instalación (Windows / PowerShell)
 
@@ -38,6 +38,8 @@ En el equipo donde se desarrolló la primera versión se conserva el entorno exi
 .\.venv\Scripts\python.exe -m metro serve
 ```
 
+La actualización incremental se activa por defecto. Se pueden repetir opciones `--url` para recorrer varias búsquedas. Los importes sin código monetario se comparan en COP por confirmación del usuario; `--listing-currency unknown` evita aplicar esa confirmación a otra búsqueda cuya moneda no se conozca. Consulta las [reglas de precios, conservación de datos y segunda confirmación de retirados](docs/INCREMENTAL.md).
+
 También se puede ejecutar desde la raíz mediante `scraper/run.py`. Con el entorno existente de este equipo:
 
 ```powershell
@@ -58,7 +60,7 @@ Opciones del scraper: `--url`, `--headed`, `--concurrency` (1–4, predeterminad
 
 Cada ejecución mide automáticamente duración en segundos/minutos, CPU y pico RAM observado de Python y todo el árbol de Playwright/Chromium. Imprime un resumen y añade una fila a `data/metrics/resource_usage.csv`, además de un CSV con las muestras temporales; la carpeta queda junto a la base utilizada. No modifica los documentos de resultados. Opciones: `--resource-interval 0.2` (segundos, predeterminado) y `--metrics-dir` para otra carpeta. Detalles, unidades, limitaciones y uso para dimensionar Cloud Run: [monitoreo de recursos](docs/RECURSOS.md).
 
-Código de salida 0: listado terminado y todas las fichas procesadas (correctas o parciales). Código 2: incompleto, bloqueado o fallido. Las fichas parciales siguen identificadas como tales. `Ctrl+C` conserva los checkpoints. Un bloqueo, CAPTCHA visible o HTTP 401/403/429 detiene nuevas solicitudes y conserva el avance; no hay evasión, sesiones persistentes, proxies ni resolución automática de desafíos.
+Código de salida 0: todos los listados terminados y todos los trabajos correctos o conservados sin cambios de precio. Código 2: incompleto, bloqueado o fallido, incluyendo fichas parciales o precios contradictorios pendientes. `Ctrl+C` conserva los checkpoints. Un bloqueo, CAPTCHA visible o HTTP 401/403/429 detiene nuevas solicitudes y conserva el avance; no hay evasión, sesiones persistentes, proxies ni resolución automática de desafíos. Sólo ejecuciones completas y exitosas cuentan ausencias; se requieren dos para confirmar retirados de una búsqueda.
 
 ## Fuentes y selectores inspeccionados
 
@@ -84,6 +86,10 @@ Las inspecciones locales están en `data/inspection/`. Las muestras usadas por l
 | `appearances` | Relación anuncio/ejecución/página; conserva búsquedas y páginas de aparición |
 | `jobs` | Estado, intentos, error y documento propio de cada ejecución |
 | `events` | Navegaciones, cambios confirmados, errores, reanudaciones y restricciones |
+| `run_searches` | Avance y confirmación de ausencias independiente por URL |
+| `listing_observations` | Precios de listado y conflictos de cada anuncio/búsqueda |
+| `search_memberships` | Estado y última verificación por búsqueda; contador de ausencias |
+| `price_changes` | Precio anterior/nuevo, fecha de detección y verificación de la ficha |
 
 Cada página se confirma junto a sus apariciones y cola en una transacción. Identidad: ID del portal que debe coincidir con la URL; se eliminan parámetros de seguimiento de la URL canónica. Los destacados repetidos se deduplican conservando su procedencia. La huella usa sólo resultados principales, para no confundir el destacado constante con una página repetida.
 
@@ -97,7 +103,7 @@ No se guardan cookies, cabeceras, almacenamiento del navegador, tokens, claves n
 
 ## Recuperación y límites
 
-Al reanudar no se repiten las fichas correctas o parciales; los intentos fallidos se conservan y el límite no vuelve a cero. Para permitir más intentos tras un fallo persistente se puede aumentar `--retries` (hasta 5). Si se terminó el descubrimiento, se va directamente a las fichas pendientes. Si se interrumpió el listado, se recorre el paginador hasta el checkpoint, verificando sus huellas; las páginas guardadas no se vuelven a insertar. Esto es necesario porque el paginador observado mantiene la misma URL para distintas páginas. Si cambió el listado desde el checkpoint, se registra el cambio y hay que iniciar una nueva ejecución para garantizar que no se pierdan anuncios.
+Al reanudar no se repiten las fichas correctas ni las conservadas sin cambios; las fallidas y parciales se reintentan dentro del límite persistente. Para permitir más intentos tras un fallo persistente se puede aumentar `--retries` (hasta 5). Si se terminó el descubrimiento, se va directamente a las fichas pendientes. Si se interrumpió un listado, se recorre el paginador hasta el checkpoint, verificando IDs y precios; las páginas guardadas no se vuelven a insertar. Esto es necesario porque el paginador observado mantiene la misma URL para distintas páginas. Si cambió el listado desde el checkpoint, se registra el cambio y hay que iniciar una nueva ejecución para garantizar que no se pierdan anuncios.
 
 SQLite dispone de instantáneas por ejecución; la tabla global muestra la información más reciente. Un bloqueo de archivo del SO impide que dos scrapers escriban simultáneamente en la misma base. La interfaz sí puede leerla a la vez. Un apagado abrupto puede dejar el estado de la ejecución como `running`: se reanuda mediante su ID y los checkpoints transaccionales.
 

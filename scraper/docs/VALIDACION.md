@@ -85,3 +85,17 @@ Una prueba real limitada a una página y dos fichas en `data/resource-check.sqli
 Los archivos son `data/metrics/resource_usage.csv` y `data/metrics/samples-20261024T181435407670Z-4e044f86.csv`. La suite completa terminó con **41 pruebas aprobadas**, y `pip check` no encontró dependencias incompatibles. Las nuevas pruebas cubren consumo real de un proceso hijo, CPU de procesos que terminan, reutilización de PID, memoria del árbol completo, append de varias invocaciones, accesos denegados, interrupción y fallo de la ejecución, y fallos de escritura que no alteran el resultado del scraper. Se prueban los contadores opcionales de cgroup v2 con archivos simulados; no se ejecutó un contenedor Linux/Cloud Run en este equipo Windows. La base original se verificó en modo de sólo lectura: conserva sus 427 anuncios y `integrity_check = ok`.
 
 Consulta [las unidades, el alcance del muestreo y su uso para dimensionar Cloud Run](RECURSOS.md). No se hace una estimación monetaria ni se modifica el despliegue.
+
+## Scraping incremental por precio
+
+Se mantuvo el scraper existente y se añadió planificación de fichas por comparación monetaria, disponibilidad por búsqueda e historial de precios. El usuario confirmó COP para las URLs configuradas; el listado real muestra `$` sin un código de moneda explícito. El modo `--listing-currency unknown` conserva la revisión por ficha cuando no hay confirmación.
+
+La suite terminó con **90 pruebas aprobadas**: formatos y monedas, operación de venta/arriendo/oferta dual, nuevos/modificados/sin cambios, conservación exacta de la ficha reutilizada, discrepancias de precios, reintentos de fichas parciales, búsquedas vacías, múltiples URLs con una sola cola de detalle, migración con respaldo, dos ausencias completas, reapariciones e idempotencia. Los cambios de precio y retirados se verificaron con escenarios controlados; no se provocaron modificaciones o retirados de anuncios reales en el portal.
+
+La migración real de los 427 anuncios conservó las instantáneas originales y creó `data/metro.pre-incremental.sqlite`. Las pruebas completas iniciales se ejecutaron sobre `data/incremental-validation.sqlite`, una copia SQLite consistente del catálogo. Se identificaron tres ofertas de «Venta y Arriendo» con precio normalizado ausente en la versión anterior; se inspeccionó el componente público del listado y se corrigió su normalización sin confundir venta y arriendo.
+
+En la ejecución **5 de la copia de validación**, el scraper recorrió las **9 páginas**, volvió a encontrar **427 IDs únicos** y los clasificó **todos como `unchanged`, sin abrir ninguna ficha**. El monitor registró **19,10 s**, **19,47 s de CPU**, **779,12 MiB de pico RSS observado** y 6 procesos simultáneos. Es una medición de una ejecución concreta, no una garantía de tiempo o costo diario.
+
+Después se ejecutó el flujo nuevo en la base principal: ejecución **2**, las 9 páginas y 427 anuncios, con **424 fichas reutilizadas y 3 revisadas una vez para reparar su normalización antigua**. Terminó `completed`, sin conflictos ni retirados. Las 427 fichas de la ejecución original 1 se conservaron.
+
+Chromium verificó el resumen incremental, el filtro `unchanged`, el catálogo de disponibilidad y la ficha; sin errores JavaScript, con ancho móvil de 390 px. Capturas: `data/verification/incremental-dashboard.png` y `incremental-mobile.png`. La aplicación quedó disponible en `http://127.0.0.1:8000/`; la nueva vista es `/catalog`. No se instaló un cron ni se hizo commit o push.

@@ -15,7 +15,9 @@ def main():
     parser.add_argument('--db',default=os.getenv('METRO_DB',str(DEFAULT_DB)))
     sub = parser.add_subparsers(dest='command',required=True)
     scrape = sub.add_parser('scrape',help='Descubrir y procesar fichas sin servidor web')
-    scrape.add_argument('--url',default=DEFAULT_URL)
+    scrape.add_argument('--url',action='append',help='URL de búsqueda; repetir para varias URLs')
+    scrape.add_argument('--listing-currency',choices=('COP','USD','EUR','unknown'),default='COP',
+                        help='Moneda confirmada para importes sin código explícito; unknown obliga a revisar')
     scrape.add_argument('--headed',action='store_true')
     scrape.add_argument('--concurrency',type=int,default=2)
     scrape.add_argument('--delay',type=float,default=1.5)
@@ -41,6 +43,11 @@ def main():
     if command == 'status':
         print(json.dumps(Store(args['db']).summary(args['run']),ensure_ascii=False,indent=2))
         return
+    configured_urls = args.pop('url')
+    args['urls'] = configured_urls
+    args['url'] = configured_urls[0] if configured_urls else DEFAULT_URL
+    if args['listing_currency'] == 'unknown':
+        args['listing_currency'] = None
     Path(args['db']).parent.mkdir(parents=True,exist_ok=True)
     logging.basicConfig(level=logging.INFO,format='%(asctime)s %(levelname)s %(message)s',
                         handlers=[logging.FileHandler(Path(args['db']).parent/'scraper.log',encoding='utf-8'),logging.StreamHandler()])

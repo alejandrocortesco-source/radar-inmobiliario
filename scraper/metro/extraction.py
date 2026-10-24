@@ -243,7 +243,8 @@ def normalize_detail(raw, url, visible_text='', ld=None, dom_media=None):
     numeric = {'administration','latitude','longitude','area','built_area','private_area','rooms','bathrooms','garages','stratum'}
     for name, path in mapping.items():
         field(name, path, name in numeric)
-    price_key = {'venta':'salePrice','arriendo':'rentPrice'}.get(raw.get('businessType'))
+    price_key = {'venta':'salePrice','arriendo':'rentPrice','venta y arriendo':'salePrice'}.get(
+        str(raw.get('businessType') or '').strip().lower())
     field('price', price_key or 'price', True)
     # Unidad y moneda sólo si el DOM las publica; nunca inferidas por país o barrio.
     if normalized['currency'] is None and re.search(r'\bCOP\b',visible_text):
