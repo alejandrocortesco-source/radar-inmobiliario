@@ -24,6 +24,37 @@ T2 = '2026-10-21T12:00:00+00:00'
 T3 = '2026-10-24T12:00:00+00:00'
 
 
+@pytest.mark.parametrize('bandera,esperado', [('S', True), ('N', False), (None, None)])
+def test_traslada_geografia_guardada_sin_escribir(base, bandera, esperado):
+    with sqlite3.connect(base) as db:
+        documento = json.loads(db.execute('SELECT data_json FROM properties WHERE id=?', (ID,)).fetchone()[0])
+        documento['normalized'].update(latitude=4.7, longitude=-74.04,
+                                       portal_map_url='https://portal.test/' + ID + '#location-section',
+                                       map_url='https://www.openstreetmap.org/?mlat=4.7&mlon=-74.04')
+        documento['extra']['ubicacionaproximada'] = bandera
+        db.execute('UPDATE properties SET data_json=? WHERE id=?', (json.dumps(documento), ID))
+    antes = hashlib.sha256(base.read_bytes()).hexdigest()
+    ficha = CatalogoSQLite(base).obtener(INTERNO)
+    assert ficha.latitud == Decimal('4.7') and ficha.longitud == Decimal('-74.04')
+    assert ficha.ubicacion_aproximada is esperado
+    assert ficha.portal_map_url == documento['normalized']['portal_map_url']
+    assert ficha.map_url == documento['normalized']['map_url']
+    assert hashlib.sha256(base.read_bytes()).hexdigest() == antes
+
+
+def test_geografia_ausente_invalida_y_evidencia_anterior(base):
+    ficha = CatalogoSQLite(base).obtener(INTERNO)
+    assert ficha.latitud is ficha.longitud is ficha.ubicacion_aproximada is ficha.portal_map_url is None
+    with sqlite3.connect(base) as db:
+        documento = json.loads(db.execute('SELECT data_json FROM properties WHERE id=?', (ID,)).fetchone()[0])
+        documento['normalized'].update(latitude=91, longitude=True)
+        documento['fields'] = {'map_url': {'raw': {'ubicacionaproximada': 'S'}}}
+        db.execute('UPDATE properties SET data_json=? WHERE id=?', (json.dumps(documento), ID))
+    ficha = CatalogoSQLite(base).obtener(INTERNO)
+    assert ficha.latitud is ficha.longitud is None
+    assert ficha.ubicacion_aproximada is True
+
+
 @pytest.fixture
 def base(tmp_path):
     ruta = tmp_path / 'base con espacios # y ?.sqlite'
@@ -106,7 +137,7 @@ def test_ficha_recupera_atributos_precios_fotos_y_procedencia(base):
     assert ficha.origen.operacion_original == 'Venta y Arriendo'
     assert ficha.ciudad == 'Bogotá' and ficha.barrio == 'La Carolina'
     assert ficha.zona == 'Norte' and ficha.direccion == 'Calle pública'
-    assert ficha.area_publicada_m2 is None  # Unidad no confirmada.
+    assert ficha.area_publicada_m2 == Decimal('90')  # Convención de m² del mercado local.
     assert ficha.area_construida_m2 == Decimal('85.25')
     assert ficha.area_privada_m2 == Decimal('80')
     assert (ficha.habitaciones, ficha.banos, ficha.parqueaderos, ficha.estrato) == (3, 2, 0, 5)
@@ -252,7 +283,7 @@ def test_valores_desconocidos_y_ambiguos_no_se_inventan(base):
     assert ficha.tipo == TipoInmueble.OTRO
     assert ficha.habitaciones is None and ficha.banos is None
     assert ficha.parqueaderos == 0 and ficha.estrato is None
-    assert ficha.area_publicada_m2 is None and ficha.area_construida_m2 is None
+    assert ficha.area_publicada_m2 == Decimal('90') and ficha.area_construida_m2 == Decimal('80')
     assert ficha.origen.ultima_extraccion is None
     assert ficha.origen.actualizado_en_fuente is None
     assert ficha.calidad == Calidad.PARCIAL

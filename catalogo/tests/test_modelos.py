@@ -14,6 +14,16 @@ def origen(**valores):
     return Origen(fuente='portal', id_original='001', **valores)
 
 
+@pytest.mark.parametrize('campo,valor', [
+    ('latitud', Decimal('91')), ('longitud', Decimal('-181')), ('latitud', Decimal('NaN')),
+    ('longitud', Decimal('Infinity')), ('latitud', True), ('longitud', 4.7),
+    ('ubicacion_aproximada', 'S'),
+])
+def test_geografia_rechaza_valores_invalidos(campo, valor):
+    with pytest.raises((ValueError, TypeError)):
+        Inmueble(origen=origen(), **{campo: valor})
+
+
 def test_ficha_minima_preserva_desconocidos():
     ficha = Inmueble(origen=origen())
     assert ficha.titulo is None

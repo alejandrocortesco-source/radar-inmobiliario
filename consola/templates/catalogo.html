@@ -1,38 +1,37 @@
 {% extends 'base.html' %}
 {% block content %}
-<section class="catalog-hero"><div><p class="eyebrow">TU CATÁLOGO, EN UN SOLO LUGAR</p><h1>Explora el catálogo</h1><p>Encuentra inmuebles y consulta sus detalles con calma.</p></div><div class="hero-note"><span class="live-dot"></span> Publicaciones reunidas para ti</div></section>
-{% if error %}<div class="notice notice-error" role="alert"><strong>No pudimos aplicar los filtros.</strong><p>{{error}}</p></div>{% endif %}
-<div class="catalog-layout">
-  <aside aria-label="Filtros del catálogo">{% include '_filtros.html' %}</aside>
-  <section class="results" aria-label="Resultados de inmuebles">
-    <div class="results-toolbar"><div><h2>{% if error %}Revisa tu búsqueda{% else %}<span data-total>{{total}}</span> {{'inmueble encontrado' if total==1 else 'inmuebles encontrados'}}{% endif %}</h2>{% if resultado and tarjetas %}<p>Mostrando {{primero}}–{{ultimo}} de {{total}}</p>{% endif %}</div>
-      <div class="sort-controls"><label for="orden">Ordenar por<select id="orden" name="orden" form="filtros" data-auto-submit>{% for clave,label in [('actualizacion_desc','Ficha consultada: más reciente'),('actualizacion_asc','Ficha consultada: más antigua'),('precio_asc','Precio: menor a mayor'),('precio_desc','Precio: mayor a menor'),('area_asc','Área: menor a mayor'),('area_desc','Área: mayor a menor'),('ultima_verificacion_desc','Presencia en búsquedas: reciente'),('id','Orden del catálogo')] %}<option value="{{clave}}" {% if (values.get('orden') or 'actualizacion_desc')==clave %}selected{% endif %}>{{label}}</option>{% endfor %}</select></label>
-      <label class="page-size-label" for="limit">Por página<select id="limit" name="limit" form="filtros" data-auto-submit>{% set tamano = resultado.limit if resultado else 12 %}{% for n in (12,24,48) %}<option value="{{n}}" {% if tamano==n %}selected{% endif %}>{{n}}</option>{% endfor %}{% if tamano not in (12,24,48) %}<option value="{{tamano}}" selected>{{tamano}}</option>{% endif %}</select></label></div>
-    </div>
-    {% if error %}<p class="muted">Corrige los filtros y vuelve a buscar.</p>
-    {% elif tarjetas %}
-    <div class="property-grid">
-    {% for card in tarjetas %}{% set i=card.inmueble %}
-      <article class="property-card">
-        <a class="card-media photo-wrap" href="{{card.url}}" aria-label="Ver ficha de {{i.titulo or 'este inmueble'}}">
-          <div class="photo-fallback"><svg><use href="#icon-home"/></svg><span>Imagen no disponible</span></div>
-          {% if card.fotos %}<img src="{{card.fotos[0]}}" alt="{{i.titulo or 'Fotografía del inmueble'}}" loading="lazy" decoding="async" referrerpolicy="no-referrer" data-property-photo>{% endif %}
-          <span class="source-badge">{{card.fuente}}</span>
-        </a>
-        <div class="card-body"><div class="card-meta"><span>{{i.tipo.value|capitalize if i.tipo else 'Inmueble'}}</span><span class="status status-{{card.clase_estado}}">{{card.estado}}</span></div>
-          <div class="card-prices">{% for o in card.ofertas %}<div class="offer"><span class="offer-operation">{{o.operacion}}</span><p class="price">{{o.precio}}{% if o.con_precio %}<small>{{o.moneda}}</small>{% endif %}</p></div>{% else %}<p class="price price-missing">Precio no informado</p>{% endfor %}</div>
-          <h3><a href="{{card.url}}">{{i.titulo or 'Conoce este inmueble'}}</a></h3><p class="card-location">{{card.ubicacion}}</p>
-          <div class="card-facts"><span>{{card.area}}</span><span>{{i.habitaciones if i.habitaciones is not none else '—'}} hab.</span><span>{{i.banos if i.banos is not none else '—'}} {{'baño' if i.banos==1 else 'baños'}}</span><span>{{i.parqueaderos if i.parqueaderos is not none else '—'}} parq.</span></div>
-          <div class="card-bottom"><span>Ficha consultada<br><time>{{i.origen.ultima_extraccion|fecha}}</time></span><a href="{{card.url}}" aria-label="Ver detalles de {{i.titulo or 'este inmueble'}}">Ver detalles <svg class="icon"><use href="#icon-arrow"/></svg></a></div>
-        </div>
-      </article>
-    {% endfor %}
-    </div>
-    <nav class="pagination" aria-label="Paginación del catálogo">{% if anterior %}<a class="button button-outline" href="{{anterior}}" rel="prev">← Anterior</a>{% else %}<span></span>{% endif %}<span>Página {{pagina}} de {{paginas}}</span>{% if siguiente %}<a class="button button-outline" href="{{siguiente}}" rel="next">Siguiente →</a>{% else %}<span></span>{% endif %}</nav>
-    {% else %}
-    <div class="empty-state"><span class="empty-icon"><svg class="icon"><use href="#icon-search"/></svg></span><h2>{% if total %}Esta página ya no tiene inmuebles{% else %}No encontramos inmuebles con estos filtros{% endif %}</h2><p>{% if total %}Vuelve a la primera página para continuar con tu búsqueda.{% else %}Prueba ampliar el precio o el área, cambiar la ubicación o quitar algún filtro.{% endif %}</p><a class="button button-primary" href="{{primera if total else '/consola/'}}">{{'Ir a la primera página' if total else 'Ver todos los inmuebles'}}</a></div>
-    {% endif %}
-    <p class="availability-note">Los estados reflejan presencia en las búsquedas consultadas. Una ausencia no confirma que el inmueble se haya vendido.</p>
-  </section>
+{% include '_filtros.html' %}
+{% if error %}<div class="notice" role="alert"><strong>No pudimos aplicar los filtros.</strong><p>{{error}}</p></div>
+{% elif tarjetas %}
+<div class="table-scroll" role="region" aria-label="Catálogo de inmuebles" tabindex="0" data-catalog-scroll>
+  <table class="catalog-table">
+    <caption class="sr-only">Catálogo consolidado. Área prioritaria: construida, privada o publicada, en m². Filtros y orden comparan únicamente área {{filtros.tipo_area.value}}. Selecciona una zona para abrir la ficha.</caption>
+    <thead><tr>
+      <th scope="col">Zona</th><th scope="col">Tipo</th>
+      <th scope="col" class="numeric" {% if filtros.orden.value.startswith('precio_') %}aria-sort="{{'ascending' if filtros.orden.value=='precio_asc' else 'descending'}}"{% endif %}><a data-price-order="{{'precio_desc' if filtros.orden.value=='precio_asc' else 'precio_asc'}}" href="{{orden_url('precio_desc' if filtros.orden.value=='precio_asc' else 'precio_asc')}}" title="Ordenar precio; requiere operación y moneda">Precio{% if filtros.orden.value.startswith('precio_') %} {{'↑' if filtros.orden.value=='precio_asc' else '↓'}}{% endif %}</a></th>
+      <th scope="col" class="numeric" {% if filtros.orden.value.startswith('area_') %}aria-sort="{{'ascending' if filtros.orden.value=='area_asc' else 'descending'}}"{% endif %}><a href="{{orden_url('area_desc' if filtros.orden.value=='area_asc' else 'area_asc')}}" title="Área {{filtros.tipo_area.value}} en m²">Área{% if filtros.orden.value.startswith('area_') %} {{'↑' if filtros.orden.value=='area_asc' else '↓'}}{% endif %}</a></th>
+      <th scope="col" class="numeric">Habitaciones</th><th scope="col">Links</th>
+    </tr></thead>
+    <tbody>{% for card in tarjetas %}{% set i=card.inmueble %}<tr>
+      <td><a class="property-link" href="{{card.url}}" aria-label="Ver ficha de {{i.titulo or i.origen.id_original}}" title="{{card.ubicacion}} · {{i.titulo or i.origen.id_original}}">{{i.barrio or i.zona or i.ciudad or 'Sin ubicación'}}</a></td>
+      <td>{{i.tipo.value|capitalize if i.tipo else 'Sin dato'}}</td>
+      <td class="numeric prices">{% set o=card.oferta_principal %}{% if o %}<span>{{o.precio}} <small>· {{o.operacion}}</small></span>{% else %}Sin dato{% endif %}</td>
+      <td class="numeric" title="Filtros y orden por área {{filtros.tipo_area.value}}: {{card.area_comparacion}}">{{card.area}}</td>
+      <td class="numeric">{{i.habitaciones if i.habitaciones is not none else '—'}}</td>
+      <td>{% include '_links.html' %}</td>
+    </tr>{% endfor %}</tbody>
+  </table>
 </div>
+<nav class="pagination" aria-label="Paginación del catálogo">
+  <span>{{primero}}–{{ultimo}} de {{total}}</span>
+  <div>{% if anterior %}<a href="{{anterior}}" rel="prev">← Anterior</a>{% else %}<span aria-disabled="true">← Anterior</span>{% endif %}
+    <span>Página {{pagina}} de {{paginas}}</span>
+    {% if siguiente %}<a href="{{siguiente}}" rel="next">Siguiente →</a>{% else %}<span aria-disabled="true">Siguiente →</span>{% endif %}</div>
+  <label for="limit">Filas<select aria-label="Filas" id="limit" name="limit" form="filtros" data-auto-submit>{% for n in (12,24,48) %}<option value="{{n}}" {% if resultado.limit==n %}selected{% endif %}>{{n}}</option>{% endfor %}{% if resultado.limit not in (12,24,48) %}<option value="{{resultado.limit}}" selected>{{resultado.limit}}</option>{% endif %}</select></label>
+  <noscript><button type="submit" form="filtros">Cambiar filas</button></noscript>
+</nav>
+<p class="legend">Publicación · Fotografías · Mapa original. Accesos deshabilitados: no disponibles. Área mostrada: construida, luego privada y luego publicada. Filtros y orden de área: solo {{filtros.tipo_area.value}}, sin sustituir por otro tipo.</p>
+{% else %}
+<section class="empty-state"><h1>{{'Esta página ya no tiene inmuebles' if total else 'No encontramos inmuebles con estos filtros'}}</h1><p>{{'Regresa a la primera página para continuar.' if total else 'Amplía los rangos o limpia los filtros.'}}</p><a href="{{primera if total else '/consola/'}}">{{'Ir a la primera página' if total else 'Limpiar filtros'}}</a></section>
+{% endif %}
 {% endblock %}

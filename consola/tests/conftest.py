@@ -36,6 +36,12 @@ def escenario_consola(tmp_path, monkeypatch):
             'fields': {}, 'sources': {}, 'extra': {'rentPrice': 1_000_000} if n == 1 else {},
             'media': {}, 'visible_text': '', 'errors': [],
         }
+        if n <= 2:
+            doc['normalized'].update(
+                latitude=4.7, longitude=-74.04,
+                portal_map_url=link['url'] + '#location-section',
+                map_url='https://www.openstreetmap.org/?mlat=4.7&mlon=-74.04#map=16/4.7/-74.04')
+            doc['extra']['ubicacionaproximada'] = 'S' if n == 1 else 'N'
         documentos[link['id']] = doc
         store.result(run, link['id'], 'success', doc)
     with store.connect() as db:

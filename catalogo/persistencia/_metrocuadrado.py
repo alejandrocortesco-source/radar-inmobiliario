@@ -37,6 +37,16 @@ def _entero(valor):
     return int(numero) if numero is not None and numero == numero.to_integral_value() else None
 
 
+def _coordenada(valor, limite):
+    if isinstance(valor, bool) or valor is None:
+        return None
+    try:
+        numero = Decimal(str(valor))
+    except (InvalidOperation, ValueError):
+        return None
+    return numero if numero.is_finite() and -limite <= numero <= limite else None
+
+
 def _fecha(valor):
     if not isinstance(valor, str):
         return None
@@ -129,10 +139,18 @@ def convertir(fila, documento, presencias, config):
     ))
     areas = {}
     for campo in ('area', 'built_area', 'private_area'):
-        # No inferir m² de un número o de la unidad de otra clase de área.
-        unidad = _clave(normal.get(campo + '_unit')).replace(' ', '')
-        areas[campo] = _numero(normal.get(campo)) if unidad in ('m²', 'm2') else None
+        # Regla del mercado local: presentar valores positivos en m², sin
+        # reescribir los valores ni las unidades originales de la captura.
+        areas[campo] = _numero(normal.get(campo))
     estrato = _entero(normal.get('stratum'))
+    coordenadas = original.get('coordinates')
+    coordenadas = coordenadas if isinstance(coordenadas, dict) else {}
+    # Capturas anteriores conservan la precisión en la evidencia del enlace.
+    campos = documento.get('fields')
+    campo_mapa = campos.get('map_url') if isinstance(campos, dict) else None
+    evidencia = campo_mapa.get('raw') if isinstance(campo_mapa, dict) else None
+    evidencia = evidencia if isinstance(evidencia, dict) else {}
+    aproximada = original.get('ubicacionaproximada', evidencia.get('ubicacionaproximada'))
     return Inmueble(
         origen=Origen(
             fuente='metrocuadrado', id_original=fila['id'], url=_texto(fila['url']),
@@ -148,6 +166,10 @@ def convertir(fila, documento, presencias, config):
         ciudad=_texto(normal.get('city')) or _texto(fila['city']),
         zona=_texto(normal.get('zone')), barrio=_texto(normal.get('neighborhood')) or _texto(normal.get('common_neighborhood')),
         direccion=_texto(normal.get('address')),
+        latitud=_coordenada(normal.get('latitude', coordenadas.get('lat')), 90),
+        longitud=_coordenada(normal.get('longitude', coordenadas.get('lon')), 180),
+        ubicacion_aproximada={'S': True, 'N': False}.get(aproximada) if isinstance(aproximada, str) else None,
+        portal_map_url=_texto(normal.get('portal_map_url')), map_url=_texto(normal.get('map_url')),
         area_publicada_m2=areas['area'], area_construida_m2=areas['built_area'],
         area_privada_m2=areas['private_area'], habitaciones=_entero(normal.get('rooms')),
         banos=_entero(normal.get('bathrooms')), parqueaderos=_entero(normal.get('garages')),

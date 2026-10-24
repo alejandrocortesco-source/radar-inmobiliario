@@ -1,33 +1,75 @@
-<details class="filters-panel" open data-filters>
-  <summary><svg class="icon"><use href="#icon-filter"/></svg> Filtrar inmuebles <span>＋</span></summary>
-  <div class="filter-body">
-    <div class="filter-heading"><h2>Encuentra tu inmueble</h2><a href="/consola/">Limpiar</a></div>
-    <form id="filtros" action="/consola/" method="get" data-filter-form>
-      <input type="hidden" name="offset" value="0">
-      <div class="field"><label for="texto">¿Qué estás buscando?</label><div class="search-input"><svg class="icon"><use href="#icon-search"/></svg><input id="texto" name="texto" value="{{values.get('texto','')}}" placeholder="Terraza, jardín, oficina…"></div></div>
-      <fieldset><legend>Ubicación</legend>
-        <div class="field"><label for="ciudad">Ciudad</label><select id="ciudad" name="ciudad"><option value="">Todas las ciudades</option>{% for ciudad in ciudades %}<option value="{{ciudad}}" {% if values.get('ciudad')==ciudad %}selected{% endif %}>{{ciudad}}</option>{% endfor %}</select></div>
-        <div class="field"><label for="barrios">Barrio</label><input id="barrios" name="barrios" list="lista-barrios" value="{{values.get('barrios','')}}" placeholder="Todos los barrios"><datalist id="lista-barrios">{% for barrio in barrios %}<option value="{{barrio}}">{% endfor %}</datalist></div>
-        <div class="field"><label for="zonas">Zona</label><input id="zonas" name="zonas" value="{{values.get('zonas','')}}" placeholder="Todas las zonas"></div>
-      </fieldset>
-      <fieldset><legend>El inmueble</legend>
-        <div class="field"><label for="operacion">Operación</label><select id="operacion" name="operacion"><option value="">Venta y arriendo</option><option value="venta" {% if values.get('operacion')=='venta' %}selected{% endif %}>Venta</option><option value="arriendo" {% if values.get('operacion')=='arriendo' %}selected{% endif %}>Arriendo</option></select></div>
-        <div class="field"><label for="tipos">Tipo de inmueble</label><select id="tipos" name="tipos"><option value="">Todos los tipos</option>{% for tipo in tipos %}<option value="{{tipo.value}}" {% if values.get('tipos')==tipo.value %}selected{% endif %}>{{tipo.value|capitalize}}</option>{% endfor %}</select></div>
-      </fieldset>
-      <fieldset><legend>Precio</legend>
-        <div class="field"><label for="moneda">Moneda</label><select id="moneda" name="moneda"><option value="">Todas las monedas</option>{% for moneda,label in [('COP','Pesos colombianos (COP)'),('USD','Dólares (USD)'),('EUR','Euros (EUR)')] %}<option value="{{moneda}}" {% if values.get('moneda')==moneda %}selected{% endif %}>{{label}}</option>{% endfor %}</select></div>
-        <div class="field-row"><div class="field"><label for="precio_min">Desde</label><input id="precio_min" name="precio_min" type="number" min="0" step="0.01" inputmode="decimal" value="{{values.get('precio_min','')}}" placeholder="Mínimo"></div><div class="field"><label for="precio_max">Hasta</label><input id="precio_max" name="precio_max" type="number" min="0" step="0.01" inputmode="decimal" value="{{values.get('precio_max','')}}" placeholder="Máximo"></div></div>
-        <p class="field-help">Para comparar precios, elige operación y moneda.</p>
-      </fieldset>
-      <fieldset><legend>Área</legend>
-        <div class="field"><label for="tipo_area">Área que deseas comparar</label><select id="tipo_area" name="tipo_area">{% for clave,label in [('construida','Construida'),('privada','Privada'),('publicada','Publicada')] %}<option value="{{clave}}" {% if (values.get('tipo_area') or 'construida')==clave %}selected{% endif %}>{{label}}</option>{% endfor %}</select></div>
-        <div class="field-row"><div class="field"><label for="area_min_m2">Desde (m²)</label><input id="area_min_m2" name="area_min_m2" type="number" min="0" step="any" value="{{values.get('area_min_m2','')}}" placeholder="Mínimo"></div><div class="field"><label for="area_max_m2">Hasta (m²)</label><input id="area_max_m2" name="area_max_m2" type="number" min="0" step="any" value="{{values.get('area_max_m2','')}}" placeholder="Máximo"></div></div>
-      </fieldset>
-      <fieldset><legend>Características</legend><div class="field-row">
-      {% for clave,label in [('habitaciones_min','Habitaciones mín.'),('banos_min','Baños mín.'),('parqueaderos_min','Parqueaderos mín.')] %}<div class="field"><label for="{{clave}}">{{label}}</label><select id="{{clave}}" name="{{clave}}"><option value="">Sin preferencia</option>{% for n in range(0,6) %}<option value="{{n}}" {% if values.get(clave)==n|string %}selected{% endif %}>{{n}} o más</option>{% endfor %}</select></div>{% endfor %}
-      </div></fieldset>
-      <div class="field"><label for="disponibilidad">Disponibilidad en búsquedas</label><select id="disponibilidad" name="disponibilidad"><option value="">Todos los estados</option>{% for clave,label in [('activo','Activo en búsquedas'),('posiblemente_retirado','Pendiente de confirmar'),('retirado','Fuera de las búsquedas'),('desconocida','Sin verificación')] %}<option value="{{clave}}" {% if values.get('disponibilidad')==clave %}selected{% endif %}>{{label}}</option>{% endfor %}</select></div>
-      <button class="button button-primary apply-button" type="submit"><svg class="icon"><use href="#icon-search"/></svg> Buscar inmuebles</button>
-    </form>
+{% macro input(clave, etiqueta, tipo='text', placeholder='') -%}
+<label for="{{clave}}">{{etiqueta}}<input aria-label="{{etiqueta}}" id="{{clave}}" name="{{clave}}" type="{{tipo}}" value="{{values.get(clave,'')}}" placeholder="{{placeholder}}" {% if tipo=='number' %}min="0" step="any"{% endif %}></label>
+{%- endmacro %}
+<form id="filtros" action="/consola/" method="get" data-filter-form>
+  <input type="hidden" name="offset" value="0">
+  {% if not tarjetas %}<input type="hidden" name="limit" value="{{values.get('limit') or 24}}">{% endif %}
+  <div class="toolbar">
+    <p class="result-count"><span data-total>{{total}}</span> {{'inmueble' if total==1 else 'inmuebles'}}</p>
+    <div class="tools">
+      <details class="popover" {% if values.get('texto') %}open{% endif %}>
+        <summary>Buscar</summary>
+        <div class="popover-body">
+          {{input('texto', 'Buscar por texto', placeholder='Título, descripción o ID')}}
+          <button type="submit">Buscar inmuebles</button>
+        </div>
+      </details>
+      <details class="popover" data-filters {% if error %}open{% endif %}>
+        <summary>Filtros{% if activos %} ({{activos|length}}){% endif %}</summary>
+        <div class="popover-body advanced">
+          <div class="fields">
+            <label for="ciudad">Ciudad<select aria-label="Ciudad" id="ciudad" name="ciudad"><option value="">Todas</option>{% for ciudad in ciudades %}<option value="{{ciudad}}" {% if values.get('ciudad')==ciudad %}selected{% endif %}>{{ciudad}}</option>{% endfor %}</select></label>
+            <label for="barrios">Barrio<input aria-label="Barrio" id="barrios" name="barrios" list="lista-barrios" value="{{values.get('barrios','')}}"><datalist id="lista-barrios">{% for barrio in barrios %}<option value="{{barrio}}">{% endfor %}</datalist></label>
+            <label for="tipo_area">Área que deseas comparar<select aria-label="Área que deseas comparar" id="tipo_area" name="tipo_area">{% for clave,label in [('construida','Construida'),('privada','Privada'),('publicada','Publicada')] %}<option value="{{clave}}" {% if (values.get('tipo_area') or 'construida')==clave %}selected{% endif %}>{{label}}</option>{% endfor %}</select></label>
+            {{input('area_min_m2', 'Área desde (m²)', 'number')}}
+            {{input('area_max_m2', 'Área hasta (m²)', 'number')}}
+            {{input('habitaciones_min', 'Habitaciones mín.', 'number')}}
+            {{input('habitaciones_max', 'Habitaciones máx.', 'number')}}
+            {{input('banos_min', 'Baños mín.', 'number')}}
+            {{input('parqueaderos_min', 'Parqueaderos mín.', 'number')}}
+            <label for="estratos">Estrato<select aria-label="Estrato" id="estratos" name="estratos"><option value="">Todos</option>{% for n in range(1,7) %}<option value="{{n}}" {% if values.get('estratos')==n|string %}selected{% endif %}>{{n}}</option>{% endfor %}</select></label>
+            <label for="disponibilidad">Disponibilidad en búsquedas<select aria-label="Disponibilidad en búsquedas" id="disponibilidad" name="disponibilidad"><option value="">Todos los estados</option>{% for clave,label in [('activo','Activo en búsquedas'),('posiblemente_retirado','Pendiente de confirmar'),('retirado','Fuera de las búsquedas'),('desconocida','Sin verificación')] %}<option value="{{clave}}" {% if values.get('disponibilidad')==clave %}selected{% endif %}>{{label}}</option>{% endfor %}</select></label>
+            <label for="fuente">Fuente<select aria-label="Fuente" id="fuente" name="fuente"><option value="">Todas</option>{% for fuente in fuentes %}<option value="{{fuente}}" {% if values.get('fuente')==fuente %}selected{% endif %}>{{fuente|capitalize}}</option>{% endfor %}</select></label>
+            <label for="id_busqueda">Búsqueda de origen<input aria-label="Búsqueda de origen" id="id_busqueda" name="id_busqueda" value="{{values.get('id_busqueda','')}}" list="lista-busquedas"><datalist id="lista-busquedas">{% for fuente,id in busquedas_opciones %}<option value="{{id}}">{{fuente}}</option>{% endfor %}</datalist></label>
+            <label for="requiere_revision">Requiere revisión<select aria-label="Requiere revisión" id="requiere_revision" name="requiere_revision"><option value="">Todos</option><option value="true" {% if values.get('requiere_revision')=='true' %}selected{% endif %}>Sí</option><option value="false" {% if values.get('requiere_revision')=='false' %}selected{% endif %}>No</option></select></label>
+          </div>
+          <p class="muted">Los rangos y el orden por área usan solo el tipo seleccionado. La columna muestra el área prioritaria e identifica su tipo.</p>
+          <p class="muted">Para filtrar una búsqueda de origen, selecciona también su fuente.</p>
+          <div class="actions"><button type="submit">Aplicar filtros</button><a href="/consola/">Limpiar filtros</a></div>
+        </div>
+      </details>
+      <details class="popover">
+        <summary>Ordenar</summary>
+        <div class="popover-body">
+          <label for="orden">Ordenar por<select aria-label="Ordenar por" id="orden" name="orden">{% for clave,label in ordenes %}<option value="{{clave}}" {% if (values.get('orden') or 'actualizacion_desc')==clave %}selected{% endif %}>{{label}}</option>{% endfor %}</select></label>
+          <button type="submit">Aplicar orden</button>
+        </div>
+      </details>
+      <details class="popover">
+        <summary>Exportar</summary>
+        <div class="popover-body">
+          <p>Todos los resultados de los filtros aplicados, en el orden actual. Una fila por oferta.</p>
+          {% if exportar and not error %}<a href="{{exportar}}" download>Descargar CSV</a>{% endif %}
+        </div>
+      </details>
+    </div>
   </div>
-</details>
+  <div class="primary-filters">
+    <label class="inline-field" for="zonas">Zona<input aria-label="Zona" id="zonas" name="zonas" list="lista-zonas" value="{{values.get('zonas','')}}" placeholder="Todas las zonas"><datalist id="lista-zonas">{% for zona in zonas %}<option value="{{zona}}">{% endfor %}</datalist></label>
+    <details class="popover price-filter">
+      <summary>Precio <span class="muted">{% if values.get('precio_min') or values.get('precio_max') %}Rango aplicado{% else %}Todos{% endif %}</span></summary>
+      <div class="popover-body">
+        <label for="operacion">Operación<select aria-label="Operación" id="operacion" name="operacion"><option value="">Venta y arriendo</option>{% for clave,label in [('venta','Venta'),('arriendo','Arriendo')] %}<option value="{{clave}}" {% if values.get('operacion')==clave %}selected{% endif %}>{{label}}</option>{% endfor %}</select></label>
+        <label for="moneda">Moneda<select aria-label="Moneda" id="moneda" name="moneda"><option value="">Todas</option>{% for moneda in ('COP','USD','EUR') %}<option value="{{moneda}}" {% if values.get('moneda')==moneda %}selected{% endif %}>{{moneda}}</option>{% endfor %}</select></label>
+        {{input('precio_min', 'Precio desde', 'number')}}
+        {{input('precio_max', 'Precio hasta', 'number')}}
+        <p class="muted">Para filtrar u ordenar por precio, elige operación y moneda.</p>
+        <button type="submit">Aplicar precio</button>
+      </div>
+    </details>
+    <label class="inline-field" for="tipos">Tipo<select aria-label="Tipo" id="tipos" name="tipos"><option value="">Todos</option>{% for tipo in tipos %}<option value="{{tipo.value}}" {% if values.get('tipos')==tipo.value %}selected{% endif %}>{{tipo.value|capitalize}}</option>{% endfor %}</select></label>
+    <button type="submit">Aplicar</button>
+    {% if activos %}<a href="/consola/">Limpiar</a>{% endif %}
+  </div>
+  {% if activos %}<p class="active-filters">{% for etiqueta,valor in activos %}<span>{{etiqueta}}: {{valor}}</span>{% endfor %}</p>{% endif %}
+</form>

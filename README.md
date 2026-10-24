@@ -4,7 +4,7 @@ Radar Inmobiliario es un proyecto para recopilar y revisar información pública
 
 El componente implementado actualmente es el **scraper de Metrocuadrado**: recorre búsquedas con Playwright, actualiza incrementalmente un catálogo por cambios de precio, guarda su trazabilidad en SQLite y ofrece una interfaz local con FastAPI para revisar y exportar los resultados.
 
-La **Consola v0.1** permite consultar el catálogo visual en [http://127.0.0.1:8000/consola/](http://127.0.0.1:8000/consola/) dentro del mismo FastAPI. Consulta su [guía de inicio y uso](consola/README.md). El servicio y el modelo compartidos están en `catalogo/`; la interfaz técnica permanece en `/`.
+La **Consola v0.2** permite consultar el catálogo en una tabla compacta en [http://127.0.0.1:8000/consola/](http://127.0.0.1:8000/consola/) dentro del mismo FastAPI. Consulta su [guía de inicio y uso](consola/README.md). El servicio y el modelo compartidos están en `catalogo/`; la interfaz técnica permanece en `/`.
 
 Consulta las [instrucciones de instalación, ejecución y pruebas del scraper](scraper/README.md). Su código, dependencias, herramientas y documentación se encuentran en [`scraper/`](scraper/).
 

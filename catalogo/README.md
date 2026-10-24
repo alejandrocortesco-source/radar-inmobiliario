@@ -35,9 +35,10 @@ normalización de URLs pertenecen a futuros adaptadores específicos de cada fue
 - Moneda es un código de tres letras mayúsculas o `None`. El modelo valida el
   formato, no interpreta símbolos ni convierte divisas. No impone precisión
   monetaria o moneda por país; esas reglas pertenecen a la normalización.
-- Áreas publicadas, construidas y privadas se distinguen y están en m². Solo se
-  rellenarán si la unidad está confirmada o existe conversión explícita verificable.
-  Una unidad desconocida queda pendiente del adaptador; nunca se supone m².
+- Áreas publicadas, construidas y privadas se distinguen y están en m² por la
+  convención del mercado colombiano: se aceptan números positivos finitos aunque
+  falte la unidad en la captura. Los valores y unidades originales no se reescriben
+  en SQLite. El área publicada no se reclasifica como construida o privada.
 - Tipo desconocido es `None`; `OTRO` significa tipo publicado sin categoría común.
   Los valores originales se conservan en `Origen`.
 - Fotos son enlaces y características son textos normalizados. Este paso no
@@ -134,8 +135,9 @@ El servicio del paso 4 ejecuta los filtros y la paginación definidos en el paso
 El modelo común contiene las ofertas de la ficha global. La capa opcional de
 revisión del paso 3 conserva además el historial y las evidencias técnicas.
 
-Áreas sin unidad confirmada y fechas publicadas sin zona horaria quedan como
-`None`. Números ambiguos, no finitos o inválidos no se adivinan. Los precios duales
+Las fechas publicadas sin zona horaria quedan como `None`. Las áreas numéricas
+positivas usan la convención local de m², incluso sin unidad explícita. Números
+ambiguos, no finitos o inválidos no se adivinan. Los precios duales
 se separan usando la operación y los importes originales ya guardados, sin volver
 a visitar el portal. Características agrupadas se presentan con su título como
 prefijo y fotografías se mantienen como URLs, sin descargarlas.
@@ -267,9 +269,9 @@ en solicitudes separadas pueden cambiar si el scraper actualiza el catálogo ent
 ellas. El orden estable evita saltos por empates cuando los datos no cambian;
 no se han añadido cursores ni sesiones de instantáneas.
 
-Los filtros solo usan atributos conocidos: un área publicada sin unidad confirmada
-queda desconocida aunque exista un número original. En esos casos puede usarse
-`tipo_area=construida` o `privada` si esa unidad sí fue publicada. La API histórica
+Los filtros de área usan solo la clase elegida (`tipo_area`), con números
+positivos finitos presentados en m² según la convención local. No toman otra
+clase de área como sustituto de un dato ausente. La API histórica
 continúa excluyendo anuncios sin pertenencia a ninguna búsqueda; el servicio común
 sí permite consultar todos los anuncios mediante `consultar`.
 

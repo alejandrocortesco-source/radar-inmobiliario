@@ -10,18 +10,20 @@ from metro.web import app
 def soup(response):
     return BeautifulSoup(response.text, 'html.parser')
 
-def test_catalogo_consolidado_sin_ids_tecnicos(escenario_consola):
+def test_catalogo_consolidado_tabla_compacta_sin_fotografias(escenario_consola):
     r = TestClient(app).get('/consola/')
     assert r.status_code == 200
     pagina = soup(r)
     assert pagina.select_one('[data-total]').text == '26'
-    assert len(pagina.select('.property-card')) == 12
+    assert len(pagina.select('.catalog-table tbody tr')) == 24
     assert 'Radar Inmobiliario' in pagina.get_text(' ', strip=True)
     assert '1-M1' not in pagina.get_text()
     assert identificar_inmueble('metrocuadrado', '1-M1') not in pagina.get_text()
-    assert 'Ficha consultada' in pagina.get_text() and 'Metrocuadrado' in pagina.get_text()
-    assert all(i.get('loading') == 'lazy' for i in pagina.select('img'))
-    assert len({a['href'] for a in pagina.select('.property-card h3 a')}) == 12
+    assert [th.text.strip() for th in pagina.select('.catalog-table th')] == ['Zona', 'Tipo', 'Precio', 'Área', 'Habitaciones', 'Links']
+    assert not pagina.select('img, iframe, .property-card')
+    assert len({a['href'] for a in pagina.select('.property-link')}) == 24
+    assert pagina.select_one('#limit option[selected]')['value'] == '24'
+    assert [o['value'] for o in pagina.select('#limit option')] == ['12', '24', '48']
 
 def test_filtros_y_parametros_reales_del_servicio(escenario_consola):
     params = {'ciudad': 'Bogotá', 'operacion': 'venta', 'moneda': 'COP',
@@ -31,27 +33,27 @@ def test_filtros_y_parametros_reales_del_servicio(escenario_consola):
               'orden': 'precio_desc', 'limit': 2}
     pagina = soup(TestClient(app).get('/consola/', params=params))
     assert pagina.select_one('[data-total]').text == '5'
-    assert len(pagina.select('.property-card')) == 2
-    assert pagina.select_one('.property-card h3').get_text(strip=True) == 'Casa con jardín 05'
+    assert len(pagina.select('.catalog-table tbody tr')) == 2
+    assert pagina.select_one('.property-link')['aria-label'] == 'Ver ficha de Casa con jardín 05'
     assert pagina.select_one('#precio_max')['value'] == '105000000'
     assert pagina.select_one('#ciudad option[selected]')['value'] == 'Bogotá'
-    assert '0 parq.' in pagina.get_text()
+    assert '105.000.000' in pagina.get_text()
 
 def test_pagina_ficha_y_regreso_conservan_estado(escenario_consola):
     client = TestClient(app)
     params = {'ciudad': 'Bogotá', 'tipos': 'casa', 'orden': 'id', 'limit': 2, 'offset': 2}
     pagina = soup(client.get('/consola/', params=params))
-    ficha = soup(client.get(pagina.select_one('.property-card h3 a')['href']))
+    ficha = soup(client.get(pagina.select_one('.property-link')['href']))
     volver = ficha.select_one('.back-link')['href']
     assert parse_qs(urlsplit(volver).query) == {k: [str(v)] for k, v in params.items()}
     repetida = soup(client.get(volver))
-    assert [a['href'] for a in repetida.select('.property-card h3 a')] == [
-        a['href'] for a in pagina.select('.property-card h3 a')]
+    assert [a['href'] for a in repetida.select('.property-link')] == [
+        a['href'] for a in pagina.select('.property-link')]
     segunda = soup(client.get(pagina.select_one('a[rel=next]')['href']))
-    assert not ({a['href'].split('?')[0] for a in segunda.select('.property-card h3 a')} &
-                {a['href'].split('?')[0] for a in pagina.select('.property-card h3 a')})
+    assert not ({a['href'].split('?')[0] for a in segunda.select('.property-link')} &
+                {a['href'].split('?')[0] for a in pagina.select('.property-link')})
 
-def test_ficha_doble_oferta_procedencia_fechas_y_galeria(escenario_consola):
+def test_ficha_doble_oferta_procedencia_fechas_y_enlaces(escenario_consola):
     id = identificar_inmueble('metrocuadrado', '1-M1')
     pagina = soup(TestClient(app).get('/consola/inmuebles/' + id))
     texto = pagina.get_text(' ', strip=True)
@@ -60,9 +62,10 @@ def test_ficha_doble_oferta_procedencia_fechas_y_galeria(escenario_consola):
     assert 'Última extracción de la ficha' in texto and 'Última presencia en listados' in texto
     assert '20/10/2026 · 10:00' in texto and '24/10/2026 · 11:00' in texto
     assert len(pagina.select('.search-presences li')) == 2
-    assert len(pagina.select('[data-index]')) == 3
+    assert len(pagina.select('.photo-list a')) == 3
+    assert not pagina.select('img, iframe, [data-gallery]')
     assert 'Terraza' in texto and 'Cocina integral' in texto
-    assert 'Ver publicación original' in texto and 'no confirma una venta' in texto
+    assert 'Publicación original' in texto and 'no confirma una venta' in texto
     assert id not in texto and 'data_json' not in texto and 'normalized' not in texto
 
 def test_estados_vacios_y_pagina_fuera_de_rango(escenario_consola):
@@ -107,7 +110,8 @@ def test_consultas_no_escriben_y_rutas_anteriores_siguen(escenario_consola):
     antes = hashlib.sha256(ruta.read_bytes()).hexdigest()
     client = TestClient(app)
     for destino in ('/consola/', '/api/catalog', '/api/runs', '/', '/catalog',
-                    '/consola/static/consola.css', '/consola/static/consola.js'):
+                    '/consola/static/consola.css', '/consola/static/consola.js', '/consola/exportar.csv',
+                    '/consola/inmuebles/' + identificar_inmueble('metrocuadrado', '1-M1')):
         assert client.get(destino).status_code == 200
     assert hashlib.sha256(ruta.read_bytes()).hexdigest() == antes
 
@@ -123,8 +127,9 @@ def test_enlaces_malformados_o_con_credenciales_no_se_exponen():
     assert enlace_publico('https://usuario:clave@externo.test/foto.jpg') is None
     assert enlace_publico('https://:clave@externo.test/foto.jpg') is None
 
-def test_ficha_sin_imagenes_tiene_alternativa_visual(escenario_consola):
+def test_ficha_sin_imagenes_no_inventa_enlaces(escenario_consola):
     id = identificar_inmueble('metrocuadrado', '3-M3')
     pagina = soup(TestClient(app).get('/consola/inmuebles/' + id))
     assert not pagina.select('[data-gallery-main]')
-    assert 'No hay una fotografía disponible' in pagina.get_text()
+    assert 'Fotografías no disponibles.' in pagina.get_text()
+    assert not pagina.select('.photo-list a, img')

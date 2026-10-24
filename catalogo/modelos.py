@@ -108,7 +108,8 @@ class Origen:
 class Inmueble:
     """Un anuncio por origen; no presupone equivalencia física entre anuncios.
 
-    Las áreas son m² confirmados; el adaptador no debe inferir una unidad ausente.
+    Las áreas se expresan en m² según la convención del mercado local.
+    El adaptador no modifica los valores ni las unidades de la captura original.
     ofertas=() indica operación desconocida. Una oferta dual tiene dos Oferta.
     """
 
@@ -121,6 +122,11 @@ class Inmueble:
     zona: str | None = None
     barrio: str | None = None
     direccion: str | None = None
+    latitud: Decimal | None = None
+    longitud: Decimal | None = None
+    ubicacion_aproximada: bool | None = None
+    portal_map_url: str | None = None
+    map_url: str | None = None
     area_publicada_m2: Decimal | None = None
     area_construida_m2: Decimal | None = None
     area_privada_m2: Decimal | None = None
@@ -136,8 +142,18 @@ class Inmueble:
     def __post_init__(self):
         if not isinstance(self.origen, Origen):
             raise TypeError('origen debe ser Origen')
-        for nombre in ('titulo', 'descripcion', 'ciudad', 'zona', 'barrio', 'direccion'):
+        for nombre in ('titulo', 'descripcion', 'ciudad', 'zona', 'barrio', 'direccion',
+                       'portal_map_url', 'map_url'):
             validar.texto(getattr(self, nombre), nombre)
+        for nombre, limite in (('latitud', 90), ('longitud', 180)):
+            valor = getattr(self, nombre)
+            if valor is not None:
+                if not isinstance(valor, Decimal):
+                    raise TypeError(f'{nombre} debe ser Decimal o None')
+                if not valor.is_finite() or not -limite <= valor <= limite:
+                    raise ValueError(f'{nombre} fuera del intervalo válido')
+        if self.ubicacion_aproximada is not None and not isinstance(self.ubicacion_aproximada, bool):
+            raise TypeError('ubicacion_aproximada debe ser bool o None')
         validar.enumeracion(self.tipo, TipoInmueble, 'tipo', opcional=True)
         validar.enumeracion(self.calidad, Calidad, 'calidad')
         validar.tupla(self.ofertas, Oferta, 'ofertas')

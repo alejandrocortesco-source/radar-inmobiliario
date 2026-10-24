@@ -1,38 +1,48 @@
 {% extends 'base.html' %}
 {% block title %}{{inmueble.titulo or 'Detalle del inmueble'}} · Radar Inmobiliario{% endblock %}
 {% block content %}
+<article class="detail">
 <a class="back-link" href="{{volver}}">← Volver al catálogo</a>
-<div class="detail-heading"><div><p class="eyebrow">{{datos.fuente}} · {{inmueble.tipo.value|capitalize if inmueble.tipo else 'Inmueble'}}</p><h1>{{inmueble.titulo or 'Detalle del inmueble'}}</h1><p class="detail-location">{{datos.ubicacion}}</p></div><span class="status status-{{datos.clase_estado}}">{{datos.estado}}</span></div>
-<div class="detail-layout">
-  <div class="detail-main">
-    <section class="gallery" aria-label="Galería de fotografías" data-gallery data-photos='{{datos.fotos|tojson}}'>
-      <div class="gallery-main photo-wrap">
-        <div class="photo-fallback"><svg><use href="#icon-home"/></svg><span>No hay una fotografía disponible</span></div>
-        {% if datos.fotos %}<img class="gallery-image" src="{{datos.fotos[0]}}" alt="{{inmueble.titulo or 'Fotografía del inmueble'}}" loading="lazy" decoding="async" data-property-photo data-gallery-main referrerpolicy="no-referrer">
-        {% if datos.fotos|length>1 %}<button class="gallery-step gallery-prev" type="button" data-step="-1" aria-label="Fotografía anterior">←</button><button class="gallery-step gallery-next" type="button" data-step="1" aria-label="Fotografía siguiente">→</button>{% endif %}<span class="gallery-counter" aria-live="polite" data-gallery-count>1 / {{datos.fotos|length}}</span>{% endif %}
-      </div>
-      {% if datos.fotos %}<div class="gallery-thumbnails" aria-label="Elegir fotografía">{% for foto in datos.fotos %}<button type="button" class="thumbnail {{'selected' if loop.first else ''}}" data-index="{{loop.index0}}" aria-label="Ver fotografía {{loop.index}}" aria-pressed="{{'true' if loop.first else 'false'}}"><span aria-hidden="true">Foto {{loop.index}}</span><img src="{{foto}}" alt="" loading="lazy" decoding="async" data-property-photo referrerpolicy="no-referrer"></button>{% endfor %}</div><a class="text-link gallery-original" href="{{datos.fotos[0]}}" target="_blank" rel="noopener noreferrer" data-full-photo>Ver fotografía completa ↗</a>{% endif %}
-    </section>
-    <section class="detail-panel"><div class="section-heading"><span class="section-number">01</span><h2>Lo esencial</h2></div>
-      <dl class="detail-facts">{% for valor,etiqueta in [(inmueble.area_construida_m2,'Área construida (m²)'),(inmueble.area_privada_m2,'Área privada (m²)'),(inmueble.area_publicada_m2,'Área publicada (m²)'),(inmueble.habitaciones,'Habitaciones'),(inmueble.banos,'Baños'),(inmueble.parqueaderos,'Parqueaderos'),(inmueble.estrato,'Estrato')] %}<div><dt>{{etiqueta}}</dt><dd>{{valor|numero}}</dd></div>{% endfor %}</dl>
-      <p class="field-help">Las áreas se muestran con la unidad confirmada en la publicación.</p>
-      {% if inmueble.direccion %}<div class="address"><h3>Dirección publicada</h3><p>{{inmueble.direccion}}</p></div>{% endif %}
-    </section>
-    <section class="detail-panel"><div class="section-heading"><span class="section-number">02</span><h2>Sobre este inmueble</h2></div><p class="description">{{inmueble.descripcion or 'La publicación no incluye una descripción disponible.'}}</p></section>
-    <section class="detail-panel"><div class="section-heading"><span class="section-number">03</span><h2>Características</h2></div><ul class="amenities">{% for caracteristica in inmueble.caracteristicas %}<li>{{caracteristica}}</li>{% else %}<li class="muted">No se publicaron características adicionales.</li>{% endfor %}</ul></section>
-    <section class="detail-panel"><div class="section-heading"><span class="section-number">04</span><h2>Presencia en búsquedas</h2></div><p class="panel-intro">Un mismo anuncio puede aparecer en varias búsquedas. Aquí se conserva una sola ficha.</p>
-      <ul class="search-presences">{% for busqueda in busquedas %}<li><div>{% if busqueda.url %}<a href="{{busqueda.url}}" target="_blank" rel="noopener noreferrer">{{busqueda.nombre}} ↗</a>{% else %}<strong>{{busqueda.nombre}}</strong>{% endif %}<small>Última presencia: {{busqueda.fecha|fecha}}</small></div><span class="status status-{{busqueda.clase}}">{{busqueda.estado}}</span></li>{% else %}<li>No hay búsquedas asociadas disponibles.</li>{% endfor %}</ul>
-      <p class="availability-note">Que un anuncio no aparezca en una búsqueda no confirma una venta ni su eliminación del portal.</p>
-    </section>
-  </div>
-  <aside class="detail-sidebar" aria-label="Precio y procedencia">
-    <section class="summary-panel"><p class="eyebrow">PRECIO PUBLICADO</p>
-      {% for o in ofertas %}<div class="detail-offer"><span class="offer-operation">{{o.operacion}}</span><p class="price">{{o.precio}}{% if o.con_precio %}<small>{{o.moneda}}</small>{% endif %}</p></div>{% else %}<p class="price price-missing">Precio no informado</p>{% endfor %}
-      <div class="source-summary"><span>Fuente</span><strong>{{datos.fuente}}</strong></div>
-      {% set original=enlace_publico(inmueble.origen.url) %}{% if original %}<a class="button button-primary" href="{{original}}" target="_blank" rel="noopener noreferrer">Ver publicación original ↗</a>{% endif %}
-      <p class="field-help">Consulta los detalles y la disponibilidad con la fuente original.</p>
-    </section>
-    <section class="dates-panel"><h2>Fechas de consulta</h2><dl><div><dt>Última extracción de la ficha</dt><dd>{{inmueble.origen.ultima_extraccion|fecha}}</dd></div><div><dt>Última presencia en listados</dt><dd>{{inmueble.origen.ultima_verificacion|fecha}}</dd></div>{% if inmueble.origen.actualizado_en_fuente %}<div><dt>Actualización publicada por la fuente</dt><dd>{{inmueble.origen.actualizado_en_fuente|fecha}}</dd></div>{% endif %}</dl><p class="field-help">Una presencia reciente no significa que las fotos o características se hayan vuelto a consultar.</p>{% if inmueble.requiere_revision %}<p class="revision-note">Hay una revisión pendiente. Se muestra la ficha conservada del catálogo.</p>{% endif %}</section>
-  </aside>
-</div>
+<div class="detail-heading"><h1>{{inmueble.titulo or 'Detalle del inmueble'}}</h1><span>{{inmueble.origen.id_original}}</span></div>
+<section class="essentials" aria-label="Características principales">
+  <div class="offers">{% for o in ofertas %}<span>{{o.operacion}} <strong>{{o.precio}}</strong></span>{% else %}<span>Precio no informado</span>{% endfor %}</div>
+  <p>Área: {{datos.area}}</p>
+  <p>{{inmueble.habitaciones|numero}} habitaciones <span>·</span> {{inmueble.banos|numero}} baños <span>·</span> {{inmueble.parqueaderos|numero}} parqueaderos</p>
+</section>
+<dl class="metadata">
+  <dt>Ubicación</dt><dd>{{datos.ubicacion}}{% if inmueble.direccion %} · {{inmueble.direccion}}{% endif %}</dd>
+  <dt>Fuente</dt><dd>{{datos.fuente}}</dd><dt>Estado</dt><dd>{{datos.estado}}</dd>
+  <dt>Enlaces</dt><dd>{% set original=enlace_publico(inmueble.origen.url) %}{% if original %}<a href="{{original}}" target="_blank" rel="noopener noreferrer">Publicación original ↗</a>{% else %}<span>Publicación no disponible</span>{% endif %}
+    {% if datos.mapa %} · <a href="{{datos.mapa}}" target="_blank" rel="noopener noreferrer">Mapa original en Metrocuadrado ↗</a>{% if inmueble.ubicacion_aproximada is sameas true %} <small>Ubicación aproximada</small>{% elif inmueble.ubicacion_aproximada is none %} <small>Precisión no informada</small>{% endif %}{% else %} · <span class="muted">Mapa original no disponible</span>{% endif %}
+    {% if datos.fotos %}<details class="detail-photos"><summary>Fotografías ({{datos.fotos|length}})</summary><div class="photo-list">{% for foto in datos.fotos %}<a href="{{foto}}" target="_blank" rel="noopener noreferrer">Foto {{loop.index}} ↗</a>{% endfor %}</div></details>{% else %}<p class="muted">Fotografías no disponibles.</p>{% endif %}
+  </dd>
+</dl>
+<section class="detail-section"><h2>Descripción</h2><p class="description">{{inmueble.descripcion or 'La publicación no incluye una descripción disponible.'}}</p></section>
+<details class="detail-section"><summary>Más datos y características</summary>
+  <dl class="metadata">
+    {% for valor,etiqueta in [(inmueble.area_construida_m2,'Área construida (m²)'),(inmueble.area_privada_m2,'Área privada (m²)'),(inmueble.area_publicada_m2,'Área no especifica (m²)')] %}<dt>{{etiqueta}}</dt><dd>{{valor|numero if valor is not none else 'No especifica'}}</dd>{% endfor %}
+    <dt>Estrato</dt><dd>{{inmueble.estrato|numero}}</dd>
+    <dt>Tipo</dt><dd>{{inmueble.tipo.value|capitalize if inmueble.tipo else 'Sin dato'}}</dd>
+    <dt>Calidad de los datos</dt><dd>{{inmueble.calidad.value|capitalize}}</dd>
+    <dt>Revisión pendiente</dt><dd>{{'Sí' if inmueble.requiere_revision else 'No'}}</dd>
+  </dl>
+  <ul class="amenities">{% for caracteristica in inmueble.caracteristicas %}<li>{{caracteristica}}</li>{% else %}<li>No se publicaron características adicionales.</li>{% endfor %}</ul>
+</details>
+<details class="detail-section" open><summary>Historial de precios</summary>
+  {% if error_historial %}<p role="status">No pudimos consultar el historial. Vuelve a abrir la ficha para reintentar.</p>
+  {% elif historial %}<div class="table-scroll" tabindex="0" role="region" aria-label="Historial de precios"><table class="history-table"><thead><tr><th scope="col">Fecha observada</th><th scope="col">Precio anterior</th><th scope="col">Precio observado</th><th scope="col">Precio en ficha</th><th scope="col">Verificación</th></tr></thead><tbody>{% for cambio in historial %}<tr><td>{{cambio.fecha}}</td><td>{{cambio.anterior}}</td><td>{{cambio.nuevo}}</td><td>{{cambio.detalle}}</td><td>{{cambio.estado}}</td></tr>{% endfor %}</tbody></table></div>
+  {% else %}<p class="muted">No hay cambios de precio registrados.</p>{% endif %}
+</details>
+<details class="detail-section"><summary>Fechas, procedencia y presencia en búsquedas</summary>
+  <dl class="metadata">
+    <dt>Primera observación</dt><dd>{{inmueble.origen.primera_observacion|fecha}}</dd>
+    <dt>Última extracción de la ficha</dt><dd>{{inmueble.origen.ultima_extraccion|fecha}}</dd>
+    <dt>Última presencia en listados</dt><dd>{{inmueble.origen.ultima_verificacion|fecha}}</dd>
+    <dt>Actualización publicada por la fuente</dt><dd>{{inmueble.origen.actualizado_en_fuente|fecha}}</dd>
+  </dl>
+  <ul class="search-presences">{% for busqueda in busquedas %}<li>{% if busqueda.url %}<a href="{{busqueda.url}}" target="_blank" rel="noopener noreferrer">{{busqueda.nombre}} ↗</a>{% else %}{{busqueda.nombre}}{% endif %} · {{busqueda.estado}} · {{busqueda.fecha|fecha}}</li>{% else %}<li>No hay búsquedas asociadas disponibles.</li>{% endfor %}</ul>
+  <p class="muted">Horas de Colombia (UTC−5). Una presencia reciente no implica una nueva extracción de la ficha.</p>
+</details>
+<p class="legend">Los estados reflejan presencia en búsquedas. Una ausencia no confirma una venta ni disponibilidad comercial.</p>
+</article>
 {% endblock %}

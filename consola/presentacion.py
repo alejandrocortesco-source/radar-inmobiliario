@@ -1,7 +1,7 @@
 """Formato y estado de navegación; las consultas pertenecen a catalogo."""
 
 from dataclasses import fields
-from datetime import timedelta, timezone
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from urllib.parse import urlencode, urlsplit
 
@@ -32,7 +32,7 @@ def leer_filtros(query):
             datos[campo.name] = tuple(valores) if campo.name in LISTAS else valores[-1]
     datos.setdefault('tipo_area', 'construida')
     datos.setdefault('orden', 'actualizacion_desc')
-    datos['limite'] = query.get('limit') or 12
+    datos['limite'] = query.get('limit') or 24
     datos['desplazamiento'] = query.get('offset') or 0
     return ADAPTADOR.validate_python(datos)
 
@@ -87,45 +87,109 @@ def numero(valor):
     return entero.replace(',', '.') + (',' + decimales.rstrip('0') if decimales.rstrip('0') else '')
 
 
+def precio_cop(valor):
+    """Convención visual local; conserva el importe y no convierte divisas."""
+    return f'${numero(valor)}' if valor is not None else 'Precio no informado'
+
+
 def fecha(valor):
+    if isinstance(valor, str):
+        try:
+            valor = datetime.fromisoformat(valor.replace('Z', '+00:00'))
+        except ValueError:
+            return 'No registrada'
+    if valor and valor.tzinfo is None:
+        return 'No registrada'
     return valor.astimezone(COLOMBIA).strftime('%d/%m/%Y · %H:%M') if valor else 'No registrada'
 
 
-def area_principal(inmueble, tipo=TipoArea.CONSTRUIDA):
+def area_disponible(inmueble, tipo=None):
+    """Prioridad visual; una comparación explícita nunca sustituye su tipo."""
     opciones = {
-        TipoArea.CONSTRUIDA: (inmueble.area_construida_m2, 'construidos'),
-        TipoArea.PRIVADA: (inmueble.area_privada_m2, 'privados'),
-        TipoArea.PUBLICADA: (inmueble.area_publicada_m2, 'publicados'),
+        TipoArea.CONSTRUIDA: (inmueble.area_construida_m2, 'construida'),
+        TipoArea.PRIVADA: (inmueble.area_privada_m2, 'privada'),
+        TipoArea.PUBLICADA: (inmueble.area_publicada_m2, 'no especifica'),
     }
-    valor, etiqueta = opciones[tipo]
-    if valor is None:
-        valor, etiqueta = next(((v, e) for v, e in opciones.values() if v is not None), (None, None))
-    return f'{numero(valor)} m² {etiqueta}' if valor is not None else 'Área no informada'
+    candidatos = (opciones[tipo],) if tipo is not None else opciones.values()
+    return next(((v, e) for v, e in candidatos if v is not None and v.is_finite() and v > 0), (None, None))
+
+
+def area_principal(inmueble, tipo=None):
+    valor, etiqueta = area_disponible(inmueble, tipo)
+    return f'{numero(valor)} m² ({etiqueta})' if valor is not None else 'No especifica'
 
 
 def ofertas_visibles(inmueble, filtros=None):
     ofertas = ofertas_compatibles(inmueble, filtros) if filtros else inmueble.ofertas
     return [{
         'operacion': 'Venta' if o.operacion.value == 'venta' else 'Arriendo',
-        'precio': numero(o.precio) if o.precio is not None else 'Precio no informado',
-        'moneda': o.moneda or 'Moneda no informada',
+        'precio': precio_cop(o.precio),
+        'moneda': 'COP',
         'con_precio': o.precio is not None,
     } for o in ofertas]
 
 
 def tarjeta(inmueble, filtros, volver):
     etiqueta, clase = ESTADOS[inmueble.disponibilidad]
+    ofertas = ofertas_visibles(inmueble, filtros)
+    principal = next((o for o in ofertas if o['operacion'] == 'Venta'), ofertas[0] if ofertas else None)
+    area_valor, area_tipo = area_disponible(inmueble)
     return {
         'inmueble': inmueble, 'estado': etiqueta, 'clase_estado': clase,
         'ubicacion': ' · '.join(dict.fromkeys(
             v for v in (inmueble.barrio, inmueble.zona, inmueble.ciudad) if v
         )) or 'Ubicación no informada',
-        'ofertas': ofertas_visibles(inmueble, filtros),
-        'area': area_principal(inmueble, filtros.tipo_area),
+        'ofertas': ofertas, 'oferta_principal': principal,
+        'area': area_principal(inmueble), 'area_valor': area_valor, 'area_tipo': area_tipo,
+        'area_comparacion': area_principal(inmueble, filtros.tipo_area),
+        'mapa': enlace_mapa(inmueble),
         'fotos': tuple(f for f in inmueble.fotos if enlace_publico(f)),
         'fuente': 'Metrocuadrado' if inmueble.origen.fuente == 'metrocuadrado' else inmueble.origen.fuente.title(),
         'url': '/consola/inmuebles/' + inmueble.id_interno + '?' + urlencode({'volver': volver}),
     }
+
+
+def enlace_mapa(inmueble):
+    """Solo el enlace almacenado a la sección del mapa del mismo anuncio."""
+    mapa = enlace_publico(inmueble.portal_map_url)
+    publicacion = enlace_publico(inmueble.origen.url)
+    if not mapa or not publicacion or inmueble.origen.fuente != 'metrocuadrado':
+        return None
+    try:
+        destino, original = urlsplit(mapa), urlsplit(publicacion)
+        if (destino.hostname not in ('www.metrocuadrado.com', 'metrocuadrado.com')
+                or destino.hostname != original.hostname or destino.port != original.port
+                or not destino.path.startswith('/inmueble/') or destino.path != original.path
+                or destino.fragment != 'location-section'):
+            return None
+    except ValueError:
+        return None
+    return mapa
+
+
+def precio_historico(valor):
+    if not isinstance(valor, dict):
+        return 'Sin dato'
+    if valor.get('status') != 'valid' or valor.get('amount') is None:
+        return 'No comparable'
+    operacion = {'venta': 'Venta', 'arriendo': 'Arriendo'}.get(valor.get('operation'), 'Operación desconocida')
+    return f"{operacion} · {precio_cop(valor['amount'])}"
+
+
+def historial_visible(cambios):
+    verificaciones = {
+        'confirmed': 'Confirmado en ficha', 'pending': 'Pendiente de verificar',
+        'price_confirmed_partial_detail': 'Precio confirmado; ficha parcial',
+        'disagreement_or_uncomparable': 'Diferencia o dato no comparable',
+        'detail_failed': 'No se pudo verificar la ficha',
+    }
+    return [{
+        'fecha': fecha(c.get('detected_at')),
+        'anterior': precio_historico(c.get('previous_price')),
+        'nuevo': precio_historico(c.get('new_price')),
+        'detalle': precio_historico(c.get('detail_price')),
+        'estado': verificaciones.get(c.get('verification'), 'Sin verificación'),
+    } for c in reversed(cambios)]
 
 
 def nombre_busqueda(presencia, indice):

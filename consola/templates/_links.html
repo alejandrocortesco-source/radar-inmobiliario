@@ -1,0 +1,8 @@
+{% from '_iconos.html' import icono %}
+<div class="external-links">
+{% set publicacion=enlace_publico(i.origen.url) %}
+{% if publicacion %}<a href="{{publicacion}}" target="_blank" rel="noopener noreferrer" aria-label="Publicación original en {{card.fuente}} de {{i.titulo or i.origen.id_original}}" title="Publicación original en {{card.fuente}}">{{icono('publicacion')}}</a>{% else %}<span aria-disabled="true" aria-label="Publicación no disponible" title="Publicación no disponible">{{icono('publicacion')}}</span>{% endif %}
+{% if card.fotos %}<details class="photo-links"><summary title="Enlaces a fotografías" aria-label="Fotografías de {{i.titulo or i.origen.id_original}}">{{icono('fotografias')}}</summary><div>{% for foto in card.fotos %}<a href="{{foto}}" target="_blank" rel="noopener noreferrer">Foto {{loop.index}} ↗</a>{% endfor %}</div></details>{% else %}<span aria-disabled="true" aria-label="Fotografías no disponibles" title="Fotografías no disponibles">{{icono('fotografias')}}</span>{% endif %}
+{% set precision='Ubicación aproximada' if i.ubicacion_aproximada is sameas true else ('Precisión no informada' if i.ubicacion_aproximada is none else 'Ubicación publicada por el portal') %}
+{% if card.mapa %}<a href="{{card.mapa}}" target="_blank" rel="noopener noreferrer" aria-label="Mapa original de {{i.titulo or i.origen.id_original}}. {{precision}}" title="Mapa original en Metrocuadrado · {{precision}}">{{icono('mapa')}}</a>{% else %}<span aria-disabled="true" aria-label="Mapa original no disponible" title="Mapa original no disponible">{{icono('mapa')}}</span>{% endif %}
+</div>
