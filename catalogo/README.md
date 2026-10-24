@@ -1,4 +1,4 @@
-# Catálogo — modelo común y adaptador SQLite
+# Catálogo — modelo común, persistencia y servicio
 
 Este componente usa únicamente la biblioteca estándar de Python 3.12. El modelo
 no depende de extracción ni persistencia; el adaptador SQLite abre explícitamente
@@ -80,9 +80,9 @@ Calidad de ficha y revisión pendiente son independientes de disponibilidad.
   seleccionada. Ausentes al final y desempate por ID interno ascendente siempre.
 - Paginación por límite (1–200; predeterminado 30) y desplazamiento desde cero.
 
-Estas reglas deberán validarse mediante pruebas de contrato de los repositorios
-cuando existan. Las pruebas actuales verifican los tipos y consultas válidas o
-inválidas, no simulan un motor de búsqueda.
+Estas reglas se validarán con consultas reales al implementar el paso 4.
+Actualmente se verifican la definición de filtros y la compatibilidad con los
+parámetros antiguos de la API; no se implementa el motor nuevo de filtrado.
 
 ## Adaptador SQLite de solo lectura — paso 2
 
@@ -133,8 +133,8 @@ el documento elegido. Es deliberado para no añadir un índice o una tabla al sc
 será necesario medir este coste al crecer el catálogo.
 
 No se ejecutan aún los filtros ni la paginación definidos en el paso 1.
-No se expone aún el historial de precios: esta entrega recupera las ofertas de
-la ficha global. Tampoco se reproducen todos los originales técnicos del scraper.
+El modelo común contiene las ofertas de la ficha global. La capa opcional de
+revisión del paso 3 conserva además el historial y las evidencias técnicas.
 
 Áreas sin unidad confirmada y fechas publicadas sin zona horaria quedan como
 `None`. Números ambiguos, no finitos o inválidos no se adivinan. Los precios duales
@@ -146,6 +146,52 @@ Se requiere el esquema incremental existente (`properties`, `search_memberships`
 `jobs` y `runs`). Una base anterior debe ser preparada por su componente propietario;
 este adaptador nunca ejecutará su migración.
 
+## Servicio común y FastAPI — paso 3
+
+`ServicioCatalogo` recibe un `RepositorioCatalogo` y ofrece `listar()` y
+`obtener(id_interno)` para consumir el modelo común sin depender de HTTP.
+Opcionalmente recibe un `RepositorioRevision` para conservar documentos y
+evidencias de la API técnica. Ese contrato adicional no obliga al futuro
+almacenamiento de negocio a reproducir todas las tablas del scraper.
+
+`catalogo/api.py` ofrece `crear_router(proveedor_servicio)`: la aplicación
+inyecta el servicio, el almacenamiento y la normalización específica de búsquedas.
+El router se incluye una sola vez en `metro.web.app`; no hay otro servidor.
+
+Compatibilidad mantenida:
+
+- `GET /api/catalog`: conserva `state`, `search_url`, `limit`, `offset`, el
+  orden por ID del portal y el formato `total/items/limit/offset`. Los valores
+  originales del resumen no se reemplazan por valores normalizados distintos.
+- `GET /api/properties/{property_id}`: acepta el ID original y, adicionalmente,
+  el UUID interno. El campo `id` de la respuesta sigue siendo el ID original.
+- Ambas respuestas agregan `id_interno` sin eliminar o renombrar campos previos.
+- `run_id` conserva la selección de instantáneas. Una captura parcial reciente
+  no sustituye la ficha fiable global; al seleccionar esa ejecución se muestra
+  su captura parcial y se mantiene `catalog_data` por separado.
+- Se conservan trabajo, procedencias, búsquedas, historial de precios y documentos
+  originales. Las columnas JSON del trabajo siguen siendo cadenas, como antes.
+- `/api/properties` (lista por ejecución), ejecuciones, reportes, exportaciones
+  y páginas técnicas mantienen sus rutas. Catálogo HTML, ficha HTML y exportación
+  reutilizan el servicio, sin copiar las consultas de la ficha.
+- Base ausente o ilegible: HTTP 503, sin inicializar `Store`, crear base o migrar.
+  Ficha inexistente: HTTP 404. Parámetros HTTP inválidos: HTTP 422.
+
+`Store.catalog()` queda como entrada compatible que delega al servicio;
+se eliminó su consulta SQL anterior. El adaptador es el único propietario de
+las consultas de catálogo/ficha; la selección de documento y la proyección de
+la respuesta están en el servicio.
+
+Para mantener `python -m metro serve` desde `scraper/` sin instalar otro
+paquete, `metro.paths` incorpora la raíz del repositorio a la ruta de importación
+solo si existe el componente hermano `catalogo/`. El servicio web debe ejecutarse
+con ambos componentes presentes. El Dockerfile actual sigue siendo un Job de
+extracción; una futura imagen web deberá incluir también el componente compartido.
+
+Los filtros nuevos y la paginación del contrato v0.1 siguen pendientes del paso 4.
+Solo se conserva el comportamiento de los parámetros que ya existían. La lectura
+completa sigue cargándose en memoria; no se añadió caché ni índices ni migraciones.
+
 ## Verificación
 
 Desde la raíz, con el entorno existente:
@@ -155,5 +201,5 @@ Desde la raíz, con el entorno existente:
 .\.venv\Scripts\python.exe -m pytest -c scraper/pytest.ini scraper/tests
 ```
 
-Quedan fuera de esta entrega: API, interfaz, adaptador Sheets, migraciones,
+Quedan fuera de esta entrega: interfaz de Mónica, adaptador Sheets, migraciones,
 historial general de cambios, nuevas fuentes, oportunidades, matching y despliegue.

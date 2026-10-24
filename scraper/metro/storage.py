@@ -378,17 +378,11 @@ class Store:
                 'listing_conflicts':conflicts}
 
     def catalog(self, *, state=None, search_url=None, limit=100, offset=0):
-        with self.connect() as db:
-            condition = 'WHERE m.search_url=?' if search_url else ''
-            params = [search_identity(search_url)] if search_url else []
-            query = '''SELECT p.id,p.url,p.title,p.price,p.city,p.property_type,p.needs_refresh,
-              max(m.last_verified_at) last_verified_at,
-              CASE WHEN sum(m.state='active')>0 THEN 'active'
-                   WHEN sum(m.state='possibly_removed')>0 THEN 'possibly_removed' ELSE 'removed' END state
-              FROM properties p JOIN search_memberships m ON m.property_id=p.id '''+condition+' GROUP BY p.id'
-            if state:
-                query = 'SELECT * FROM ('+query+') WHERE state=?'
-                params.append(state)
-            total = db.execute('SELECT count(*) FROM ('+query+')',params).fetchone()[0]
-            rows = [dict(r) for r in db.execute(query+' ORDER BY id LIMIT ? OFFSET ?',(*params,limit,offset))]
-            return {'total':total,'items':rows,'limit':limit,'offset':offset}
+        # Entrada histórica: la consulta vive ahora en el servicio común.
+        from catalogo.persistencia.sqlite import CatalogoSQLite
+        from catalogo.servicio import ServicioCatalogo
+        repositorio = CatalogoSQLite(self.path)
+        servicio = ServicioCatalogo(
+            repositorio, revision=repositorio, normalizar_busqueda=search_identity)
+        return servicio.catalogo_compatible(
+            state=state, search_url=search_url, limit=limit, offset=offset)

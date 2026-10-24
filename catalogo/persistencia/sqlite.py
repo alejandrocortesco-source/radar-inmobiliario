@@ -10,12 +10,13 @@ from decimal import Decimal
 from ..identidad import identificar_inmueble
 from ..modelos import Inmueble
 from ._metrocuadrado import convertir
+from .contrato import ErrorLecturaCatalogo, RegistroCatalogo, RevisionCatalogo
 
 
 BASE_PREDETERMINADA = Path(__file__).resolve().parents[2] / 'scraper' / 'data' / 'metro.sqlite'
 
 
-class ErrorCatalogoSQLite(RuntimeError):
+class ErrorCatalogoSQLite(ErrorLecturaCatalogo):
     """Base ilegible, esquema incompatible o documento inválido."""
 
 
@@ -45,7 +46,7 @@ class CatalogoSQLite:
             if db is not None:
                 db.close()
 
-    def _leer(self, db, id_original=None):
+    def _leer_registros(self, db, id_original=None):
         condicion = ' WHERE p.id=?' if id_original is not None else ''
         args = (id_original,) if id_original is not None else ()
         filas = db.execute(
@@ -67,7 +68,13 @@ class CatalogoSQLite:
             try:
                 documento = json.loads(fila['data_json'], parse_float=Decimal) if fila['data_json'] else {}
                 config = json.loads(fila['captura_config']) if fila['captura_config'] else {}
-                resultado.append(convertir(fila, documento, por_anuncio[fila['id']], config))
+                resultado.append(RegistroCatalogo(
+                    inmueble=convertir(fila, documento, por_anuncio[fila['id']], config),
+                    documento=json.loads(fila['data_json']) if fila['data_json'] else None,
+                    resumen={k: fila[k] for k in (
+                        'id', 'url', 'title', 'price', 'city', 'property_type', 'needs_refresh')},
+                    presencias=tuple(dict(p) for p in por_anuncio[fila['id']]),
+                ))
             except (ValueError, TypeError, KeyError, IndexError) as exc:
                 raise ErrorCatalogoSQLite(
                     f'Datos inválidos en el anuncio {fila["id"]} de {self.ruta}: {exc}'
@@ -90,3 +97,39 @@ class CatalogoSQLite:
                 if identificar_inmueble('metrocuadrado', fila['id']) == id_interno:
                     return self._leer(db, fila['id'])[0]
             return None
+
+    def _leer(self, db, id_original=None):
+        return tuple(r.inmueble for r in self._leer_registros(db, id_original))
+
+    def listar_registros(self):
+        with self._conexion() as db:
+            return self._leer_registros(db)
+
+    def obtener_revision(self, identificador):
+        with self._conexion() as db:
+            fila = db.execute('SELECT id FROM properties WHERE id=?', (identificador,)).fetchone()
+            if fila is None:
+                fila = next((r for r in db.execute('SELECT id FROM properties')
+                             if identificar_inmueble('metrocuadrado', r['id']) == identificador), None)
+            if fila is None:
+                return None
+            original = fila['id']
+            registro = self._leer_registros(db, original)[0]
+            trabajos = tuple(dict(r) for r in db.execute(
+                'SELECT * FROM jobs WHERE property_id=? ORDER BY run_id DESC', (original,)))
+            apariciones = tuple(dict(r) for r in db.execute(
+                'SELECT run_id,page,url,search_url FROM appearances WHERE property_id=? '
+                'ORDER BY run_id,search_url,page', (original,)))
+            historial = [dict(r) for r in db.execute(
+                'SELECT * FROM price_changes WHERE property_id=? ORDER BY id', (original,))]
+            try:
+                for cambio in historial:
+                    for clave in ('previous_price_json', 'new_price_json', 'detail_price_json'):
+                        valor = cambio.pop(clave)
+                        cambio[clave.removesuffix('_json')] = json.loads(valor) if valor else None
+                return RevisionCatalogo(
+                    registro=registro, documento=registro.documento,
+                    trabajos=trabajos, apariciones=apariciones, historial=tuple(historial),
+                )
+            except (ValueError, TypeError) as exc:
+                raise ErrorCatalogoSQLite(f'Evidencia inválida en el anuncio {original}') from exc

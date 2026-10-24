@@ -7,6 +7,10 @@ from fastapi.templating import Jinja2Templates
 from . import __version__
 from .storage import Store
 from .paths import DEFAULT_DB
+from .prices import search_identity
+from catalogo.api import crear_router, consultar_catalogo, consultar_ficha
+from catalogo.persistencia.sqlite import CatalogoSQLite
+from catalogo.servicio import ServicioCatalogo
 
 app = FastAPI(title='Metrocuadrado · Revisión local',version=__version__)
 templates = Jinja2Templates(directory=str(Path(__file__).parent/'templates'))
@@ -14,6 +18,15 @@ templates.env.filters['from_json'] = json.loads
 
 def store():
     return Store(os.getenv('METRO_DB',str(DEFAULT_DB)))
+
+def servicio():
+    repositorio = CatalogoSQLite(os.getenv('METRO_DB', str(DEFAULT_DB)))
+    return ServicioCatalogo(
+        repositorio, revision=repositorio, normalizar_busqueda=search_identity)
+
+
+app.include_router(crear_router(servicio))
+
 
 def rows(run_id=None,q='',status='',property_type='',limit=30,offset=0):
     filters, args = ['1=1'], []
@@ -49,35 +62,13 @@ def properties(run_id:int|None=None,q:str='',status:str='',property_type:str='',
     return rows(run_id,q,status,property_type,limit,offset)
 
 def property_data(property_id,run_id=None):
-    with store().connect() as db:
-        prop=db.execute('SELECT * FROM properties WHERE id=?',(property_id,)).fetchone()
-        if not prop: raise HTTPException(404,'Inmueble no encontrado')
-        jobs=[dict(r) for r in db.execute('SELECT * FROM jobs WHERE property_id=? ORDER BY run_id DESC',(property_id,))]
-        job=next((j for j in jobs if run_id is None or j['run_id']==run_id),None)
-        appearances=[dict(r) for r in db.execute('SELECT a.run_id,a.page,a.url,a.search_url FROM appearances a WHERE a.property_id=? ORDER BY a.run_id,a.search_url,a.page',(property_id,))]
-        memberships=[dict(r) for r in db.execute('SELECT * FROM search_memberships WHERE property_id=? ORDER BY search_url',(property_id,))]
-        history=[dict(r) for r in db.execute('SELECT * FROM price_changes WHERE property_id=? ORDER BY id',(property_id,))]
-    selected_json = job['data_json'] if job and job['data_json'] and (run_id is not None or job['status'] in ('success','unchanged')) else prop['data_json']
-    for change in history:
-        for key in ('previous_price_json','new_price_json','detail_price_json'):
-            change[key.removesuffix('_json')] = json.loads(change[key]) if change[key] else None
-            del change[key]
-    return {'id':prop['id'],'url':prop['url'],'job':job,'data':json.loads(selected_json) if selected_json else None,
-            'catalog_data':json.loads(prop['data_json']) if prop['data_json'] else None,'needs_refresh':bool(prop['needs_refresh']),
-            'appearances':appearances,'memberships':memberships,'price_history':history}
+    return consultar_ficha(servicio(), property_id, run_id)
 
-@app.get('/api/properties/{property_id}')
-def property_api(property_id:str,run_id:int|None=None):
-    return property_data(property_id,run_id)
-
-@app.get('/api/catalog')
-def catalog_api(state:str|None=None,search_url:str|None=None,limit:int=Query(100,ge=1,le=1000),offset:int=Query(0,ge=0)):
-    return store().catalog(state=state,search_url=search_url,limit=limit,offset=offset)
 
 @app.get('/catalog',response_class=HTMLResponse)
 def catalog_page(request:Request,state:str|None=None,search_url:str|None=None,page:int=Query(1,ge=1)):
     return templates.TemplateResponse(request=request,name='catalog.html',context={
-        'result':store().catalog(state=state,search_url=search_url,limit=50,offset=(page-1)*50),
+        'result':consultar_catalogo(servicio(),state=state,search_url=search_url,limit=50,offset=(page-1)*50),
         'state':state,'search_url':search_url,'page':page})
 
 @app.get('/api/runs/{run_id}/report')
