@@ -117,14 +117,19 @@ def test_csv_neutraliza_formulas_y_preserva_doble_oferta(escenario_consola):
 def test_enlaces_publicos_validos_y_mapa_sin_coordenadas_inventadas(escenario_consola):
     inmueble = servicio().obtener(identificar_inmueble('metrocuadrado', '1-M1'))
     enlace = enlace_mapa(inmueble)
-    assert enlace == inmueble.portal_map_url == inmueble.origen.url + '#location-section'
+    assert enlace == inmueble.map_url
+    assert urlsplit(enlace).hostname == 'www.openstreetmap.org'
+    assert parse_qs(urlsplit(enlace).query) == {'mlat': ['4.7'], 'mlon': ['-74.04']}
     assert enlace_mapa(replace(inmueble, ciudad=None, direccion=None, barrio=None)) == enlace
-    assert enlace_mapa(replace(inmueble, portal_map_url=None)) is None
+    assert enlace_mapa(replace(inmueble, portal_map_url=None)) == enlace
+    assert enlace_mapa(replace(inmueble, map_url=None)) is None
+    assert enlace_mapa(replace(inmueble, latitud=None)) is None
+    assert enlace_mapa(replace(inmueble, longitud=None)) is None
     for valor in ('javascript:alert(1)', 'https://usuario:clave@www.metrocuadrado.com/inmueble/x',
                   'https://externo.test/#location-section', inmueble.origen.url,
                   inmueble.origen.url.replace('1-M1', 'otro') + '#location-section',
                   'https://www.metrocuadrado.com:incorrecto/inmueble/x#location-section'):
-        assert enlace_mapa(replace(inmueble, portal_map_url=valor)) is None
+        assert enlace_mapa(replace(inmueble, map_url=valor)) is None
     pagina = BeautifulSoup(TestClient(app).get('/consola/').text, 'html.parser')
     assert not pagina.select('img, iframe, video, source')
     enlaces = pagina.select('a[target="_blank"]')
@@ -155,13 +160,13 @@ def test_iconos_accesibles_y_precision_del_mapa_original(escenario_consola):
     assert len(links.select('svg[aria-hidden="true"]')) == 3
     controles = links.select(':scope > a, :scope > details > summary')
     assert len(controles) == 3 and all(c.get('aria-label') and c.get('title') for c in controles)
-    mapa = links.select_one('a[href$="#location-section"]')
-    assert 'Ubicación aproximada' in mapa['title'] and 'Google' not in pagina.text
+    mapa = links.select_one('a[href*="openstreetmap.org"]')
+    assert 'Centro de una zona aproximada; no es una dirección exacta' in mapa['title'] and 'Google' not in pagina.text
     ficha = BeautifulSoup(client.get(pagina.select_one('.property-link')['href']).text, 'html.parser')
-    assert 'Ubicación aproximada' in ficha.text
+    assert 'Centro de una zona aproximada; no es una dirección exacta' in ficha.text
     sin_mapa = BeautifulSoup(client.get('/consola/', params={'texto': 'Casa con jardín 03'}).text, 'html.parser')
-    assert sin_mapa.select_one('[aria-label="Mapa original no disponible"][aria-disabled="true"]')
-    assert not sin_mapa.select('a[href*="maps"], a[href$="#location-section"]')
+    assert sin_mapa.select_one('[aria-label="Mapa no disponible"][aria-disabled="true"]')
+    assert not sin_mapa.select('a[href*="openstreetmap.org"], a[href$="#location-section"]')
 
 
 def test_prioridad_venta_independiente_del_orden_de_las_ofertas(escenario_consola):
@@ -194,3 +199,24 @@ def test_una_lectura_por_catalogo_y_enlaces_sin_sql(escenario_consola, monkeypat
         assert len(lecturas) == 1
     finally:
         app.dependency_overrides.pop(servicio, None)
+
+
+@pytest.mark.parametrize('url', [
+    'https://www.openstreetmap.org/',
+    'https://www.openstreetmap.org/?mlat=4.8&mlon=-74.04#map=16/4.7/-74.04',
+    'https://www.openstreetmap.org/?mlat=4.7&mlon=-74.04#map=16/4.8/-74.04',
+    'https://www.openstreetmap.org/?mlat=NaN&mlon=-74.04#map=16/4.7/-74.04',
+    'https://www.openstreetmap.org/?mlat=4.7&mlat=4.8&mlon=-74.04#map=16/4.7/-74.04',
+    'https://www.openstreetmap.org/?mlat=4.7&mlon=-74.04#map=30/4.7/-74.04',
+    'https://www.openstreetmap.org/user/otro?mlat=4.7&mlon=-74.04#map=16/4.7/-74.04',
+    'https://www.openstreetmap.org:incorrecto/?mlat=4.7&mlon=-74.04#map=16/4.7/-74.04',
+])
+def test_mapa_desactiva_enlaces_sin_marcador_y_centro_coincidentes(escenario_consola, url):
+    inmueble = servicio().obtener(identificar_inmueble('metrocuadrado', '1-M1'))
+    assert enlace_mapa(replace(inmueble, map_url=url)) is None
+
+
+def test_mapa_admite_coordenadas_cero_validas(escenario_consola):
+    inmueble = servicio().obtener(identificar_inmueble('metrocuadrado', '1-M1'))
+    url = 'https://www.openstreetmap.org/?mlat=0&mlon=0#map=16/0/0'
+    assert enlace_mapa(replace(inmueble, latitud=Decimal('0'), longitud=Decimal('0'), map_url=url)) == url

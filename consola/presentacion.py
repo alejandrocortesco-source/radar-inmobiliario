@@ -2,8 +2,8 @@
 
 from dataclasses import fields
 from datetime import datetime, timedelta, timezone
-from decimal import Decimal
-from urllib.parse import urlencode, urlsplit
+from decimal import Decimal, InvalidOperation
+from urllib.parse import parse_qs, urlencode, urlsplit
 
 from pydantic import TypeAdapter, ValidationError
 
@@ -150,19 +150,26 @@ def tarjeta(inmueble, filtros, volver):
 
 
 def enlace_mapa(inmueble):
-    """Solo el enlace almacenado a la sección del mapa del mismo anuncio."""
-    mapa = enlace_publico(inmueble.portal_map_url)
-    publicacion = enlace_publico(inmueble.origen.url)
-    if not mapa or not publicacion or inmueble.origen.fuente != 'metrocuadrado':
+    """OSM almacenado: marcador y centro deben coincidir con las coordenadas."""
+    mapa = enlace_publico(inmueble.map_url)
+    lat, lon = inmueble.latitud, inmueble.longitud
+    if not mapa or lat is None or lon is None:
         return None
     try:
-        destino, original = urlsplit(mapa), urlsplit(publicacion)
-        if (destino.hostname not in ('www.metrocuadrado.com', 'metrocuadrado.com')
-                or destino.hostname != original.hostname or destino.port != original.port
-                or not destino.path.startswith('/inmueble/') or destino.path != original.path
-                or destino.fragment != 'location-section'):
+        if not lat.is_finite() or not lon.is_finite() or not -90 <= lat <= 90 or not -180 <= lon <= 180:
             return None
-    except ValueError:
+        destino = urlsplit(mapa)
+        query = parse_qs(destino.query)
+        centro = destino.fragment.removeprefix('map=').split('/')
+        if (destino.scheme != 'https' or destino.hostname not in ('www.openstreetmap.org', 'openstreetmap.org')
+                or destino.port not in (None, 443) or destino.path != '/'
+                or len(query.get('mlat', ())) != 1 or len(query.get('mlon', ())) != 1
+                or not destino.fragment.startswith('map=') or len(centro) != 3
+                or not 0 <= int(centro[0]) <= 22
+                or Decimal(query['mlat'][0]) != lat or Decimal(query['mlon'][0]) != lon
+                or Decimal(centro[1]) != lat or Decimal(centro[2]) != lon):
+            return None
+    except (ValueError, InvalidOperation):
         return None
     return mapa
 

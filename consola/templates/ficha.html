@@ -13,7 +13,7 @@
   <dt>Ubicación</dt><dd>{{datos.ubicacion}}{% if inmueble.direccion %} · {{inmueble.direccion}}{% endif %}</dd>
   <dt>Fuente</dt><dd>{{datos.fuente}}</dd><dt>Estado</dt><dd>{{datos.estado}}</dd>
   <dt>Enlaces</dt><dd>{% set original=enlace_publico(inmueble.origen.url) %}{% if original %}<a href="{{original}}" target="_blank" rel="noopener noreferrer">Publicación original ↗</a>{% else %}<span>Publicación no disponible</span>{% endif %}
-    {% if datos.mapa %} · <a href="{{datos.mapa}}" target="_blank" rel="noopener noreferrer">Mapa original en Metrocuadrado ↗</a>{% if inmueble.ubicacion_aproximada is sameas true %} <small>Ubicación aproximada</small>{% elif inmueble.ubicacion_aproximada is none %} <small>Precisión no informada</small>{% endif %}{% else %} · <span class="muted">Mapa original no disponible</span>{% endif %}
+    {% if datos.mapa %} · <a href="{{datos.mapa}}" target="_blank" rel="noopener noreferrer">Mapa en OpenStreetMap ↗</a>{% if inmueble.ubicacion_aproximada is sameas true %} <small>Centro de una zona aproximada; no es una dirección exacta</small>{% elif inmueble.ubicacion_aproximada is none %} <small>Precisión no informada; no confirma una dirección exacta</small>{% endif %}{% else %} · <span class="muted">Mapa no disponible</span>{% endif %}
     {% if datos.fotos %}<details class="detail-photos"><summary>Fotografías ({{datos.fotos|length}})</summary><div class="photo-list">{% for foto in datos.fotos %}<a href="{{foto}}" target="_blank" rel="noopener noreferrer">Foto {{loop.index}} ↗</a>{% endfor %}</div></details>{% else %}<p class="muted">Fotografías no disponibles.</p>{% endif %}
   </dd>
 </dl>

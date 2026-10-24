@@ -30,7 +30,7 @@
   <label for="limit">Filas<select aria-label="Filas" id="limit" name="limit" form="filtros" data-auto-submit>{% for n in (12,24,48) %}<option value="{{n}}" {% if resultado.limit==n %}selected{% endif %}>{{n}}</option>{% endfor %}{% if resultado.limit not in (12,24,48) %}<option value="{{resultado.limit}}" selected>{{resultado.limit}}</option>{% endif %}</select></label>
   <noscript><button type="submit" form="filtros">Cambiar filas</button></noscript>
 </nav>
-<p class="legend">Publicación · Fotografías · Mapa original. Accesos deshabilitados: no disponibles. Área mostrada: construida, luego privada y luego publicada. Filtros y orden de área: solo {{filtros.tipo_area.value}}, sin sustituir por otro tipo.</p>
+<p class="legend">Publicación · Fotografías · OpenStreetMap. En ubicaciones aproximadas, el punto es el centro de la zona, no una dirección exacta. Accesos deshabilitados: no disponibles. Área mostrada: construida, luego privada y luego publicada. Filtros y orden de área: solo {{filtros.tipo_area.value}}, sin sustituir por otro tipo.</p>
 {% else %}
 <section class="empty-state"><h1>{{'Esta página ya no tiene inmuebles' if total else 'No encontramos inmuebles con estos filtros'}}</h1><p>{{'Regresa a la primera página para continuar.' if total else 'Amplía los rangos o limpia los filtros.'}}</p><a href="{{primera if total else '/consola/'}}">{{'Ir a la primera página' if total else 'Limpiar filtros'}}</a></section>
 {% endif %}

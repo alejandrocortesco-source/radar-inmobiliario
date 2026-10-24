@@ -61,10 +61,13 @@ No se requieren nuevas dependencias. La base predeterminada continúa siendo
   Una fila por oferta, con operación y moneda separadas. Antes de exportar,
   aplicar cualquier cambio pendiente en el formulario.
 - Los iconos de enlace externo, imagen y ubicación abren la publicación,
-  los enlaces individuales a fotos y el mapa original de Metrocuadrado.
-  Se utiliza el `portal_map_url` almacenado del mismo anuncio; no se generan
-  búsquedas genéricas. Si falta un enlace válido, el acceso queda deshabilitado.
-  Se conserva la indicación de ubicación aproximada y la precisión desconocida.
+  los enlaces individuales a fotos y el mapa directo de OpenStreetMap.
+  Se utiliza el `map_url` almacenado si su marcador y centro corresponden a las
+  coordenadas válidas del anuncio. `portal_map_url` solo apunta a una sección de
+  la publicación y no garantiza que se cargue su mapa; no se usa como sustituto.
+  Si faltan coordenadas o un enlace directo válido, el acceso queda deshabilitado.
+  Las ubicaciones aproximadas identifican el punto como centro de una zona
+  aproximada, nunca como dirección exacta. La precisión desconocida se indica.
   Los destinos externos abren otra pestaña. No se cargan imágenes automáticamente.
 - La ficha muestra descripción, ofertas y características principales;
   datos adicionales y trazabilidad se consultan en secciones desplegables.
