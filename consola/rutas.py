@@ -18,6 +18,8 @@ from .presentacion import (
     ESTADOS, enlace_publico, fecha, leer_filtros, mensaje_filtros, nombre_busqueda,
     numero, ofertas_visibles, regreso_seguro, tarjeta, url_catalogo, historial_visible,
 )
+from .oportunidades import crear_router as crear_router_oportunidades, contexto_captura
+from oportunidades.persistencia import ErrorPersistencia, NoEncontrado
 
 RAIZ = Path(__file__).resolve().parent
 ESTATICOS = RAIZ / 'static'
@@ -28,6 +30,7 @@ templates.env.globals.update(enlace_publico=enlace_publico)
 
 def crear_router(proveedor_servicio):
     router = APIRouter()
+    router.include_router(crear_router_oportunidades(proveedor_servicio, templates))
 
     def render(request, nombre, status=200, **contexto):
         base = {'values': request.query_params, 'tipos': tuple(TipoInmueble),
@@ -71,6 +74,13 @@ def crear_router(proveedor_servicio):
                           reintentar=url_catalogo(request.query_params))
         volver = url_catalogo(request.query_params)
         limite, offset, total = resultado['limit'], resultado['offset'], resultado['total']
+        try:
+            captura = contexto_captura(request, todos)
+        except NoEncontrado as exc:
+            return render(request, 'estado.html', 404, titulo='No encontramos el registro',
+                          mensaje=str(exc), reintentar='/consola/')
+        except ErrorPersistencia:
+            captura = {'error_crm': 'No se pudieron cargar clientes y oportunidades. El catálogo sigue disponible.'}
         return render(
             request, 'catalogo.html', ciudades=ciudades, barrios=barrios, filtros=filtros,
             zonas=zonas, fuentes=fuentes, busquedas_opciones=busquedas_opciones,
@@ -85,6 +95,7 @@ def crear_router(proveedor_servicio):
             anterior=url_catalogo(request.query_params, offset=max(0, offset - limite)) if offset else None,
             siguiente=url_catalogo(request.query_params, offset=offset + limite) if offset + limite < total else None,
             primera=url_catalogo(request.query_params, offset=0),
+            **captura,
         )
 
     @router.get('/consola/exportar.csv', include_in_schema=False)

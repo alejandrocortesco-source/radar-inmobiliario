@@ -1,0 +1,16 @@
+{
+  "version": "2026-10-26.1",
+  "fuente": "https://www.catastrobogota.gov.co/sites/default/files/Aviso%20cierre%202021-2022%20f.pdf",
+  "alcance": "Semilla revisada de sectores catastrales, páginas 23–25 y 28. No equivale a un nomenclátor completo de barrios comerciales. No se deducen equivalencias por proximidad.",
+  "barrios": [
+    {"id": "bogota:008401", "ciudad": "bogota", "nombre": "La Calleja", "localidad": "Usaquén", "zona": "Norte"},
+    {"id": "bogota:008402", "ciudad": "bogota", "nombre": "Country Club", "localidad": "Usaquén", "zona": "Norte"},
+    {"id": "bogota:008403", "ciudad": "bogota", "nombre": "La Carolina", "localidad": "Usaquén", "zona": "Norte"},
+    {"id": "bogota:008407", "ciudad": "bogota", "nombre": "Usaquén", "localidad": "Usaquén", "zona": "Norte"},
+    {"id": "bogota:008411", "ciudad": "bogota", "nombre": "Rincón del Chicó", "localidad": "Usaquén", "zona": "Norte"},
+    {"id": "bogota:008510", "ciudad": "bogota", "nombre": "Acacias Usaquén", "localidad": "Usaquén", "zona": "Norte"},
+    {"id": "bogota:008314", "ciudad": "bogota", "nombre": "Antiguo Country", "localidad": "Chapinero", "zona": "Norte"},
+    {"id": "bogota:008308", "ciudad": "bogota", "nombre": "El Chicó", "localidad": "Chapinero", "zona": "Norte"},
+    {"id": "bogota:009236", "ciudad": "bogota", "nombre": "La Carolina de Suba", "localidad": "Suba", "zona": "Norte"}
+  ]
+}

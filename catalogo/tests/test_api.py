@@ -78,7 +78,7 @@ def test_catalogo_conserva_contrato_y_agrega_identidad_interna(escenario):
     item = body['items'][0]
     assert set(item) == {
         'id', 'url', 'title', 'price', 'city', 'property_type', 'needs_refresh',
-        'last_verified_at', 'state', 'id_interno',
+        'last_verified_at', 'state', 'id_interno', 'neighborhood', 'zone', 'building', 'geografia',
     }
     assert item['id'] == ID and item['id_interno'] == UUID
     assert item['title'] == 'Casa completa' and item['price'] == 1000
@@ -115,7 +115,7 @@ def test_ficha_original_y_uuid_tienen_misma_respuesta_y_evidencia(escenario):
     assert body == interna.json()
     assert set(body) == {
         'id', 'url', 'id_interno', 'job', 'data', 'catalog_data', 'needs_refresh',
-        'appearances', 'memberships', 'price_history',
+        'appearances', 'memberships', 'price_history', 'geografia',
     }
     assert body['id'] == ID and body['id_interno'] == UUID
     assert body['data'] == body['catalog_data'] == documento()

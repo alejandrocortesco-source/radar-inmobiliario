@@ -2,7 +2,9 @@
 <div class="external-links">
 {% set publicacion=enlace_publico(i.origen.url) %}
 {% if publicacion %}<a href="{{publicacion}}" target="_blank" rel="noopener noreferrer" aria-label="Publicación original en {{card.fuente}} de {{i.titulo or i.origen.id_original}}" title="Publicación original en {{card.fuente}}">{{icono('publicacion')}}</a>{% else %}<span aria-disabled="true" aria-label="Publicación no disponible" title="Publicación no disponible">{{icono('publicacion')}}</span>{% endif %}
+{% if not solo_publicacion %}
 {% if card.fotos %}<details class="photo-links"><summary title="Enlaces a fotografías" aria-label="Fotografías de {{i.titulo or i.origen.id_original}}">{{icono('fotografias')}}</summary><div>{% for foto in card.fotos %}<a href="{{foto}}" target="_blank" rel="noopener noreferrer">Foto {{loop.index}} ↗</a>{% endfor %}</div></details>{% else %}<span aria-disabled="true" aria-label="Fotografías no disponibles" title="Fotografías no disponibles">{{icono('fotografias')}}</span>{% endif %}
 {% set precision='Centro de una zona aproximada; no es una dirección exacta' if i.ubicacion_aproximada is sameas true else ('Precisión no informada; no confirma una dirección exacta' if i.ubicacion_aproximada is none else 'Coordenadas publicadas por Metrocuadrado') %}
 {% if card.mapa %}<a href="{{card.mapa}}" target="_blank" rel="noopener noreferrer" aria-label="Mapa en OpenStreetMap de {{i.titulo or i.origen.id_original}}. {{precision}}" title="Abrir OpenStreetMap · {{precision}}">{{icono('mapa')}}</a>{% else %}<span aria-disabled="true" aria-label="Mapa no disponible" title="Mapa no disponible: faltan coordenadas o un enlace directo válido">{{icono('mapa')}}</span>{% endif %}
+{% endif %}
 </div>

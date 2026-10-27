@@ -1,0 +1,20 @@
+<div class="table-scroll" role="region" aria-label="Resultados del matching" tabindex="0" data-match-scroll>
+  <table class="catalog-table matching-table">
+    <caption class="sr-only">Resultados de la oportunidad, {{pagina_match.total}} candidatos. Ordena usando los encabezados. Abre la ubicación para consultar la ficha.</caption>
+    <thead><tr>{% for columna in columnas_match %}<th scope="col" {% if columna.aria_sort %}aria-sort="{{columna.aria_sort}}"{% endif %} class="{{'numeric' if columna.campo in ['precio','area','habitaciones','banos','parqueaderos'] else ''}}"><a href="{{columna.url}}" aria-label="Ordenar matching por {{columna.nombre}}">{{columna.nombre}}{{' ↑' if columna.aria_sort=='ascending' else ' ↓' if columna.aria_sort=='descending' else ''}}</a></th>{% endfor %}</tr></thead>
+    <tbody>{% for r, card in resultados %}{% set i=r.inmueble %}<tr data-match-id="{{i.origen.id_original}}">
+      <td><details class="match-evidence"><summary title="Ver requisitos y datos pendientes"><span class="match-status {{'confirmed' if r.confirmada else 'pending'}}">{{'Confirmada' if r.confirmada else 'Por verificar'}}</span> <span aria-hidden="true">⌄</span></summary>
+        {% if r.pendientes %}<p><strong>Pendiente de verificar:</strong> {{r.pendientes|join(' · ')}}</p>{% endif %}<p><strong>Cumple:</strong> {{r.cumple|join(' · ')}}</p>
+        {% if r.preferencias_cumplidas %}<p>Preferencias cumplidas: {{r.preferencias_cumplidas|join(' · ')}}</p>{% endif %}{% if r.preferencias_pendientes %}<p>Preferencias sin datos: {{r.preferencias_pendientes|join(' · ')}}</p>{% endif %}{% if r.preferencias_no_cumplidas %}<p>Preferencias no cumplidas: {{r.preferencias_no_cumplidas|join(' · ')}}</p>{% endif %}
+        <p>Presencia: {{i.disponibilidad.value}}. {% if i.requiere_revision %}Anuncio con revisión pendiente. {% endif %}Confirmar disponibilidad comercial.</p>
+      </details></td>
+      <td><a class="match-property-link" href="{{card.url}}" title="{{i.titulo or i.origen.id_original}}">{{i.barrio or i.zona or 'Ubicación pendiente'}}</a><small class="cell-secondary">{{i.ciudad or 'Ciudad pendiente'}}{{' · ' + i.zona if i.zona else ''}}</small></td>
+      <td>{{i.tipo.value|capitalize if i.tipo else 'Sin dato'}}</td>
+      <td class="numeric match-price-cell">{% if r.oferta and r.oferta.precio is not none %}${{r.oferta.precio|numero}}<small class="cell-secondary">{{r.oferta.moneda or 'Moneda por verificar'}}</small>{% else %}Sin dato{% endif %}</td>
+      <td class="numeric">{{card.area_valor|numero if card.area_valor is not none else 'Sin dato'}}<small class="cell-secondary">{{card.area_tipo or ''}}</small></td>
+      <td class="numeric">{{i.habitaciones if i.habitaciones is not none else '—'}}</td><td class="numeric">{{i.banos if i.banos is not none else '—'}}</td><td class="numeric">{{i.parqueaderos if i.parqueaderos is not none else '—'}}</td>
+      <td>{{card.fuente}}</td><td>{% with solo_publicacion=true %}{% include '_links.html' %}{% endwith %}</td>
+    </tr>{% endfor %}</tbody>
+  </table>
+</div>
+<nav class="pagination matching-pagination" aria-label="Paginación del matching"><span>{{match_primero}}–{{match_ultimo}} de {{pagina_match.total}} candidatos</span><div>{% if match_anterior %}<a href="{{match_anterior}}" rel="prev">← Anterior</a>{% else %}<span aria-disabled="true">← Anterior</span>{% endif %}<span>Página {{match_pagina}} de {{match_paginas}}</span>{% if match_siguiente %}<a href="{{match_siguiente}}" rel="next">Siguiente →</a>{% else %}<span aria-disabled="true">Siguiente →</span>{% endif %}</div><div class="match-page-size"><span>Filas</span>{% for n in [12,24,48] %}{% if pagina_match.limit==n %}<strong aria-current="true">{{n}}</strong>{% else %}<a href="{{match_limite_urls[n]}}" aria-label="Mostrar {{n}} resultados por página">{{n}}</a>{% endif %}{% endfor %}</div></nav>

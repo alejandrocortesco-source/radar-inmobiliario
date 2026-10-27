@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="capture"><h1>Editar cliente</h1>
+{% if errores %}<div class="notice" role="alert"><ul>{% for error in errores %}<li>{{error}}</li>{% endfor %}</ul></div>{% endif %}
+<form method="post" action="/consola/clientes/{{cliente.id}}"><div class="capture-fields">
+<label for="cliente_nombre">Nombre del cliente *<input id="cliente_nombre" name="nombre" required maxlength="200" value="{{cliente.nombre}}"></label>
+<label for="cliente_telefono">Teléfono / WhatsApp<input id="cliente_telefono" name="telefono" type="tel" maxlength="80" value="{{cliente.telefono or ''}}"></label>
+</div><button type="submit">Guardar cliente</button></form>
+<p>Los cambios se reflejan en todas las oportunidades del cliente.</p></section>
+<a href="/consola/">← Volver al catálogo</a>
+{% endblock %}

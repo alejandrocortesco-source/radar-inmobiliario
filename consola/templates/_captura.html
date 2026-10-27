@@ -1,0 +1,47 @@
+<section id="necesidades-cliente" class="capture workspace-area" aria-label="Captura de oportunidades">
+  <div class="area-heading"><div><span class="area-kicker">01 · Captura manual</span><h2>Cliente y oportunidad</h2><p>Registra las necesidades para comparar inmuebles del catálogo.</p></div><a class="quiet-link" href="/consola/">+ Nueva captura</a></div>
+  {% if guardada %}<p class="saved-message" role="status">Guardado correctamente. El matching usa las necesidades guardadas.</p>{% endif %}
+  {% if errores_captura %}<div class="notice" role="alert"><strong>Revisa los datos antes de guardar.</strong><ul>{% for mensaje in errores_captura %}<li>{{mensaje}}</li>{% endfor %}</ul></div>{% endif %}
+  {% if clientes_crm %}<form method="get" action="/consola/" class="actions client-picker">
+    <label for="crm_cliente_existente">Usar un cliente existente<select id="crm_cliente_existente" name="cliente"><option value="">Nuevo cliente</option>{% for c in clientes_crm %}<option value="{{c.id}}" {{'selected' if captura.get('cliente_id')==c.id else ''}}>{{c.nombre}} · {{c.telefono or 'Sin teléfono'}}</option>{% endfor %}</select></label><button type="submit">Preparar nueva oportunidad</button>
+  </form>{% endif %}
+  <form action="/consola/oportunidades" method="post" id="crm-form">
+    <input type="hidden" name="oportunidad_id" value="{{captura.get('oportunidad_id', '')}}">
+    <input type="hidden" name="cliente_id" value="{{captura.get('cliente_id', '')}}">
+    <input type="hidden" name="ubicaciones_ciudad" value="{{ciudad_clave_crm}}">
+    <div class="capture-fields">
+      <label for="crm_nombre" class="client-name">Nombre del cliente *<input id="crm_nombre" name="nombre" required maxlength="200" autocomplete="name" placeholder="¿Para quién estamos buscando?" value="{{captura.get('nombre', '')}}"></label>
+      <label for="crm_telefono">Teléfono / WhatsApp<input id="crm_telefono" name="telefono" maxlength="80" type="tel" autocomplete="tel" value="{{captura.get('telefono', '')}}"></label>
+      <label for="crm_operacion">Operación *<select id="crm_operacion" name="operacion" required>{% for valor, nombre in [('compra','Compra'),('arriendo','Arriendo')] %}<option value="{{valor}}" {{'selected' if captura.get('operacion')==valor else ''}}>{{nombre}}</option>{% endfor %}</select></label>
+      <label for="crm_tipo">Tipo de inmueble *<select id="crm_tipo" name="tipo" required><option value="">Selecciona</option>{% for tipo in tipos_crm %}<option value="{{tipo.value}}" {{'selected' if captura.get('tipo')==tipo.value else ''}}>{{tipo.value|capitalize}}</option>{% endfor %}</select></label>
+      <label for="crm_ciudad">Ciudad *
+        {% if ciudad_unica_crm %}<input id="crm_ciudad" name="ciudad" value="{{captura.ciudad}}" data-city-key="{{ciudad_clave_crm}}" readonly autocomplete="off"><small>Única ciudad con inmuebles en el catálogo.</small>
+        {% else %}<select id="crm_ciudad" name="ciudad" required autocomplete="off"><option value="">Selecciona una ciudad</option>{% if ciudad_historica_crm %}<option value="{{captura.ciudad}}" data-city-key="{{ciudad_clave_crm}}" selected>{{captura.ciudad}} · Guardada, sin anuncios</option>{% endif %}{% for c in ciudades_crm %}<option value="{{c.valor}}" data-city-key="{{c.clave}}" {{'selected' if c.clave==ciudad_clave_crm else ''}}>{{c.valor}}</option>{% endfor %}</select>{% endif %}
+      </label>
+      <label for="crm_presupuesto">Presupuesto máximo COP *<input id="crm_presupuesto" name="presupuesto_max" type="number" min="0.01" max="9999999999999999.99" step="0.01" required placeholder="Ej. 450000000" value="{{captura.get('presupuesto_max', '')}}"></label>
+      {% include '_ubicaciones.html' %}
+      {% for campo in ['habitaciones_min','area_min_m2'] %}<label for="crm_{{campo}}">{{criterios_crm[campo]}}{{' (m²)' if campo=='area_min_m2' else ''}}<input id="crm_{{campo}}" name="{{campo}}" type="number" min="{{'0.01' if campo=='area_min_m2' else '0'}}" step="{{'0.01' if campo=='area_min_m2' else '1'}}" max="{{'9999999999.99' if campo=='area_min_m2' else '1000'}}" value="{{captura.get(campo) if captura.get(campo) is not none else ''}}"></label>{% endfor %}
+    </div>
+    <p class="capture-help">* Obligatorio. Ingresa habitaciones mínimas o área mínima; puedes ingresar ambas. Los criterios numéricos son indispensables salvo que los marques como preferencia.</p>
+    <details class="capture-extra" {{'open' if errores_captura else ''}}><summary>Características adicionales y preferencias</summary>
+      <div class="capture-fields">
+        <label for="crm_otros_barrios">Agregar barrios (separados por coma)<input id="crm_otros_barrios" name="otros_barrios" value="{{captura.get('otros_barrios', '')}}"></label>
+        <label for="crm_otras_zonas">Agregar zonas (separadas por coma)<input id="crm_otras_zonas" name="otros_zonas" value="{{captura.get('otros_zonas', '')}}"></label>
+        {% for campo in ['banos_min','parqueaderos_min','area_max_m2','antiguedad_max'] %}<label for="crm_{{campo}}">{{criterios_crm[campo]}}{{' (m²)' if campo=='area_max_m2' else ' (años)' if campo=='antiguedad_max' else ''}}<input id="crm_{{campo}}" name="{{campo}}" type="number" min="{{'0.01' if campo=='area_max_m2' else '0'}}" step="{{'0.01' if campo=='area_max_m2' else '1'}}" max="{{'9999999999.99' if campo=='area_max_m2' else '1000'}}" value="{{captura.get(campo) if captura.get(campo) is not none else ''}}"></label>{% endfor %}
+        <label for="crm_tipo_area">Tipo de área para comparar<select id="crm_tipo_area" name="tipo_area">{% for tipo in ['construida','privada','publicada'] %}<option {{'selected' if captura.get('tipo_area','construida')==tipo else ''}}>{{tipo}}</option>{% endfor %}</select></label>
+        <label for="crm_estado">Estado<select id="crm_estado" name="estado">{% for estado in ['abierta','cerrada'] %}<option {{'selected' if captura.get('estado','abierta')==estado else ''}}>{{estado}}</option>{% endfor %}</select></label>
+      </div>
+      <fieldset class="preference-fields"><legend>Tratar como preferencia (ordena, no excluye)</legend>{% for campo, etiqueta in criterios_crm.items() %}<label><input type="checkbox" name="preferencias" value="{{campo}}" {{'checked' if campo in captura.get('preferencias', []) else ''}}> {{etiqueta}}</label>{% endfor %}</fieldset>
+      <p class="capture-help">Antigüedad: el catálogo actual no tiene este dato estructurado. Se mostrará pendiente de verificar. Las áreas se comparan solo con el tipo elegido, sin sustituirlo.</p>
+      <label for="crm_observaciones">Observaciones y preferencias adicionales<textarea id="crm_observaciones" name="observaciones" rows="2" maxlength="5000">{{captura.get('observaciones', '')}}</textarea></label>
+      <p class="capture-help">El texto libre se conserva para consulta de Mónica; no se interpreta automáticamente.</p>
+    </details>
+    <div class="actions capture-actions"><button class="save-search" type="submit" name="accion" value="buscar">Guardar y buscar coincidencias <span aria-hidden="true">→</span></button><button class="secondary-save" type="submit" name="accion" value="guardar">{{'Guardar cambios' if captura.get('oportunidad_id') else 'Guardar oportunidad'}}</button>{% if captura.get('oportunidad_id') %}<a href="/consola/oportunidades/{{captura.oportunidad_id}}/coincidencias">Buscar coincidencias</a>{% endif %}</div>
+    {% if captura.get('cliente_id') %}<p class="capture-help">Cliente existente: guardar actualiza su nombre y teléfono para todas sus oportunidades. <a href="/consola/clientes/{{captura.cliente_id}}">Editar solo cliente</a></p>{% endif %}
+    {% if seleccionada_crm %}<p class="capture-help">ID {{seleccionada_crm.id}} · Creada {{seleccionada_crm.creado_en|fecha}} · Actualizada {{seleccionada_crm.actualizado_en|fecha}}</p>{% endif %}
+  </form>
+  <details class="crm-records"><summary>Clientes ({{clientes_crm|length}}) y oportunidades ({{oportunidades_crm|length}})</summary>
+    <ul>{% for c in clientes_crm %}<li>{{c.nombre}} · {{c.telefono or 'Sin teléfono'}} · <a href="/consola/?cliente={{c.id}}">Nueva oportunidad para este cliente</a> · <a href="/consola/clientes/{{c.id}}">Editar cliente</a></li>{% else %}<li>Aún no hay clientes.</li>{% endfor %}</ul>
+    <ul>{% for o in oportunidades_crm %}<li><strong>{{nombres_clientes.get(o.cliente_id, 'Cliente')}}</strong> · {{o.necesidades.operacion}} · {{o.necesidades.ciudad}} · {{o.estado}} · {{o.creado_en|fecha}} · <a href="/consola/?oportunidad={{o.id}}">Consultar / editar</a> · <a href="/consola/oportunidades/{{o.id}}/coincidencias">Buscar coincidencias</a></li>{% else %}<li>Aún no hay oportunidades.</li>{% endfor %}</ul>
+  </details>
+</section>

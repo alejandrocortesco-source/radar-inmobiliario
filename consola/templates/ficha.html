@@ -22,6 +22,13 @@
   <dl class="metadata">
     {% for valor,etiqueta in [(inmueble.area_construida_m2,'Área construida (m²)'),(inmueble.area_privada_m2,'Área privada (m²)'),(inmueble.area_publicada_m2,'Área no especifica (m²)')] %}<dt>{{etiqueta}}</dt><dd>{{valor|numero if valor is not none else 'No especifica'}}</dd>{% endfor %}
     <dt>Estrato</dt><dd>{{inmueble.estrato|numero}}</dd>
+    {% if inmueble.geografia %}
+    <dt>Ubicación normalizada</dt><dd>{{'Consistente con el catálogo controlado' if inmueble.geografia.estado=='confirmada' else 'Pendiente de verificar'}}. {{inmueble.geografia.motivos|join(' · ')}}</dd>
+    <dt>Barrio publicado (original)</dt><dd>{{inmueble.geografia.barrio_original or 'Sin dato'}}</dd>
+    <dt>Barrio común publicado (original)</dt><dd>{{inmueble.geografia.barrio_comun_original or 'Sin dato'}}</dd>
+    <dt>Zona / sector publicados</dt><dd>{{inmueble.geografia.zona_original or 'Sin dato'}} / {{inmueble.geografia.sector_original or 'Sin dato'}}</dd>
+    <dt>Edificio</dt><dd>{{inmueble.edificio or 'Sin identificar'}}</dd>
+    {% endif %}
     <dt>Tipo</dt><dd>{{inmueble.tipo.value|capitalize if inmueble.tipo else 'Sin dato'}}</dd>
     <dt>Calidad de los datos</dt><dd>{{inmueble.calidad.value|capitalize}}</dd>
     <dt>Revisión pendiente</dt><dd>{{'Sí' if inmueble.requiere_revision else 'No'}}</dd>

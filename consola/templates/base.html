@@ -11,7 +11,8 @@
 <a class="skip-link" href="#contenido">Ir al contenido</a>
 <header class="site-header shell">
   <a class="brand" href="/consola/">Radar Inmobiliario</a>
-  <p>Catálogo consolidado</p>
+  <p>Consola v0.3 · Catálogo consolidado</p>
+  {% if captura is defined %}<nav class="workspace-nav" aria-label="Áreas de la Consola"><a href="#necesidades-cliente">01 Necesidades</a><a href="#matching-resumen">02 Resumen</a><a href="#matching-resultados">03 Resultados</a><a href="#catalogo-completo">Explorar catálogo</a></nav>{% endif %}
 </header>
 <main id="contenido" class="shell">{% block content %}{% endblock %}</main>
 </body>

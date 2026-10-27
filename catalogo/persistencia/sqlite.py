@@ -9,6 +9,7 @@ from decimal import Decimal
 
 from ..identidad import identificar_inmueble
 from ..modelos import Inmueble
+from ..geografia.persistencia import leer as leer_geografia, recuperar as recuperar_geografia
 from ._metrocuadrado import convertir
 from .contrato import ErrorLecturaCatalogo, RegistroCatalogo, RevisionCatalogo
 
@@ -64,12 +65,14 @@ class CatalogoSQLite:
         for presencia in db.execute(consulta + ' ORDER BY property_id,search_url', args):
             por_anuncio[presencia['property_id']].append(presencia)
         resultado = []
+        geografia = leer_geografia(self.ruta)
         for fila in filas:
             try:
                 documento = json.loads(fila['data_json'], parse_float=Decimal) if fila['data_json'] else {}
                 config = json.loads(fila['captura_config']) if fila['captura_config'] else {}
                 resultado.append(RegistroCatalogo(
-                    inmueble=convertir(fila, documento, por_anuncio[fila['id']], config),
+                    inmueble=convertir(fila, documento, por_anuncio[fila['id']], config,
+                                       geografia=recuperar_geografia(geografia, fila)),
                     documento=json.loads(fila['data_json']) if fila['data_json'] else None,
                     resumen={k: fila[k] for k in (
                         'id', 'url', 'title', 'price', 'city', 'property_type', 'needs_refresh')},

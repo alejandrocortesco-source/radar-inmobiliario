@@ -1,0 +1,25 @@
+<div class="location-field capture-wide" data-location-field>
+  <span id="crm_ubicaciones_label">Barrios o zonas de interés *</span>
+  <label class="location-fallback" for="crm_ubicaciones">Selección múltiple de ubicaciones
+    <select id="crm_ubicaciones" name="ubicaciones" multiple size="4" aria-describedby="crm_ubicacion_ayuda">
+    {% for o in ubicaciones_crm %}<option value="{{o.valor}}" data-city="{{o.ciudad}}" data-key="{{o.clave}}" data-legacy="{{'1' if o.legado else '0'}}" {{'selected' if o.seleccionada else ''}} {{'disabled' if o.ciudad!=ciudad_clave_crm else ''}}>{{o.nombre}} · {{o.tipo}}{{' · Guardado fuera del catálogo' if o.legado else ''}}</option>{% endfor %}
+    </select>
+  </label>
+  <div class="location-enhanced" hidden>
+    <div class="location-tags" data-location-tags aria-label="Ubicaciones seleccionadas"></div>
+    <details class="location-picker" data-location-picker>
+      <summary aria-labelledby="crm_ubicaciones_label crm_picker_label"><span id="crm_picker_label">Seleccionar barrios o zonas</span><span data-location-count></span></summary>
+      <div class="location-panel">
+        <label for="crm_buscar_barrio">Buscar barrio o zona<input id="crm_buscar_barrio" type="search" placeholder="Escribe parte del nombre…" autocomplete="off" spellcheck="false" data-location-search></label>
+        <div class="location-options" data-location-options>
+        {% for o in ubicaciones_crm if not o.legado %}<label data-location-row data-city="{{o.ciudad}}" data-key="{{o.clave}}"><input type="checkbox" value="{{o.valor}}" data-location-choice {{'checked' if o.seleccionada else ''}}><span>{{o.nombre}}</span><small>{{o.tipo}}</small></label>{% endfor %}
+        </div>
+        <p class="capture-help" data-location-empty hidden>No hay ubicaciones del catálogo que coincidan con esta búsqueda.</p>
+        <button type="button" data-location-done>Listo</button>
+      </div>
+    </details>
+  </div>
+  <small id="crm_ubicacion_ayuda">Solo barrios normalizados con información consistente. Las zonas son alternativas de ubicación. Las ubicaciones ambiguas quedan pendientes de verificar en los resultados.</small>
+  <p class="capture-help" data-location-notice aria-live="polite">{{aviso_ubicaciones or ''}}</p>
+  <noscript><p class="capture-help">Cambia la ciudad y pulsa «Actualizar barrios» antes de seleccionarlos. Usa Ctrl/Cmd para seleccionar varios.</p><button type="submit" formaction="/consola/ubicaciones" formnovalidate>Actualizar barrios</button></noscript>
+</div>

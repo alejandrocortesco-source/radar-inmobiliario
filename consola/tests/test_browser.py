@@ -12,6 +12,15 @@ from playwright.sync_api import sync_playwright, expect
 from catalogo.identidad import identificar_inmueble
 
 
+def seleccionar_barrio(page, javascript):
+    if javascript:
+        page.locator('[data-location-picker] > summary').click()
+        page.locator('[data-location-row][data-city="bogota"][data-key="barrio:la carolina"] input').check()
+        page.locator('[data-location-done]').click()
+    else:
+        page.locator('#crm_ubicaciones').select_option('barrio:La Carolina')
+
+
 @pytest.fixture(scope='session')
 def chromium():
     with sync_playwright() as p:
@@ -233,3 +242,163 @@ def test_precio_unico_e_iconos_con_mapa_original(pagina, servidor):
     pagina.goto(servidor + '/consola/?operacion=arriendo')
     expect(pagina.locator('td.prices')).to_have_text('$1.000.000 · Arriendo')
     expect(pagina.locator('td.prices > span')).to_have_count(1)
+
+
+@pytest.mark.parametrize('javascript,ancho', [(True, 1440), (True, 390), (False, 768)])
+def test_v03_ciclo_captura_edicion_y_matching(chromium, servidor, tmp_path, javascript, ancho):
+    contexto = chromium.new_context(java_script_enabled=javascript, viewport={'width': ancho, 'height': 1000})
+    page = contexto.new_page()
+    errores = []
+    page.on('pageerror', lambda e: errores.append(str(e)))
+    try:
+        page.goto(servidor + '/consola/')
+        page.locator('#crm_nombre').fill('Ana de prueba')
+        page.locator('#crm_telefono').fill('3001234567')
+        page.locator('#crm_tipo').select_option('casa')
+        page.locator('#crm_ciudad').select_option('Bogotá')
+        if not javascript:
+            page.get_by_role('button', name='Actualizar barrios', exact=True).click()
+        page.locator('#crm_presupuesto').fill('110000000')
+        seleccionar_barrio(page, javascript)
+        page.get_by_role('button', name='Guardar oportunidad', exact=True).click()
+        if javascript:
+            assert page.locator('#crm_nombre').input_value() == 'Ana de prueba'
+            assert not page.locator('#crm_habitaciones_min').evaluate('(e) => e.checkValidity()')
+        else:
+            expect(page.get_by_role('alert')).to_contain_text('habitaciones mínimas o área mínima')
+        page.locator('#crm_habitaciones_min').fill('3')
+        page.get_by_role('button', name='Guardar oportunidad', exact=True).click()
+        expect(page.get_by_role('status')).to_contain_text('Guardado correctamente')
+        assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+        page.screenshot(path=str(tmp_path / f'captura-v03-{ancho}.png'), full_page=True)
+        page.locator('#crm-form').get_by_role('link', name='Buscar coincidencias', exact=True).click()
+        expect(page.locator('.matching-table tbody tr')).to_have_count(10)
+        assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+        page.screenshot(path=str(tmp_path / f'matching-v03-{ancho}.png'), full_page=True)
+        page.get_by_role('link', name='Modificar oportunidad').click()
+        page.locator('#crm_presupuesto').fill('103000000')
+        page.get_by_role('button', name='Guardar cambios').click()
+        page.locator('#crm-form').get_by_role('link', name='Buscar coincidencias', exact=True).click()
+        expect(page.locator('.matching-table tbody tr')).to_have_count(3)
+        page.get_by_role('link', name='Modificar oportunidad').click()
+        page.get_by_role('button', name='Preparar nueva oportunidad').click()
+        expect(page.locator('#crm_nombre')).to_have_value('Ana de prueba')
+        page.locator('#crm_tipo').select_option('casa')
+        page.locator('#crm_ciudad').select_option('Bogotá')
+        if not javascript:
+            page.get_by_role('button', name='Actualizar barrios', exact=True).click()
+        page.locator('#crm_presupuesto').fill('110000000')
+        seleccionar_barrio(page, javascript)
+        page.locator('#crm_area_min_m2').fill('82')
+        page.get_by_role('button', name='Guardar oportunidad', exact=True).click()
+        expect(page.locator('.crm-records > summary')).to_contain_text('Clientes (1) y oportunidades (2)')
+        assert not errores
+    finally:
+        contexto.close()
+
+
+@pytest.mark.parametrize('javascript,ancho', [(True, 1440), (True, 390), (False, 768)])
+def test_correccion_guardar_buscar_metricas_y_explica_cero(chromium, servidor, tmp_path, javascript, ancho):
+    contexto = chromium.new_context(java_script_enabled=javascript, viewport={'width': ancho, 'height': 900})
+    page = contexto.new_page()
+    errores = []
+    page.on('pageerror', lambda e: errores.append(str(e)))
+    try:
+        page.goto(servidor + '/consola/')
+        expect(page.locator('[data-match-total]')).to_have_text('26')
+        expect(page.locator('[data-match-confirmed]')).to_have_text('—')
+        page.locator('#crm_nombre').fill('Prueba de corrección')
+        page.locator('#crm_tipo').select_option('casa')
+        page.locator('#crm_ciudad').select_option('Bogotá')
+        if not javascript:
+            page.get_by_role('button', name='Actualizar barrios', exact=True).click()
+        seleccionar_barrio(page, javascript)
+        page.locator('#crm_presupuesto').fill('110000000')
+        page.locator('#crm_habitaciones_min').fill('3')
+        page.get_by_role('button', name='Guardar y buscar coincidencias', exact=True).click()
+        expect(page.locator('[data-match-confirmed]')).to_have_text('10')
+        expect(page.locator('[data-match-pending]')).to_have_text('0')
+        expect(page.locator('.matching-table tbody tr')).to_have_count(10)
+        assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+        page.screenshot(path=str(tmp_path / f'matching-corregido-{ancho}.png'))
+        page.locator('.matching-diagnostics > summary').click()
+        expect(page.locator('.diagnostic-table tbody tr')).to_have_count(6)
+        assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+        page.locator('#crm_habitaciones_min').fill('100')
+        page.get_by_role('button', name='Guardar y buscar coincidencias', exact=True).click()
+        expect(page.locator('[data-match-confirmed]')).to_have_text('0')
+        expect(page.locator('.matching-table tbody tr')).to_have_count(0)
+        expect(page.locator('.match-empty')).to_contain_text('Habitaciones mínimas: 26 inmuebles no cumplen')
+        assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+        assert not errores
+        page.screenshot(path=str(tmp_path / f'sin-coincidencias-{ancho}.png'))
+    finally:
+        contexto.close()
+
+
+def test_selector_barrios_busqueda_etiquetas_cambio_y_guardado(pagina, servidor, escenario_consola):
+    for id, doc in escenario_consola['documentos'].items():
+        if doc['normalized']['city'] == 'Medellín':
+            doc['normalized']['neighborhood'] = 'El Poblado'
+            escenario_consola['store'].result(escenario_consola['run'], id, 'success', doc)
+    pagina.goto(servidor + '/consola/')
+    pagina.locator('#crm_ciudad').select_option('Bogotá')
+    pagina.locator('[data-location-picker] > summary').click()
+    pagina.locator('#crm_buscar_barrio').fill('  CAROLÍNA  ')
+    expect(pagina.locator('[data-location-row]:visible')).to_have_count(1)
+    pagina.locator('[data-location-row][data-city="bogota"][data-key="barrio:la carolina"] input').check()
+    expect(pagina.locator('[data-location-picker]')).to_have_attribute('open', '')
+    expect(pagina.locator('.location-tag')).to_have_count(1)
+
+    pagina.get_by_role('button', name='Quitar La Carolina', exact=True).click()
+    expect(pagina.locator('.location-tag')).to_have_count(0)
+    pagina.locator('[data-location-row][data-city="bogota"][data-key="barrio:la carolina"] input').check()
+    pagina.locator('#crm_ciudad').select_option('Medellín')
+    expect(pagina.locator('.location-tag')).to_have_count(0)
+    expect(pagina.locator('[data-location-notice]')).to_contain_text('Se retiraron')
+    pagina.locator('[data-location-picker] > summary').click()
+    # La semilla controlada todavía no incluye Medellín: el nombre extraído no
+    # se convierte por sí solo en un barrio confirmado. Su zona sí está disponible.
+    expect(pagina.locator('[data-location-row][data-city="medellin"][data-key="barrio:el poblado"]')).to_have_count(0)
+    expect(pagina.locator('[data-location-row][data-city="medellin"][data-key="zona:norte"]')).to_be_visible()
+    pagina.locator('#crm_ciudad').select_option('Bogotá')
+    pagina.locator('[data-location-picker] > summary').click()
+    pagina.locator('[data-location-row][data-city="bogota"][data-key="barrio:la carolina"] input').check()
+    pagina.locator('[data-location-done]').click()
+    pagina.locator('#crm_nombre').fill('Prueba selector')
+    pagina.locator('#crm_tipo').select_option('casa')
+    pagina.locator('#crm_presupuesto').fill('110000000')
+    pagina.locator('#crm_habitaciones_min').fill('3')
+    pagina.get_by_role('button', name='Guardar y buscar coincidencias', exact=True).click()
+    expect(pagina.locator('[data-match-confirmed]')).to_have_text('10')
+    expect(pagina.locator('.location-tag')).to_have_count(1)
+
+
+@pytest.mark.parametrize('ancho', [1440, 390])
+def test_tabla_matching_orden_pagina_y_ficha(pagina, servidor, ancho):
+    pagina.set_viewport_size({'width': ancho, 'height': 900})
+    pagina.goto(servidor + '/consola/')
+    pagina.locator('#crm_nombre').fill('Comparación de inmuebles')
+    pagina.locator('#crm_tipo').select_option('casa')
+    pagina.locator('#crm_ciudad').select_option('Bogotá')
+    seleccionar_barrio(pagina, True)
+    pagina.locator('#crm_presupuesto').fill('200000000')
+    pagina.locator('#crm_habitaciones_min').fill('3')
+    pagina.get_by_role('button', name='Guardar y buscar coincidencias', exact=True).click()
+    expect(pagina.locator('.matching-table tbody tr')).to_have_count(13)
+    pagina.get_by_role('link', name='Mostrar 12 resultados por página').click()
+    expect(pagina.locator('.matching-table tbody tr')).to_have_count(12)
+    # Primera pulsación ascendente y segunda descendente; se ordena todo antes de paginar.
+    pagina.get_by_role('link', name='Ordenar matching por Precio', exact=True).click()
+    pagina.get_by_role('link', name='Ordenar matching por Precio', exact=True).click()
+    expect(pagina.locator('.matching-table tbody tr').first).to_have_attribute('data-match-id', '13-M13')
+    assert pagina.evaluate('document.documentElement.scrollWidth <= innerWidth')
+    if ancho == 390:
+        assert pagina.locator('[data-match-scroll]').evaluate('(e) => e.scrollWidth > e.clientWidth')
+    pagina.locator('.matching-pagination').get_by_role('link', name='Siguiente →').click()
+    expect(pagina.locator('.matching-table tbody tr')).to_have_count(1)
+    pagina.locator('.match-property-link').click()
+    expect(pagina.get_by_role('heading', level=1)).to_have_text('Casa con jardín 01')
+    pagina.get_by_role('link', name='← Volver al catálogo').click()
+    expect(pagina.locator('.matching-table tbody tr')).to_have_count(1)
+    expect(pagina.locator('[data-match-confirmed]')).to_have_text('13')

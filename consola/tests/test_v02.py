@@ -105,13 +105,13 @@ def test_csv_exporta_todos_los_filtrados_sin_paginar(escenario_consola):
 def test_csv_neutraliza_formulas_y_preserva_doble_oferta(escenario_consola):
     datos = escenario_consola
     doc = datos['documentos']['1-M1']
-    doc['normalized']['neighborhood'] = '=HYPERLINK("https://externo.test")'
+    doc['normalized']['city'] = '=HYPERLINK("https://externo.test")'
     datos['store'].result(datos['run'], '1-M1', 'success', doc)
     response = TestClient(app).get('/consola/exportar.csv', params={'texto': 'Casa con jardín 01'})
     filas = list(csv.DictReader(io.StringIO(response.content.decode('utf-8-sig')), delimiter=';'))
     assert len(filas) == 2
     assert {f['Operación'] for f in filas} == {'venta', 'arriendo'}
-    assert all(f['Barrio'].startswith("'=") for f in filas)
+    assert all(f['Ciudad'].startswith("'=") for f in filas)
 
 
 def test_enlaces_publicos_validos_y_mapa_sin_coordenadas_inventadas(escenario_consola):

@@ -2,6 +2,7 @@
 <label for="{{clave}}">{{etiqueta}}<input aria-label="{{etiqueta}}" id="{{clave}}" name="{{clave}}" type="{{tipo}}" value="{{values.get(clave,'')}}" placeholder="{{placeholder}}" {% if tipo=='number' %}min="0" step="any"{% endif %}></label>
 {%- endmacro %}
 <form id="filtros" action="/consola/" method="get" data-filter-form>
+  {% if captura is defined and captura.get('oportunidad_id') %}<input type="hidden" name="oportunidad" value="{{captura.oportunidad_id}}"><input type="hidden" name="match_orden" value="{{orden}}">{% endif %}
   <input type="hidden" name="offset" value="0">
   {% if not tarjetas %}<input type="hidden" name="limit" value="{{values.get('limit') or 24}}">{% endif %}
   <div class="toolbar">

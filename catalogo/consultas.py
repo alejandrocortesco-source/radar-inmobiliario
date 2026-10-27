@@ -1,6 +1,7 @@
 """Filtrado en memoria del modelo común, sin HTTP ni conocimiento de SQLite."""
 
 import unicodedata
+from .geografia import normalizar_ciudad, resolver_barrio
 
 from .filtros import FiltrosCatalogo, OrdenCatalogo
 from .modelos import TipoArea
@@ -42,9 +43,14 @@ def _coincide(inmueble, filtros):
         for v in (inmueble.titulo, inmueble.descripcion, inmueble.origen.id_original)
     ):
         return False
-    if filtros.ciudad and _texto(filtros.ciudad) != _texto(inmueble.ciudad):
+    if filtros.ciudad and normalizar_ciudad(filtros.ciudad) != normalizar_ciudad(inmueble.ciudad):
         return False
     for campo, opciones in (('zona', filtros.zonas), ('barrio', filtros.barrios)):
+        if campo == 'barrio' and opciones and inmueble.geografia:
+            ids = {b['id'] for o in opciones if (b := resolver_barrio(inmueble.ciudad, o)[0])}
+            if inmueble.geografia.barrio_id not in ids:
+                return False
+            continue
         if opciones and _texto(getattr(inmueble, campo)) not in {_texto(o) for o in opciones}:
             return False
     if filtros.tipos and inmueble.tipo not in filtros.tipos:

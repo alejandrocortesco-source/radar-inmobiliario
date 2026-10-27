@@ -4,6 +4,7 @@ No importa ni ejecuta el scraper. Los datos ambiguos permanecen desconocidos.
 """
 
 import unicodedata
+from ..geografia import normalizar_geografia
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
 
@@ -74,7 +75,7 @@ def _objeto(valor, nombre):
     return valor
 
 
-def convertir(fila, documento, presencias, config):
+def convertir(fila, documento, presencias, config, *, geografia=None):
     documento = _objeto(documento, 'documento')
     normal = _objeto(documento.get('normalized'), 'normalized')
     extra = _objeto(documento.get('extra'), 'extra')
@@ -151,6 +152,10 @@ def convertir(fila, documento, presencias, config):
     evidencia = campo_mapa.get('raw') if isinstance(campo_mapa, dict) else None
     evidencia = evidencia if isinstance(evidencia, dict) else {}
     aproximada = original.get('ubicacionaproximada', evidencia.get('ubicacionaproximada'))
+    geografia = geografia or normalizar_geografia(
+        ciudad=_texto(normal.get('city')) or _texto(fila['city']),
+        barrio=normal.get('neighborhood'), barrio_comun=normal.get('common_neighborhood'),
+        zona=normal.get('zone'), sector=normal.get('sector'))
     return Inmueble(
         origen=Origen(
             fuente='metrocuadrado', id_original=fila['id'], url=_texto(fila['url']),
@@ -164,7 +169,8 @@ def convertir(fila, documento, presencias, config):
         titulo=_texto(normal.get('title')) or _texto(fila['title']),
         descripcion=_texto(normal.get('description')), tipo=tipo, ofertas=tuple(ofertas),
         ciudad=_texto(normal.get('city')) or _texto(fila['city']),
-        zona=_texto(normal.get('zone')), barrio=_texto(normal.get('neighborhood')) or _texto(normal.get('common_neighborhood')),
+        zona=geografia.zona, barrio=geografia.barrio,
+        geografia=geografia, edificio=geografia.edificio,
         direccion=_texto(normal.get('address')),
         latitud=_coordenada(normal.get('latitude', coordenadas.get('lat')), 90),
         longitud=_coordenada(normal.get('longitude', coordenadas.get('lon')), 180),

@@ -1,5 +1,9 @@
 {% extends 'base.html' %}
 {% block content %}
+{% if error_crm %}<p class="notice" role="alert">{{error_crm}}</p>{% elif captura is defined %}{% include '_captura.html' %}{% endif %}
+{% if captura is defined %}{% include '_matching.html' %}{% endif %}
+<section id="catalogo-completo" class="catalog-section" aria-label="Explorar catálogo completo">
+<div class="area-heading catalog-heading"><div><span class="area-kicker">Consulta independiente</span><h2>Catálogo completo</h2><p>Explora todos los inmuebles con los filtros habituales.</p></div></div>
 {% include '_filtros.html' %}
 {% if error %}<div class="notice" role="alert"><strong>No pudimos aplicar los filtros.</strong><p>{{error}}</p></div>
 {% elif tarjetas %}
@@ -34,4 +38,5 @@
 {% else %}
 <section class="empty-state"><h1>{{'Esta página ya no tiene inmuebles' if total else 'No encontramos inmuebles con estos filtros'}}</h1><p>{{'Regresa a la primera página para continuar.' if total else 'Amplía los rangos o limpia los filtros.'}}</p><a href="{{primera if total else '/consola/'}}">{{'Ir a la primera página' if total else 'Limpiar filtros'}}</a></section>
 {% endif %}
+</section>
 {% endblock %}

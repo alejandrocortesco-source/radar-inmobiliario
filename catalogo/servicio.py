@@ -1,6 +1,7 @@
 """Consultas comunes y proyección compatible de la API de revisión existente."""
 
 import json
+from dataclasses import asdict
 from collections.abc import Callable
 from dataclasses import replace
 
@@ -17,6 +18,13 @@ class ConsultaInvalida(ValueError):
 
 class InmuebleNoEncontrado(LookupError):
     pass
+
+
+def _geografia(inmueble):
+    if inmueble.geografia is None:
+        return None
+    datos = asdict(inmueble.geografia)
+    return datos | {'motivos': list(datos['motivos']), 'evidencias': list(datos['evidencias'])}
 
 
 class ServicioCatalogo:
@@ -75,6 +83,10 @@ class ServicioCatalogo:
                 'last_verified_at': max(fechas, default=None),
                 'state': estado,
                 'id_interno': registro.inmueble.id_interno,
+                'neighborhood': registro.inmueble.barrio,
+                'zone': registro.inmueble.zona,
+                'building': registro.inmueble.edificio,
+                'geografia': _geografia(registro.inmueble),
             }
         seleccionados = seleccionar(modelos, filtros, id_original_primero=True)
         resultado = []
@@ -108,6 +120,7 @@ class ServicioCatalogo:
         return {
             'id': registro.resumen['id'], 'url': registro.resumen['url'],
             'id_interno': registro.inmueble.id_interno,
+            'geografia': _geografia(registro.inmueble),
             'job': job, 'data': seleccionado, 'catalog_data': revision.documento,
             'needs_refresh': registro.inmueble.requiere_revision,
             'appearances': list(revision.apariciones),

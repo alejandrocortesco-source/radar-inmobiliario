@@ -1,0 +1,5 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="matching-page-heading"><span class="area-kicker">Oportunidad guardada · {{oportunidad.estado}}</span><h1>Coincidencias para {{cliente.nombre}}</h1><p>{{oportunidad.necesidades.operacion|capitalize}} · {{oportunidad.necesidades.ciudad}} · {{oportunidad.necesidades.tipo.value}} · Hasta ${{oportunidad.necesidades.presupuesto_max|numero}} COP</p><div class="actions"><a class="button-link" href="/consola/?oportunidad={{oportunidad.id}}">Modificar oportunidad</a><a href="/consola/">Volver al catálogo</a></div></div>
+{% include '_matching.html' %}
+{% endblock %}
