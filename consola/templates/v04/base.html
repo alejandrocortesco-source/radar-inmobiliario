@@ -1,0 +1,10 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="referrer" content="no-referrer"><title>Radar Inmobiliario · v0.4</title>
+<link rel="stylesheet" href="{{shared_css}}"><link rel="stylesheet" href="/v0.4/static/v04.css">
+<script src="{{shared_js}}" defer></script><script src="/v0.4/static/v04.js" defer></script></head>
+<body class="v04"><a class="skip-link" href="#contenido">Ir al contenido</a>
+<header class="v04-header"><a class="brand" href="/v0.4/">Radar Inmobiliario <small>v0.4</small></a><nav aria-label="Gestión"><a data-management href="/v0.4/?panel=clientes">Clientes y oportunidades</a><a class="button-link" data-new href="/v0.4/?panel=nueva">+ Nueva</a></nav></header>
+<nav class="context-tabs" aria-label="Contextos"><a data-context="catalogo" href="/v0.4/" {{'aria-current=page' if not oportunidad and request.query_params.get('contexto')!='matching' else ''}}>Catálogo completo</a><a data-context="matching" href="/v0.4/?contexto=matching" {{'aria-current=page' if oportunidad or request.query_params.get('contexto')=='matching' else ''}}>Coincidencias</a></nav>
+<main id="contenido">{% block content %}{% endblock %}</main>
+<dialog id="surface" aria-labelledby="surface-title"><header class="surface-header"><h2 id="surface-title">Detalle</h2><button type="button" data-close aria-label="Cerrar">Cerrar ×</button></header><div class="surface-content"></div><footer class="discard" hidden><p>Hay cambios sin guardar.</p><button type="button" data-continue>Seguir editando</button><button type="button" data-discard>Descartar cambios</button></footer></dialog>
+<p id="announcement" class="sr-only" role="status" aria-live="polite"></p>
+</body></html>

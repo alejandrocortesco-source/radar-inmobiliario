@@ -17,7 +17,7 @@ from .resultados import presentar_resultados, ORDENES as ORDENES_MATCH
 from oportunidades.normalizacion import normalizar_ciudad
 
 
-def contexto_captura(request, todos, valores=None, errores=None, servicio=None):
+def contexto_captura(request, todos, valores=None, errores=None, servicio=None, calcular=True):
     s = servicio or servicio_oportunidades()
     clientes = s.clientes()
     oportunidades = s.oportunidades()
@@ -41,8 +41,10 @@ def contexto_captura(request, todos, valores=None, errores=None, servicio=None):
                 criterios_crm=CRITERIOS, tipos_crm=tuple(TipoInmueble), seleccionada_crm=seleccionado,
                 guardada=request.query_params.get('guardada') == '1', match_total=len(todos), informe=None,
                 aviso_ubicaciones=valores.get('aviso_ubicaciones', ''))
-    if seleccionado:
+    if seleccionado and calcular:
         contexto.update(contexto_matching(seleccionado, todos, query=request.query_params))
+    elif seleccionado:
+        contexto['oportunidad'] = seleccionado
     return contexto
 
 

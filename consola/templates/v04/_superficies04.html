@@ -1,0 +1,5 @@
+{% if panel in ['nueva','editar'] %}
+<dialog class="editor" id="editor" aria-labelledby="editor-title" open><header class="surface-header"><h2 id="editor-title">{{'Editar' if captura.get('oportunidad_id') else 'Nueva'}} oportunidad</h2><button type="button" data-close>Cerrar ×</button></header><div class="surface-content">{% include '_captura04.html' %}</div><footer class="discard" hidden><p>Hay cambios sin guardar.</p><button type="button" data-continue>Seguir editando</button><button type="button" data-discard>Descartar cambios</button></footer></dialog>
+{% elif panel=='clientes' %}
+<dialog class="editor" id="editor" aria-labelledby="editor-title" open><header class="surface-header"><h2 id="editor-title">Clientes y oportunidades</h2><button type="button" data-close>Cerrar ×</button></header><div class="surface-content">{% include '_registros04.html' %}</div><footer class="discard" hidden><button data-continue>Seguir editando</button><button data-discard>Descartar cambios</button></footer></dialog>
+{% endif %}

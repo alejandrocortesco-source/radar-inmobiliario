@@ -1,0 +1,6 @@
+    <details class="matching-diagnostics" open><summary>Diagnóstico: inmuebles restantes después de cada filtro</summary>
+      <p>Solo se descarta un incumplimiento conocido de un requisito indispensable. La información desconocida conserva el candidato como pendiente. Las preferencias no eliminan inmuebles.</p>
+      <div class="table-scroll"><table class="diagnostic-table"><caption>Filtros acumulativos, en el orden mostrado</caption><thead><tr><th>Criterio</th><th>Antes</th><th>Descartados</th><th>Restantes</th><th>Sin dato de este criterio</th></tr></thead><tbody>{% for paso in informe.etapas %}<tr><th scope="row">{{paso.criterio}}</th><td>{{paso.antes}}</td><td>{{paso.descartados}}</td><td>{{paso.restantes}}</td><td>{{paso.sin_dato}}</td></tr>{% endfor %}</tbody></table></div>
+      {% if informe.datos_faltantes %}<p>Datos faltantes en el catálogo completo (pueden solaparse): {% for dato in informe.datos_faltantes %}{{dato.criterio}}: {{dato.cantidad}}{{' · ' if not loop.last else ''}}{% endfor %}.</p>{% endif %}
+      <p><a href="/api/oportunidades/{{oportunidad.id}}/diagnostico" target="_blank" rel="noopener">Ver diagnóstico JSON, rutas SQLite y motivos por inmueble</a></p>
+    </details>

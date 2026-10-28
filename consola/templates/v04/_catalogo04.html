@@ -1,0 +1,37 @@
+<section id="catalogo-completo" class="catalog-section" aria-label="Explorar catálogo completo">
+
+{% include '_filtros.html' %}
+{% if error %}<div class="notice" role="alert"><strong>No pudimos aplicar los filtros.</strong><p>{{error}}</p></div>
+{% elif tarjetas %}
+<div class="table-scroll" role="region" aria-label="Catálogo de inmuebles" tabindex="0" data-catalog-scroll>
+  <table class="catalog-table">
+    <caption class="sr-only">Catálogo consolidado. Área prioritaria: construida, privada o publicada, en m². Filtros y orden comparan únicamente área {{filtros.tipo_area.value}}. Selecciona una zona para abrir la ficha.</caption>
+    <thead><tr>
+      <th scope="col">Zona</th><th scope="col">Tipo</th>
+      <th scope="col" class="numeric" {% if filtros.orden.value.startswith('precio_') %}aria-sort="{{'ascending' if filtros.orden.value=='precio_asc' else 'descending'}}"{% endif %}><a data-price-order="{{'precio_desc' if filtros.orden.value=='precio_asc' else 'precio_asc'}}" href="{{orden_url('precio_desc' if filtros.orden.value=='precio_asc' else 'precio_asc')}}" title="Ordenar precio; requiere operación y moneda">Precio{% if filtros.orden.value.startswith('precio_') %} {{'↑' if filtros.orden.value=='precio_asc' else '↓'}}{% endif %}</a></th>
+      <th scope="col" class="numeric" {% if filtros.orden.value.startswith('area_') %}aria-sort="{{'ascending' if filtros.orden.value=='area_asc' else 'descending'}}"{% endif %}><a href="{{orden_url('area_desc' if filtros.orden.value=='area_asc' else 'area_asc')}}" title="Área {{filtros.tipo_area.value}} en m²">Área {{filtros.tipo_area.value}}{% if filtros.orden.value.startswith('area_') %} {{'↑' if filtros.orden.value=='area_asc' else '↓'}}{% endif %}</a></th>
+      <th scope="col" class="numeric">Habitaciones</th><th scope="col">Comentario</th><th scope="col">Links</th>
+    </tr></thead>
+    <tbody>{% for card in tarjetas %}{% set i=card.inmueble %}<tr>
+      <td><a class="property-link" href="{{card.url}}" aria-label="Ver ficha de {{i.titulo or i.origen.id_original}}" title="{{card.ubicacion}} · {{i.titulo or i.origen.id_original}}">{{i.barrio or i.zona or i.ciudad or 'Sin ubicación'}}</a></td>
+      <td>{{i.tipo.value|capitalize if i.tipo else '—'}}</td>
+      <td class="numeric prices">{% set o=card.oferta_principal %}{% if o %}<span>{{o.precio}} <small>· {{o.operacion}}</small></span>{% else %}Sin dato{% endif %}</td>
+      <td class="numeric" title="Filtros y orden por área {{filtros.tipo_area.value}}: {{card.area_comparacion}}">{{card.area}}</td>
+      <td class="numeric">{{i.habitaciones if i.habitaciones is not none else '—'}}</td>
+      <td><a data-detail-comment href="{{card.url}}#comentario">{{'Ver comentario' if comentario(i.id_interno) else 'Agregar'}}</a></td><td>{% include '_links.html' %}</td>
+    </tr>{% endfor %}</tbody>
+  </table>
+</div>
+<nav class="pagination" aria-label="Paginación del catálogo">
+  <span>{{primero}}–{{ultimo}} de {{total}}</span>
+  <div>{% if anterior %}<a href="{{anterior}}" rel="prev">← Anterior</a>{% else %}<span aria-disabled="true">← Anterior</span>{% endif %}
+    <span>Página {{pagina}} de {{paginas}}</span>
+    {% if siguiente %}<a href="{{siguiente}}" rel="next">Siguiente →</a>{% else %}<span aria-disabled="true">Siguiente →</span>{% endif %}</div>
+  <label for="limit">Filas<select aria-label="Filas" id="limit" name="limit" form="filtros" data-auto-submit>{% for n in (12,24,48) %}<option value="{{n}}" {% if resultado.limit==n %}selected{% endif %}>{{n}}</option>{% endfor %}{% if resultado.limit not in (12,24,48) %}<option value="{{resultado.limit}}" selected>{{resultado.limit}}</option>{% endif %}</select></label>
+  <noscript><button type="submit" form="filtros">Cambiar filas</button></noscript>
+</nav>
+<p class="legend">Publicación · Fotografías · OpenStreetMap. En ubicaciones aproximadas, el punto es el centro de la zona, no una dirección exacta. Accesos deshabilitados: no disponibles. Área mostrada: construida, luego privada y luego publicada. Filtros y orden de área: solo {{filtros.tipo_area.value}}, sin sustituir por otro tipo.</p>
+{% else %}
+<section class="empty-state"><h1>{{'Esta página ya no tiene inmuebles' if total else ('No encontramos inmuebles con estos filtros' if activos else 'El catálogo está vacío')}}</h1><p>{{'Regresa a la primera página para continuar.' if total else 'Amplía los rangos o limpia los filtros.'}}</p><a href="{{primera if total else '/consola/'}}">{{'Ir a la primera página' if total else 'Limpiar filtros'}}</a></section>
+{% endif %}
+</section>

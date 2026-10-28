@@ -1,10 +1,20 @@
 """Datos sintéticos: estas pruebas no utilizan la base real."""
 from pathlib import Path
 import pytest
+from playwright.sync_api import sync_playwright
 from metro.storage import Store
 
 A = 'https://www.metrocuadrado.com/inmuebles/venta/bogota/la-carolina'
 B = 'https://www.metrocuadrado.com/inmuebles/venta/bogota/norte'
+
+
+@pytest.fixture(scope='session')
+def chromium():
+    # Una sola sesión Playwright para las pruebas de ambas interfaces.
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        yield browser
+        browser.close()
 
 @pytest.fixture
 def escenario_consola(tmp_path, monkeypatch):

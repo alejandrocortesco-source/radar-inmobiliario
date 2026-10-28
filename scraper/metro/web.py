@@ -13,6 +13,7 @@ from catalogo.api import crear_router, consultar_catalogo, consultar_ficha
 from catalogo.persistencia.sqlite import CatalogoSQLite
 from catalogo.servicio import ServicioCatalogo
 from consola.rutas import crear_router as crear_router_consola, ESTATICOS
+from consola.v04 import crear_router as crear_router_v04, ESTATICOS as ESTATICOS_V04
 
 app = FastAPI(title='Metrocuadrado · Revisión local',version=__version__)
 templates = Jinja2Templates(directory=str(Path(__file__).parent/'templates'))
@@ -29,6 +30,8 @@ def servicio():
 
 app.include_router(crear_router(servicio))
 app.include_router(crear_router_consola(servicio))
+app.include_router(crear_router_v04(servicio))
+app.mount('/v0.4/static', StaticFiles(directory=str(ESTATICOS_V04)), name='v04-static')
 app.mount('/consola/static', StaticFiles(directory=str(ESTATICOS)), name='consola-static')
 
 

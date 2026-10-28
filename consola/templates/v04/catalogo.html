@@ -1,0 +1,7 @@
+{% extends 'base.html' %}{% block content %}
+{% if error_crm %}<p role="alert">{{error_crm}}</p>{% endif %}
+{% if oportunidad %}{% include '_coincidencias04.html' %}
+{% elif request.query_params.get('contexto')=='matching' %}<section class="empty-state"><h1>Coincidencias</h1><p>Selecciona una oportunidad guardada o crea una nueva para consultar sus coincidencias.</p><a href="?panel=clientes">Recuperar oportunidad</a> · <a href="?panel=nueva">Nueva oportunidad</a></section>
+{% else %}{% include '_catalogo04.html' %}{% endif %}
+{% if captura is defined %}{% include '_superficies04.html' %}{% endif %}
+{% endblock %}

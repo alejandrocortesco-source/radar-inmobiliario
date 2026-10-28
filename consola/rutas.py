@@ -28,7 +28,8 @@ templates.env.filters.update(numero=numero, fecha=fecha)
 templates.env.globals.update(enlace_publico=enlace_publico)
 
 
-def crear_router(proveedor_servicio):
+def crear_router(proveedor_servicio, plantillas=None):
+    templates = plantillas or globals()['templates']
     router = APIRouter()
     router.include_router(crear_router_oportunidades(proveedor_servicio, templates))
 
@@ -75,7 +76,7 @@ def crear_router(proveedor_servicio):
         volver = url_catalogo(request.query_params)
         limite, offset, total = resultado['limit'], resultado['offset'], resultado['total']
         try:
-            captura = contexto_captura(request, todos)
+            captura = getattr(templates, 'contexto_captura', contexto_captura)(request, todos)
         except NoEncontrado as exc:
             return render(request, 'estado.html', 404, titulo='No encontramos el registro',
                           mensaje=str(exc), reintentar='/consola/')
@@ -142,7 +143,7 @@ def crear_router(proveedor_servicio):
                 include_in_schema=False)
     def ficha(request: Request, id_interno: str, volver: str | None = None,
               servicio=Depends(proveedor_servicio)):
-        regreso = regreso_seguro(volver)
+        regreso = getattr(templates, 'regreso_seguro', regreso_seguro)(volver)
         try:
             inmueble = servicio.obtener(id_interno)
         except (FileNotFoundError, ErrorLecturaCatalogo):

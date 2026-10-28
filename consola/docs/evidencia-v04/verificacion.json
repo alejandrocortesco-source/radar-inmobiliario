@@ -1,0 +1,72 @@
+{
+  "url": "http://127.0.0.1:8040",
+  "oportunidad": "5b43100d-764f-4dde-93c0-a701b8e94454",
+  "densidad": [
+    {
+      "contexto": "catalogo",
+      "viewport_ancho": 1366,
+      "alto": 768,
+      "ancho": 1366,
+      "tablas": 1,
+      "filas": 11,
+      "fuenteTabla": "14px"
+    },
+    {
+      "contexto": "catalogo",
+      "viewport_ancho": 1440,
+      "alto": 900,
+      "ancho": 1440,
+      "tablas": 1,
+      "filas": 13,
+      "fuenteTabla": "14px"
+    },
+    {
+      "contexto": "catalogo",
+      "viewport_ancho": 390,
+      "alto": 844,
+      "ancho": 390,
+      "tablas": 1,
+      "filas": 8,
+      "fuenteTabla": "14px"
+    },
+    {
+      "contexto": "matching",
+      "viewport_ancho": 1366,
+      "alto": 768,
+      "ancho": 1366,
+      "tablas": 1,
+      "filas": 7,
+      "fuenteTabla": "14px"
+    },
+    {
+      "contexto": "matching",
+      "viewport_ancho": 1440,
+      "alto": 900,
+      "ancho": 1440,
+      "tablas": 1,
+      "filas": 10,
+      "fuenteTabla": "14px"
+    },
+    {
+      "contexto": "matching",
+      "viewport_ancho": 390,
+      "alto": 844,
+      "ancho": 390,
+      "tablas": 1,
+      "filas": 4,
+      "fuenteTabla": "14px"
+    }
+  ],
+  "errores_js": [],
+  "matching": {
+    "candidatos": 318,
+    "confirmados": 32
+  },
+  "secuencia_completa_igual": true,
+  "sha256_secuencia": "52c2fb012e8990e78d9d203aed16d732fbc6f3adb7466bff2ec3116ecd669724",
+  "exportacion_identica_sha256": "d368d27d373f84b5950803d7bd2a327d84f66b6a12404bfab528b3784826563f",
+  "huellas_originales_sin_cambios": {
+    "metro.sqlite": "89f561386617e9bf4523e26dee469ba43f706f8fb79881dcc0bbe7ab93ada5fe",
+    "metro-consola.sqlite": "d9668d5ab52733cd6e7dd9a3df69df794950ab99e847145e417d12bc8e70a7e7"
+  }
+}

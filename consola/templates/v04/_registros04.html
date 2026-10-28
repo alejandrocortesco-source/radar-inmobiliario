@@ -1,0 +1,4 @@
+  <details class="crm-records" open><summary>Clientes ({{clientes_crm|length}}) y oportunidades ({{oportunidades_crm|length}})</summary>
+    <ul>{% for c in clientes_crm %}<li>{{c.nombre}} · {{c.telefono or 'Sin teléfono'}} · <a href="/consola/?cliente={{c.id}}">Nueva oportunidad para este cliente</a> · <a href="/consola/clientes/{{c.id}}">Editar cliente</a></li>{% else %}<li>Aún no hay clientes.</li>{% endfor %}</ul>
+    <ul>{% for o in oportunidades_crm %}<li><strong>{{nombres_clientes.get(o.cliente_id, 'Cliente')}}</strong> · {{o.necesidades.operacion}} · {{o.necesidades.ciudad}} · {{o.estado}} · {{o.creado_en|fecha}} · <a href="/consola/?oportunidad={{o.id}}">Consultar / editar</a> · <a href="/consola/oportunidades/{{o.id}}/coincidencias">Buscar coincidencias</a></li>{% else %}<li>Aún no hay oportunidades.</li>{% endfor %}</ul>
+  </details>

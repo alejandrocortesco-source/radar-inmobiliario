@@ -1,0 +1,7 @@
+{% extends 'base.html' %}{% block content %}
+<dialog class="editor" id="editor" aria-labelledby="editor-title" open><header class="surface-header"><h2 id="editor-title">Editar cliente</h2><button type="button" data-close>Cerrar ×</button></header><div class="surface-content">
+<p>Guardar nombre o teléfono actualiza el cliente compartido en todas sus oportunidades.</p>
+{% if errores %}<div class="notice" role="alert"><ul>{% for error in errores %}<li>{{error}}</li>{% endfor %}</ul></div>{% endif %}
+<form method="post" action="/v0.4/clientes/{{cliente.id}}"><div class="capture-fields"><label>Nombre del cliente *<input name="nombre" required maxlength="200" value="{{cliente.nombre}}"></label><label>Teléfono / WhatsApp<input name="telefono" type="tel" maxlength="80" value="{{cliente.telefono or ''}}"></label></div><button>Guardar cliente</button></form>
+</div><footer class="discard" hidden><p>Hay cambios sin guardar.</p><button type="button" data-continue>Seguir editando</button><button type="button" data-discard>Descartar cambios</button></footer></dialog>
+{% endblock %}

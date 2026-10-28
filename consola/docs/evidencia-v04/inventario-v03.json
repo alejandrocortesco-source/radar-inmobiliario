@@ -1,0 +1,344 @@
+[
+  {
+    "seccion": "Seleccionar barrios o zonas1 seleccionados",
+    "campos": [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "acciones": [
+      "Listo"
+    ]
+  },
+  {
+    "seccion": "Características adicionales y preferencias",
+    "campos": [
+      "otros_barrios",
+      "otros_zonas",
+      "banos_min",
+      "parqueaderos_min",
+      "area_max_m2",
+      "antiguedad_max",
+      "tipo_area",
+      "estado",
+      "preferencias",
+      "preferencias",
+      "preferencias",
+      "preferencias",
+      "preferencias",
+      "preferencias",
+      "observaciones"
+    ],
+    "acciones": []
+  },
+  {
+    "seccion": "Clientes (2) y oportunidades (4)",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "Diagnóstico: inmuebles restantes después de cada filtro",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "Confirmada ⌄",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "Confirmada ⌄",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "Confirmada ⌄",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "Confirmada ⌄",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "Confirmada ⌄",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "Confirmada ⌄",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "Confirmada ⌄",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "Confirmada ⌄",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "Confirmada ⌄",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "Confirmada ⌄",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "Confirmada ⌄",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "Confirmada ⌄",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "Confirmada ⌄",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "Confirmada ⌄",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "Confirmada ⌄",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "Confirmada ⌄",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "Confirmada ⌄",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "Confirmada ⌄",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "Confirmada ⌄",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "Confirmada ⌄",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "Confirmada ⌄",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "Confirmada ⌄",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "Confirmada ⌄",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "Confirmada ⌄",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "Buscar",
+    "campos": [
+      "texto"
+    ],
+    "acciones": [
+      "Buscar inmuebles"
+    ]
+  },
+  {
+    "seccion": "Filtros",
+    "campos": [
+      "ciudad",
+      "barrios",
+      "tipo_area",
+      "area_min_m2",
+      "area_max_m2",
+      "habitaciones_min",
+      "habitaciones_max",
+      "banos_min",
+      "parqueaderos_min",
+      "estratos",
+      "disponibilidad",
+      "fuente",
+      "id_busqueda",
+      "requiere_revision"
+    ],
+    "acciones": [
+      "Aplicar filtros"
+    ]
+  },
+  {
+    "seccion": "Ordenar",
+    "campos": [
+      "orden"
+    ],
+    "acciones": [
+      "Aplicar orden"
+    ]
+  },
+  {
+    "seccion": "Exportar",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "Precio Todos",
+    "campos": [
+      "operacion",
+      "moneda",
+      "precio_min",
+      "precio_max"
+    ],
+    "acciones": [
+      "Aplicar precio"
+    ]
+  },
+  {
+    "seccion": "",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "",
+    "campos": [],
+    "acciones": []
+  },
+  {
+    "seccion": "",
+    "campos": [],
+    "acciones": []
+  }
+]

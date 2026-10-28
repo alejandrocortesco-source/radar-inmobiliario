@@ -8,7 +8,7 @@ import time
 from urllib.request import urlopen
 
 import pytest
-from playwright.sync_api import sync_playwright, expect
+from playwright.sync_api import expect
 from catalogo.identidad import identificar_inmueble
 
 
@@ -19,14 +19,6 @@ def seleccionar_barrio(page, javascript):
         page.locator('[data-location-done]').click()
     else:
         page.locator('#crm_ubicaciones').select_option('barrio:La Carolina')
-
-
-@pytest.fixture(scope='session')
-def chromium():
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
-        yield browser
-        browser.close()
 
 
 @pytest.fixture

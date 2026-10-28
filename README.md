@@ -8,6 +8,11 @@ La **Consola v0.3** permite consultar el catálogo, registrar clientes y oportun
 
 Consulta las [instrucciones de instalación, ejecución y pruebas del scraper](scraper/README.md). Su código, dependencias, herramientas y documentación se encuentran en [`scraper/`](scraper/).
 
+En la rama **`v0.4`**, la nueva consola está disponible en
+[http://127.0.0.1:8000/v0.4/](http://127.0.0.1:8000/v0.4/), en paralelo a
+v0.3 en su ruta anterior. Reutiliza los mismos datos y añade un comentario
+persistente por inmueble. Consulta [accesos, conservación de v0.3 y evidencia de v0.4](consola/docs/V04.md).
+
 ```text
 radar-inmobiliario/
 ├── .gitignore
