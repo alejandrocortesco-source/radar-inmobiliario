@@ -19,6 +19,15 @@ Inicio local desde la raíz:
 
 Las evaluaciones reales de Gemini requieren `GEMINI_API_KEY` y un `GEMINI_MODEL` Flash disponible para la cuenta. Sin configuración, o ante error, el motor determinista permanece disponible y se informa la limitación. El objetivo de operación inferior a US$10/mes queda sujeto a medir consumo y alojamiento. No hay despliegue de producción ni migración a Sheets en esta entrega.
 
+## Estado y ramas
+
+- `v0.6`: implementación del mini dashboard, clientes y matching descrita en la guía actual.
+- `main`: referencia estable; no desarrollar ni integrar v0.6 allí sin autorización.
+- `release/v0.5`: conserva el cierre funcional `291ce82b`.
+- `v0.4` y `feat/consola-v0.3`: ramas históricas. El nombre `v0.4` no cambia que el hito funcional cerrado sea v0.5.
+
+La herramienta es privada para Mónica, con unos 30 clientes activos. Se mantiene la arquitectura existente; Sheets y Cloud Run son objetivos futuros. El presupuesto objetivo vigente es inferior a 10 USD/mes, sujeto a medición.
+
 ```text
 radar-inmobiliario/
 ├── .gitignore

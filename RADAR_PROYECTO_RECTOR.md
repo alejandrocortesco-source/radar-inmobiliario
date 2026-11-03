@@ -46,3 +46,19 @@ La presentación sigue patrones oficiales de Carbon: cuadrícula de hasta 16 col
 Ver `consola/docs/V06.md`. La clave de Gemini no está configurada en el entorno de validación; el transporte, esquema, caché y errores se prueban con un servidor HTTP simulado, sin llamadas facturables. La evaluación contra el proveedor real y el presupuesto mensual quedan pendientes de credenciales y medición.
 
 Las tareas BackgroundTasks viven en el proceso web. Si se interrumpe, pueden no terminar; la ficha mantiene el fallback determinista y permite reintentar. El lease caduca a los 10 minutos. No se introduce una cola distribuida para el volumen actual. La pasada posterior al scraper procesa oportunidades secuencialmente para contener llamadas.
+
+## Propósito y conceptos de negocio
+
+La herramienta es privada y acompaña principalmente a personas que buscan vivienda para sí mismas. Mónica necesita ahorrar tiempo al registrar necesidades, actualizar el catálogo, comparar inmuebles y revisar opciones para compartir personalmente. La escala prevista es de cientos o algunos miles de anuncios; prevalecen simplicidad y mantenimiento frente a una escalabilidad hipotética. No convertirla en marketplace, portal público ni CRM corporativo.
+
+Cliente es la persona atendida; oportunidad es una necesidad concreta, con varios barrios como alternativas. Búsqueda de origen es la URL del portal que amplía la cobertura del catálogo y no equivale a los filtros de una oportunidad. Inmueble es un anuncio con identidad, procedencia y trazabilidad. Coincidencia es su evaluación para una oportunidad; la decisión comercial de Mónica se almacena de forma independiente. El catálogo completo es secundario a la revisión de clientes y sus coincidencias.
+
+## Historia, ramas y referencias
+
+- El cierre funcional de v0.5 corresponde a `291ce82b6ee83884d5501630b5da9d5e47dd8c61`, originado en la rama histórica `v0.4` y conservado en `release/v0.5`.
+- `main` es la referencia estable; no desarrollar esta v0.6 ni hacer merge allí sin autorización. `v0.4` y `feat/consola-v0.3` conservan su historia.
+- `v0.6` contiene la implementación y las correcciones descritas en este documento. La integración con el commit remoto `069fc89` conserva su historia de documentación, actualizada según la implementación comprobada, las cuatro secciones aprobadas y el objetivo menor a 10 USD/mes.
+- Los reportes de pruebas o de actualizaciones anteriores describen esas ejecuciones; no son verificaciones nuevas ni valores fijos del dashboard. Antes de cada cambio contrastar instrucciones, código, datos y pruebas pertinentes.
+- El sistema de archivos efímero de Cloud Run no será el almacenamiento definitivo cuando se aborde el despliegue futuro. Sheets sigue siendo el objetivo previsto, sin migración integral en esta entrega.
+
+Referencias técnicas: `scraper/README.md`, `scraper/docs/INCREMENTAL.md`, `catalogo/README.md`, `oportunidades/README.md`, `consola/README.md` y `consola/docs/V06.md`. Este documento es la referencia de decisiones; los README explican la implementación real. Actualizarlo por decisiones aprobadas o hitos verificados, sin confundir rama y versión funcional.

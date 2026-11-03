@@ -1,6 +1,10 @@
 # Radar Inmobiliario
 
+**Primera lectura:** `RADAR_PROYECTO_RECTOR.md` contiene las decisiones vigentes. Los README de los módulos documentan el código real; contrastar diferencias antes de asumir.
+
 ## Alcance y conservación
+
+- Herramienta privada para Mónica, unos 30 clientes activos y presupuesto operativo objetivo inferior a 10 USD/mes, sujeto a medición. Priorizar simplicidad, mantenimiento y reutilización.
 
 - La especificación vigente está en `RADAR_PROYECTO_RECTOR.md`. v0.6 se desarrolla en `v0.6`; no hacer merge a main ni push sin solicitud.
 - Reutilizar scraper, catálogo, identidades, historial, clientes, oportunidades y matching determinista. No reconstruirlos para un cambio visual.
@@ -23,3 +27,10 @@
 ## Fuera de alcance
 
 WhatsApp, comunicaciones automáticas, otros portales, CRM empresarial, migración integral a Sheets y despliegue a producción. Sheets y Cloud Run son objetivos futuros.
+
+## Disciplina Git e informes
+
+- Antes de modificar, verificar `git status`, `git branch --show-current` y `git log -1`; el nombre de una rama no demuestra su estado funcional.
+- `main` es la referencia estable, `release/v0.5` conserva el cierre `291ce82` y `v0.4` y `feat/consola-v0.3` son históricas. No reescribirlas ni publicar en ellas sin autorización explícita.
+- Hacer cambios pequeños y compatibles; no reconstruir módulos que funcionan. No desplegar ni efectuar operaciones destructivas sin autorización.
+- Informar archivos modificados, conflictos, pruebas realmente ejecutadas, commit y pendientes. No presentar resultados de commits anteriores como pruebas nuevas.
