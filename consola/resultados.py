@@ -32,7 +32,7 @@ def ordenar_resultados(resultados, orden):
         if campo == 'tipo':
             return i.tipo.value if i.tipo else None
         if campo == 'precio':
-            return r.oferta.precio if r.oferta and r.oferta.moneda == 'COP' else None
+            return r.oferta.precio if r.oferta else None
         if campo == 'area':
             return area_disponible(i)[0]
         if campo == 'fuente':

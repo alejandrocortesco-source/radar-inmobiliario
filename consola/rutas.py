@@ -162,7 +162,7 @@ def crear_router(proveedor_servicio, plantillas=None):
                     yield fila([i.origen.id_original, i.origen.fuente, i.zona, i.barrio, i.ciudad,
                                 i.tipo.value if i.tipo else None,
                                 oferta.operacion.value if oferta else None,
-                                oferta.precio if oferta else None, oferta.moneda if oferta else None,
+                                oferta.precio if oferta else None, 'COP',
                                 card['area_valor'], card['area_tipo'], i.habitaciones,
                                 enlace_publico(i.origen.url), ' | '.join(b['nombre'] for b in card['busquedas'])])
 
@@ -210,7 +210,7 @@ ORDENES = (
 )
 ETIQUETAS = {
     'texto': 'Texto', 'ciudad': 'Ciudad', 'zonas': 'Zona', 'barrios': 'Barrio', 'tipos': 'Tipo',
-    'operacion': 'Operación', 'moneda': 'Moneda', 'precio_min': 'Precio desde', 'precio_max': 'Precio hasta',
+    'operacion': 'Operación', 'precio_min': 'Precio desde', 'precio_max': 'Precio hasta',
     'tipo_area': 'Área', 'area_min_m2': 'Área desde', 'area_max_m2': 'Área hasta',
     'habitaciones_min': 'Habitaciones mín.', 'habitaciones_max': 'Habitaciones máx.',
     'banos_min': 'Baños mín.', 'parqueaderos_min': 'Parqueaderos mín.', 'estratos': 'Estrato',

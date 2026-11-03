@@ -24,17 +24,17 @@ normalización de URLs pertenecen a futuros adaptadores específicos de cada fue
 
 ## Datos desconocidos y ofertas
 
+**Política vigente:** todos los precios y presupuestos son COP. La moneda no se solicita ni se usa para filtrar, comparar u ordenar. No hay conversiones ni soporte multimoneda. Los campos históricos `moneda`/`currency` se conservan como metadatos de captura y compatibilidad de API, sin modificar SQLite ni el importe numérico. El parámetro histórico `moneda` se acepta pero no filtra resultados.
+
 - `None` significa desconocido. Tuplas vacías significan que no hay elementos
   conocidos; no prueban que el anuncio carezca de fotos, características u ofertas.
 - Una operación conocida con precio desconocido es una `Oferta` con precio `None`.
   Una oferta dual tiene una oferta de venta y otra de arriendo, cada una con su
-  precio y moneda; no existe un precio único ambiguo para el inmueble.
+  precio en COP; no existe un precio único ambiguo para el inmueble.
 - Importes y áreas usan `Decimal` finitos. Los importes y áreas conocidos son
   positivos; cero no se utiliza como sustituto de desconocido. Habitaciones,
   baños y parqueaderos sí admiten cero cuando es un dato conocido.
-- Moneda es un código de tres letras mayúsculas o `None`. El modelo valida el
-  formato, no interpreta símbolos ni convierte divisas. No impone precisión
-  monetaria o moneda por país; esas reglas pertenecen a la normalización.
+- El campo histórico moneda puede conservar su etiqueta original o `None`. Su formato de metadato no determina la comparación: el importe siempre se interpreta en COP, sin convertirlo.
 - Áreas publicadas, construidas y privadas se distinguen y están en m² por la
   convención del mercado colombiano: se aceptan números positivos finitos aunque
   falte la unidad en la captura. Los valores y unidades originales no se reescriben
@@ -63,15 +63,13 @@ Calidad de ficha y revisión pendiente son independientes de disponibilidad.
 - Texto libre: coincidencia parcial en título, descripción e ID original.
 - Ubicación: ciudad, zonas y barrios. Comparación textual sin distinguir
   mayúsculas ni tildes, sin inferir equivalencias geográficas.
-- Tipos, operación, moneda, precio, área, habitaciones, baños, parqueaderos,
+- Tipos, operación, precio en COP, área, habitaciones, baños, parqueaderos,
   estratos, fuente, búsqueda, disponibilidad y revisión pendiente.
 - Entre campos se aplica AND; dentro de zonas, barrios, tipos o estratos se aplica
   OR. Colección vacía o `None` no restringe el campo. Rangos inclusivos.
 - Desconocidos no cumplen una restricción sobre ese atributo. Sin restricción
   permanecen en los resultados. No se convierte un desconocido en cero.
-- Precio y moneda deben corresponder a la misma oferta que la operación elegida.
-  Filtrar u ordenar por precio requiere operación y moneda para no mezclar
-  monedas ni venta/arriendo. No hay conversión monetaria.
+- El precio corresponde a la oferta de la operación elegida. Filtrar u ordenar por precio requiere operación para distinguir venta y arriendo; no requiere moneda.
 - El filtro de área selecciona explícitamente publicada/construida/privada; no
   usa otra clase de área como sustituto. Por defecto selecciona publicada.
 - Búsqueda requiere fuente. Con búsqueda elegida, disponibilidad se evalúa en
@@ -221,22 +219,17 @@ La ciudad, zonas y barrios se comparan por igualdad sin distinguir mayúsculas,
 tildes ni espacios exteriores. El texto es una coincidencia parcial en título,
 descripción o ID original; no hace búsqueda semántica ni geocodificación.
 
-Filtrar u ordenar por precio requiere **operación y moneda**. Se evalúan sobre
-la misma oferta; no se combinan el precio de venta y la moneda de arriendo.
-Un importe desconocido no cumple un rango. Una operación o moneda conocida puede
-filtrarse aunque su importe sea desconocido, y este se ordena al final.
+Filtrar u ordenar por precio requiere **operación**. El precio numérico se interpreta siempre en COP y pertenece a la misma oferta de venta o arriendo. Un importe desconocido no cumple un rango del catálogo y se ordena al final; el matching de oportunidades lo conserva como pendiente de verificar.
 
 Sin parámetros nuevos se conserva la respuesta anterior. Al indicar `operacion`,
 `price` corresponde a esa operación, y se agregan `operation`, `currency` y
-`ofertas` con las ofertas compatibles. Si solo se indica `moneda`, el precio
-original permanece sin reinterpretar y `ofertas` identifica los importes y
-operaciones compatibles. Los importes se comparan como Decimal y se serializan
+`ofertas` con las ofertas compatibles. El parámetro histórico `moneda` no modifica la selección ni la respuesta; las etiquetas originales de la API son metadatos históricos. Los importes se comparan como Decimal y se serializan
 como números JSON, igual que el campo histórico; no se convierten divisas.
 
 Ejemplos:
 
 - `/api/catalog?texto=terraza&ciudad=Bogota&tipos=apartamento`
-- `/api/catalog?operacion=venta&moneda=COP&precio_max=800000000&orden=precio_asc&limit=20&offset=0`
+- `/api/catalog?operacion=venta&precio_max=800000000&orden=precio_asc&limit=20&offset=0`
 - `/api/catalog?tipo_area=construida&area_min_m2=80&habitaciones_min=3&banos_min=2&parqueaderos_min=1`
 
 `state`, `search_url`, `limit` y `offset` mantienen su significado anterior.

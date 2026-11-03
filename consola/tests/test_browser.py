@@ -96,14 +96,13 @@ def test_navegacion_paginacion_y_regreso(pagina, servidor):
     expect(pagina.locator('#orden')).to_have_value('id')
 
 
-def test_formulario_moneda_precio_y_orden(pagina, servidor):
+def test_formulario_precio_cop_y_orden(pagina, servidor):
     pagina.goto(servidor + '/consola/')
     pagina.locator('[data-filters] > summary').click()
     pagina.get_by_label('Ciudad', exact=True).select_option('Bogotá')
     pagina.get_by_role('button', name='Aplicar filtros', exact=True).click()
     pagina.locator('.price-filter > summary').click()
     pagina.get_by_label('Operación', exact=True).select_option('venta')
-    pagina.get_by_label('Moneda', exact=True).select_option('COP')
     pagina.locator('#precio_max').fill('103000000')
     pagina.get_by_role('button', name='Aplicar precio').click()
     expect(pagina.locator('[data-total]')).to_have_text('3')
@@ -112,7 +111,7 @@ def test_formulario_moneda_precio_y_orden(pagina, servidor):
     pagina.get_by_role('button', name='Aplicar orden').click()
     expect(pagina.locator('.property-link').first).to_have_attribute('aria-label', 'Ver ficha de Casa con jardín 03')
     expect(pagina.locator('#precio_max')).to_have_value('103000000')
-    expect(pagina.locator('#moneda')).to_have_value('COP')
+    expect(pagina.locator('#moneda')).to_have_count(0)
     expect(pagina.locator('#ciudad')).to_have_value('Bogotá')
     pagina.get_by_role('columnheader', name='Precio').get_by_role('link').click()
     expect(pagina.locator('.property-link').first).to_have_attribute('aria-label', 'Ver ficha de Casa con jardín 01')
@@ -158,7 +157,7 @@ def test_adaptable_sin_desbordamiento_y_filtros(pagina, servidor, tmp_path, anch
 
 def test_error_de_precio_y_vacio_se_muestran_en_pantalla(pagina, servidor):
     pagina.goto(servidor + '/consola/?precio_max=100')
-    expect(pagina.get_by_role('alert')).to_contain_text('Elige una operación y una moneda')
+    expect(pagina.get_by_role('alert')).to_contain_text('Elige una operación')
     pagina.goto(servidor + '/consola/?texto=sin-coincidencias')
     expect(pagina.get_by_role('heading', name='No encontramos inmuebles con estos filtros')).to_be_visible()
 
@@ -209,13 +208,12 @@ def test_formulario_sin_javascript(chromium, servidor):
         contexto.close()
 
 
-def test_orden_precio_solicita_operacion_y_moneda(pagina, servidor):
+def test_orden_precio_solicita_operacion_sin_moneda(pagina, servidor):
     pagina.goto(servidor + '/consola/')
     pagina.get_by_role('columnheader', name='Precio', exact=True).get_by_role('link').click()
     expect(pagina.locator('.price-filter')).to_have_attribute('open', '')
     expect(pagina.locator('#operacion')).to_be_focused()
     pagina.get_by_label('Operación', exact=True).select_option('venta')
-    pagina.get_by_label('Moneda', exact=True).select_option('COP')
     pagina.get_by_role('button', name='Aplicar precio').click()
     expect(pagina.locator('.property-link').first).to_have_attribute('aria-label', 'Ver ficha de Casa con jardín 01')
     expect(pagina.locator('th[aria-sort]')).to_have_attribute('aria-sort', 'ascending')

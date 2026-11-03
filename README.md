@@ -4,6 +4,8 @@ Radar Inmobiliario es un proyecto para recopilar y revisar información pública
 
 La **Consola v0.6** abre en [http://127.0.0.1:8000/v0.6/](http://127.0.0.1:8000/v0.6/): dashboard de cuatro secciones, clientes Activos/Inactivos y ficha individual para revisar coincidencias. Reutiliza catálogo, clientes, oportunidades y matching determinista; añade decisiones persistentes y una segunda capa opcional con Gemini Flash. Guardar una fuente no ejecuta scraping.
 
+Todos los precios y presupuestos inmobiliarios son COP. El presupuesto se compara directamente con el precio numérico, con límites inclusivos, sin solicitar ni verificar moneda y sin conversiones. Los campos históricos de moneda se conservan como metadatos.
+
 El catálogo detallado de v0.5 se conserva en `/v0.4/`, con filtros, fichas, comentarios, historial y exportaciones. `/consola/` y la interfaz técnica `/` mantienen compatibilidad. No se añadieron frameworks ni infraestructura.
 
 - [Guía v0.6, Gemini, fuentes, pruebas y limitaciones](consola/docs/V06.md).

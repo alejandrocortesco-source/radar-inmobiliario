@@ -19,6 +19,10 @@ El catálogo completo permanece en `/v0.4/` y la interfaz histórica en `/consol
 
 ## Reglas de necesidades y matching
 
+**Decisión definitiva de moneda:** el sistema solo utiliza pesos colombianos (COP), ahora y a futuro. Todos los precios y presupuestos se interpretan en COP. La moneda no se solicita, verifica ni usa como condición de comparación, incluso en registros históricos con el campo vacío o con otra etiqueta. No hay conversiones ni soporte multimoneda. Los campos históricos se conservan como metadatos de origen para evitar migraciones y cambios de esquema innecesarios; no determinan el significado del importe.
+
+El presupuesto se comprueba directamente sobre el precio numérico de la operación solicitada: mínimo incluido cuando se especifica y máximo incluido. Para 770.000.000–880.000.000 COP, 770.000.000, 800.000.000 y 880.000.000 pasan; 769.000.000, 881.000.000, 7.500.000.000 y 8.000.000.000 se excluyen aunque falte moneda u otro dato. Un precio ausente, no numérico, no finito o no positivo permanece desconocido y pendiente de verificar, sin convertirse en cero; cualquier incumplimiento estricto conocido sigue excluyendo el anuncio.
+
 Compra/arriendo, tipo, ciudad, barrios múltiples y presupuesto máximo son requeridos en las nuevas oportunidades v0.6. El mínimo de presupuesto es opcional. Habitaciones acepta mínimo/máximo opcionales; ambos límites especificados son estrictos. Área es un rango opcional flexible; no sustituir entre construida, privada y publicada. Baños, parqueaderos y antigüedad son preferencias opcionales. Observaciones no son requisitos estrictos.
 
 Se conserva el JSON de oportunidades históricas, incluyendo zonas y el antiguo campo `preferencias`. Las zonas históricas siguen siendo editables y alternativas de ubicación. Su existencia no obliga a reescribir datos. El significado vigente del motor aplica a todas las oportunidades: los límites de habitaciones son estrictos aunque una oportunidad histórica los marcara como preferencia; las características secundarias son flexibles aunque antes fueran indispensables.
@@ -26,6 +30,8 @@ Se conserva el JSON de oportunidades históricas, incluyendo zonas y el antiguo 
 El motor determinista es la primera capa. Un incumplimiento estricto conocido descarta; un dato necesario desconocido conserva el candidato como **Pendiente de verificar**. Los barrios son alternativas, no condiciones simultáneas. Gemini no amplía barrios ni presupuesto ni convierte pendientes en confirmaciones.
 
 La segunda capa usa el adaptador REST real `oportunidades/gemini.py`, JSON Schema, Pydantic, comprobación de IDs y evidencias contra los hechos enviados. Solo recibe necesidades y hechos de candidatos, sin identidad/contacto del cliente. La explicación es orientativa y requiere revisión humana; la validación estructural no garantiza que toda redacción de un modelo sea correcta. La puntuación solo ordena.
+
+Las instrucciones de Gemini establecen COP como única moneda y prohíben solicitar o verificar moneda y convertir importes. La versión de instrucciones y la huella del candidato incorporan esta política para no reutilizar evaluaciones anteriores incompatibles. Esta decisión no activa ni configura Gemini.
 
 Cada evaluación se reutiliza por hash de necesidades, datos relevantes del candidato, modelo y versión de instrucciones. Por defecto se evalúan hasta 20 candidatos deterministas por oportunidad, en una única llamada para los no almacenados en caché. El máximo configurable es 30. El resto sigue visible sin evaluación de IA. Error, timeout, respuesta bloqueada/incompleta o configuración ausente conservan los candidatos deterministas y muestran la limitación. No hay reintentos de red automáticos; Mónica puede recalcular para reintentar fallos, conservando las evaluaciones válidas intactas.
 

@@ -104,11 +104,11 @@ def test_campos_en_and_listas_en_or_y_limites_inclusivos(fichas):
     assert ids(fichas, ciudad='Bogotá', habitaciones_min=1) == []
 
 
-def test_doble_oferta_no_mezcla_precio_operacion_ni_moneda(fichas):
+def test_doble_oferta_no_mezcla_operaciones_e_ignora_moneda_historica(fichas):
     assert ids(fichas, operacion=Op.ARRIENDO, moneda='USD', precio_max=D('10')) == ['a']
-    assert ids(fichas, operacion=Op.ARRIENDO, moneda='COP', precio_max=D('10')) == []
+    assert ids(fichas, operacion=Op.ARRIENDO, moneda='COP', precio_max=D('10')) == ['a']
     assert ids(fichas, operacion=Op.VENTA, moneda='USD', precio_max=D('10')) == []
-    assert set(ids(fichas, moneda='USD')) == {'a', 'd'}
+    assert set(ids(fichas, moneda='USD')) == {'a', 'b', 'c', 'd', 'e', 'f'}
     assert ids(fichas, operacion=Op.VENTA, moneda='COP', precio_max=D('0')) == []
 
 
@@ -120,9 +120,9 @@ def test_area_no_sustituye_una_clase_por_otra(fichas):
 @pytest.mark.parametrize('orden', [OrdenCatalogo.PRECIO_ASC, OrdenCatalogo.PRECIO_DESC])
 def test_precio_ordenado_con_empates_y_desconocidos_al_final(fichas, orden):
     iguales = sorted((fichas[0], fichas[2]), key=lambda f: f.id_interno)
-    esperados = iguales + [fichas[1], fichas[5]]
+    esperados = [fichas[3]] + iguales + [fichas[1], fichas[5]]
     if orden == OrdenCatalogo.PRECIO_DESC:
-        esperados = [fichas[1]] + iguales + [fichas[5]]
+        esperados = [fichas[1]] + iguales + [fichas[3], fichas[5]]
     resultado = seleccionar(fichas, FiltrosCatalogo(operacion=Op.VENTA, moneda='COP', orden=orden))
     assert resultado == esperados
     assert seleccionar(tuple(reversed(fichas)), FiltrosCatalogo(

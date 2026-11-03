@@ -35,11 +35,10 @@ def test_consulta_completa_de_v01():
 @pytest.mark.parametrize('valores', [
     {'precio_min': Decimal('100')},
     {'precio_max': Decimal('100'), 'moneda': 'COP'},
-    {'precio_min': Decimal('100'), 'operacion': Operacion.ARRIENDO},
     {'orden': OrdenCatalogo.PRECIO_ASC},
     {'orden': OrdenCatalogo.PRECIO_DESC, 'moneda': 'COP'},
 ])
-def test_precio_requiere_operacion_y_moneda_para_no_mezclar_ofertas(valores):
+def test_precio_requiere_operacion_para_no_mezclar_venta_y_arriendo(valores):
     with pytest.raises(ValueError):
         FiltrosCatalogo(**valores)
 
@@ -62,7 +61,7 @@ def test_limites_inclusivos_iguales_y_cero_son_validos():
     {'habitaciones_min': True}, {'banos_min': -1}, {'parqueaderos_min': 0.5},
     {'limite': 0}, {'limite': 201}, {'limite': True},
     {'desplazamiento': -1}, {'desplazamiento': None},
-    {'moneda': 'cop'}, {'id_busqueda': 'norte'},
+    {'id_busqueda': 'norte'},
     {'tipos': ('apartamento',)}, {'zonas': ('',)}, {'barrios': ['Norte']},
     {'operacion': 'venta'}, {'tipo_area': 'privada'}, {'orden': 'precio'},
     {'disponibilidad': 'activo'}, {'estratos': (True,)}, {'estratos': (7,)},
@@ -71,3 +70,9 @@ def test_limites_inclusivos_iguales_y_cero_son_validos():
 def test_rechaza_consultas_ambiguas_o_invalidas(valores):
     with pytest.raises((ValueError, TypeError)):
         FiltrosCatalogo(**valores)
+
+
+def test_precio_cop_no_requiere_moneda_y_acepta_parametro_historico():
+    for moneda in (None, '', 'cop', 'USD'):
+        f=FiltrosCatalogo(operacion=Operacion.VENTA, moneda=moneda, precio_max=Decimal('880000000'))
+        assert f.precio_max == Decimal('880000000')

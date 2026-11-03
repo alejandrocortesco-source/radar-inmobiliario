@@ -101,7 +101,7 @@ desconocidos al final. No hay porcentajes ni puntuaciones de IA.
 Un incumplimiento indispensable conocido excluye el anuncio. Un requisito sin
 datos deja el resultado **pendiente de verificar**, nunca confirmado. Compra
 se compara con las ofertas de venta; en ofertas duales se usa solo la operación
-solicitada. No se convierten divisas ni se presume COP si la moneda falta.
+solicitada. Todos los precios y presupuestos son COP, aunque falte el campo histórico de moneda; se compara el número sin conversiones.
 La ciudad se compara junto con cualquiera de los barrios o zonas indicados
 (alternativas, no condiciones acumulativas); se normalizan tildes, mayúsculas
 y espacios. En ciudades se normaliza puntuación y se reconocen explícitamente
@@ -148,13 +148,13 @@ captura están documentados en [oportunidades](../oportunidades/README.md).
 - Buscar despliega texto sobre título, descripción o ID original.
 - Filtros despliega ciudad, barrio, tipo de área, rangos, características,
   disponibilidad, fuente, búsqueda de origen y revisión pendiente.
-- Precio despliega operación, moneda y rango. Comparar u ordenar precios
-  requiere operación y moneda; no se convierten divisas ni se infieren monedas.
+- Precio despliega operación y rango en COP. Comparar u ordenar precios
+  requiere operación para distinguir venta y arriendo; la moneda no se solicita ni condiciona el cálculo.
 - Ordenar permite precio, área, extracción, presencia en búsquedas e ID.
   Los encabezados Precio y Área también permiten alternar el orden.
 - Exportar descarga CSV UTF-8, compatible con Excel, con todos los resultados
   de los filtros **ya aplicados** y el mismo orden, sin limitarse a la página.
-  Una fila por oferta, con operación y moneda separadas. Antes de exportar,
+  Una fila por oferta, con operación y etiqueta COP. Antes de exportar,
   aplicar cualquier cambio pendiente en el formulario.
 - Los iconos de enlace externo, imagen y ubicación abren la publicación,
   los enlaces individuales a fotos y el mapa directo de OpenStreetMap.

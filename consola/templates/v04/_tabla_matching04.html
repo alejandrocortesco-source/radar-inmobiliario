@@ -10,7 +10,7 @@
       </details></td>
       <td><a class="match-property-link" href="{{card.url}}&oportunidad={{oportunidad.id}}" title="{{i.titulo or i.origen.id_original}}">{{i.barrio or i.zona or 'Ubicación pendiente'}}</a><small class="cell-secondary">{{i.ciudad or 'Ciudad pendiente'}}{{' · ' + i.zona if i.zona else ''}}</small></td>
       <td>{{i.tipo.value|capitalize if i.tipo else '—'}}</td>
-      <td class="numeric match-price-cell">{% if r.oferta and r.oferta.precio is not none %}${{r.oferta.precio|numero}}<small class="cell-secondary">{{r.oferta.moneda or 'Moneda por verificar'}}</small>{% else %}Sin dato{% endif %}</td>
+      <td class="numeric match-price-cell">{% if r.oferta and r.oferta.precio is not none %}${{r.oferta.precio|numero}}<small class="cell-secondary">COP</small>{% else %}Sin dato{% endif %}</td>
       <td class="numeric">{{card.area_valor|numero if card.area_valor is not none else '—'}}<small class="cell-secondary">{{card.area_tipo or ''}}</small></td>
       <td class="numeric">{{i.habitaciones if i.habitaciones is not none else '—'}}</td><td class="numeric">{{i.banos if i.banos is not none else '—'}}</td><td class="numeric">{{i.parqueaderos if i.parqueaderos is not none else '—'}}</td>
       <td>{{card.fuente}}</td><td>{% with solo_publicacion=true %}{% include '_links.html' %}{% endwith %}</td>

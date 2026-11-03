@@ -116,8 +116,6 @@ def test_lectura_sin_escritura_y_rollback_atomico(tmp_path):
     {'habitaciones': 2},
     {'ofertas': (Oferta(operacion=Operacion.VENTA, precio=Decimal('111000000'), moneda='COP'),)},
     {'ofertas': (Oferta(operacion=Operacion.ARRIENDO, precio=Decimal('1000'), moneda='COP'),)},
-    {'ofertas': (Oferta(operacion=Operacion.VENTA, precio=Decimal('1000'), moneda='USD'),)},
-    {'ofertas': (Oferta(operacion=Operacion.VENTA, moneda='USD'),)},
 ])
 def test_matching_excluye_incumplimientos_conocidos(cambios):
     assert comparar(necesidades(), inmueble(**cambios)) is None
@@ -127,7 +125,6 @@ def test_matching_excluye_incumplimientos_conocidos(cambios):
     ({'tipo': None}, 'Tipo'), ({'ciudad': None}, 'Ciudad'),
     ({'barrio': None}, 'Barrio'), ({'barrio': 'Nombre no verificado'}, 'Barrio'), ({'habitaciones': None}, 'Habitaciones'),
     ({'ofertas': ()}, 'Operación'),
-    ({'ofertas': (Oferta(operacion=Operacion.VENTA, precio=Decimal('1000')), )}, 'Presupuesto'),
     ({'ofertas': (Oferta(operacion=Operacion.VENTA, moneda='COP'), )}, 'Presupuesto'),
 ])
 def test_datos_faltantes_no_confirman(cambios, pendiente):

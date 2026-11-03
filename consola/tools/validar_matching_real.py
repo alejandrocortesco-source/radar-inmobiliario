@@ -25,7 +25,7 @@ def main():
     huellas = {str(p): hashlib.sha256(p.read_bytes()).hexdigest() for p in existentes}
     catalogo = ServicioCatalogo(CatalogoSQLite(ruta))
     todos = catalogo.listar()
-    candidatos = [(i, o) for i in todos for o in i.ofertas if o.moneda == 'COP' and o.precio
+    candidatos = [(i, o) for i in todos for o in i.ofertas if o.precio is not None
                   and i.ciudad and i.barrio and i.tipo and i.habitaciones is not None
                   and i.area_construida_m2 and i.barrio == 'La Carolina'
                   and i.origen.id_original == '3147-M5621082']

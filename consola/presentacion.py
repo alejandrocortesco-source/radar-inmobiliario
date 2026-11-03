@@ -39,8 +39,8 @@ def leer_filtros(query):
 
 def mensaje_filtros(error: ValidationError):
     texto = str(error)
-    if 'requiere operación y moneda' in texto:
-        return 'Elige una operación y una moneda para filtrar u ordenar por precio.'
+    if 'requiere operación' in texto:
+        return 'Elige una operación para filtrar u ordenar por precio en COP.'
     if 'precio_min no puede superar' in texto:
         return 'El precio mínimo no puede superar el máximo.'
     if 'area_min_m2 no puede superar' in texto:

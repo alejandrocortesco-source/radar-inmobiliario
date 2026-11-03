@@ -76,7 +76,7 @@ def test_estados_vacios_y_pagina_fuera_de_rango(escenario_consola):
 def test_filtros_invalidos_se_explican_en_html(escenario_consola):
     r = TestClient(app).get('/consola/?precio_min=100')
     assert r.status_code == 422 and 'text/html' in r.headers['content-type']
-    assert 'Elige una operación y una moneda' in r.text
+    assert 'Elige una operación para filtrar u ordenar por precio en COP' in r.text
     r = TestClient(app).get('/consola/?area_min_m2=100&area_max_m2=50')
     assert r.status_code == 422 and 'El área mínima no puede superar' in r.text
 

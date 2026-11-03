@@ -19,6 +19,8 @@ El motor determinista no importa `metro` ni ejecuta scraping. El adaptador `gemi
 
 ## Reglas vigentes v0.6
 
+La única moneda es COP: se compara directamente el precio con ambos límites inclusivos de presupuesto, incluso si falta la moneda histórica. No hay conversiones ni verificación de moneda. Un precio ausente o inválido sigue pendiente; un incumplimiento conocido excluye aunque falte otro dato.
+
 Los límites especificados de presupuesto y habitaciones son estrictos, junto a operación, tipo y ubicación. Barrios múltiples son alternativas. Baños, área y características secundarias son preferencias, sin controles de obligatoriedad. Se leen JSON históricos sin reescribirlos; `preferencias` se conserva por compatibilidad, no cambia esas reglas.
 
 `seguimiento.py` define un protocolo independiente y SQLite aditivo para actividad de clientes, decisiones por oportunidad/inmueble, estado del matching y caché de Gemini. Los repositorios actuales de clientes y oportunidades conservan sus tablas y migración. Las decisiones no se borran al recalcular ni al desaparecer candidatos. Clientes inactivos y oportunidades cerradas no se recalculan automáticamente.
@@ -141,7 +143,7 @@ En esa instantánea, el único barrio con anuncios sin contradicciones es La
 Carolina; el selector no ofrece como opciones nuevas los textos ambiguos ni
 todos los nombres del nomenclátor sin anuncios confirmados. Conserva búsqueda,
 selección múltiple y etiquetas históricas. Los otros requisitos del matching
-(precio y moneda, operación, tipo y límites de habitaciones) siguen vigentes; el área es una preferencia flexible en v0.6;
+(precio en COP, operación, tipo y límites de habitaciones) siguen vigentes; el área es una preferencia flexible en v0.6;
 confirmar la geografía no confirma por sí solo una oportunidad completa.
 
 La API de coincidencias y diagnóstico conserva su contrato completo. La tabla

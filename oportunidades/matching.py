@@ -51,10 +51,9 @@ def evaluar(n: Necesidades, i: Inmueble):
     operacion = Operacion.VENTA if n.operacion == 'compra' else Operacion.ARRIENDO
     oferta = next((o for o in i.ofertas if o.operacion == operacion), None)
     criterio('operacion', 'Operación: ' + n.operacion, True if oferta else False if i.ofertas else None)
-    if oferta and oferta.moneda is not None and oferta.moneda != 'COP':
-        criterio('presupuesto', 'Presupuesto máximo en COP: moneda incompatible', False)
-    elif oferta is None or oferta.moneda is None or oferta.precio is None:
-        criterio('presupuesto', 'Presupuesto máximo en COP (precio y moneda)', None)
+    # Todos los importes son COP. El campo histórico moneda no condiciona el presupuesto.
+    if oferta is None or oferta.precio is None:
+        criterio('presupuesto', 'Presupuesto en COP: precio ausente o inválido', None)
     else:
         criterio('presupuesto', 'Presupuesto en COP', oferta.precio <= n.presupuesto_max and
                  (n.presupuesto_min is None or oferta.precio >= n.presupuesto_min))
@@ -112,8 +111,8 @@ def buscar(necesidades: Necesidades, catalogo, orden='coincidencia'):
 
 def ordenar(resultados, orden):
     if orden == 'precio':
-        return sorted(resultados, key=lambda r: (r.oferta is None or r.oferta.precio is None or r.oferta.moneda != 'COP',
-                      r.oferta.precio if r.oferta and r.oferta.precio is not None and r.oferta.moneda == 'COP' else 0, r.inmueble.id_interno))
+        return sorted(resultados, key=lambda r: (r.oferta is None or r.oferta.precio is None,
+                      r.oferta.precio if r.oferta and r.oferta.precio is not None else 0, r.inmueble.id_interno))
     if orden != 'coincidencia':
         raise ValueError('Orden desconocido')
     return sorted(resultados, key=lambda r: (not r.confirmada, len(r.pendientes),

@@ -111,12 +111,11 @@ function prepararFiltrosCatalogo() {
   document.querySelectorAll("[data-price-order]").forEach(link => {
     link.addEventListener("click", event => {
       const operation = document.querySelector("#operacion");
-      const currency = document.querySelector("#moneda");
-      if (operation.value && currency.value) return;
+      if (operation.value) return;
       event.preventDefault();
       document.querySelector("#orden").value = link.dataset.priceOrder;
       document.querySelector(".price-filter").open = true;
-      (operation.value ? currency : operation).focus();
+      operation.focus();
     });
   });
   panels.forEach(panel => panel.addEventListener("toggle", () => {

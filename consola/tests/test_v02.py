@@ -44,7 +44,7 @@ def test_historial_formato_cop_conserva_datos_y_verificacion():
     assert precio_historico({**dato, 'status': 'uncomparable'}) == 'No comparable'
 
 
-def test_formato_visual_no_altera_moneda_filtros_api_ni_exportacion(escenario_consola):
+def test_formato_cop_conserva_metadato_historico_api_sin_usarlo_en_filtros(escenario_consola):
     datos = escenario_consola
     doc = datos['documentos']['1-M1']
     doc['normalized']['currency'] = 'USD'
@@ -59,7 +59,7 @@ def test_formato_visual_no_altera_moneda_filtros_api_ni_exportacion(escenario_co
     assert 'Moneda no informada' not in pagina.text + ficha.text
     assert client.get('/api/catalog', params=params).json()['items'][0]['currency'] == 'USD'
     filas = list(csv.DictReader(io.StringIO(client.get('/consola/exportar.csv', params=params).content.decode('utf-8-sig')), delimiter=';'))
-    assert filas[0]['Moneda'] == 'USD' and filas[0]['Precio'] == '101000000'
+    assert filas[0]['Moneda'] == 'COP' and filas[0]['Precio'] == '101000000'
     assert hashlib.sha256(datos['ruta'].read_bytes()).hexdigest() == antes
 
 

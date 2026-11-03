@@ -16,10 +16,10 @@ def huella(datos):
 
 def candidato(r):
     i = r.inmueble
-    return {'id': i.id_interno, 'pendientes': r.pendientes, 'hechos': {
+    return {'id': i.id_interno, 'politica_precios': 'COP-unica-v1', 'pendientes': r.pendientes, 'hechos': {
         'tipo': i.tipo, 'ciudad': i.ciudad, 'barrio': i.barrio, 'zona': i.zona,
         'precio': str(r.oferta.precio) if r.oferta and r.oferta.precio is not None else None,
-        'moneda': r.oferta.moneda if r.oferta else None,
+        'moneda': 'COP',
         'habitaciones': i.habitaciones, 'banos': i.banos, 'parqueaderos': i.parqueaderos,
         'area_construida_m2': str(i.area_construida_m2) if i.area_construida_m2 else None,
         'area_privada_m2': str(i.area_privada_m2) if i.area_privada_m2 else None,

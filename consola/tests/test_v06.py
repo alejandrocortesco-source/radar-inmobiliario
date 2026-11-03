@@ -304,6 +304,9 @@ def test_gemini_rest_estructurado_y_validacion(monkeypatch):
     assert 'temperature' not in cuerpo['generationConfig']
     assert 'gemini-3.8-flash:generateContent' in cliente.post.call_args.args[0]
     assert 'nombre' not in cuerpo['contents'][0]['parts'][0]['text']
+    instrucciones = cuerpo['systemInstruction']['parts'][0]['text']
+    assert 'La única moneda del sistema es COP' in instrucciones
+    assert 'No solicites ni verifiques moneda' in instrucciones
     for campo, valor in [('id','inventado'),('puntuacion',101),('evidencias',[{'campo':'banos','valor':'99'}])]:
         original = datos['evaluaciones'][0][campo]
         datos['evaluaciones'][0][campo] = valor

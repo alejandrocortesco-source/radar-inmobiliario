@@ -293,7 +293,7 @@ def catalogo_variado(escenario):
     ({'tipos': ['apartamento', 'oficina']}, ['2-M2']),
     ({'operacion': 'arriendo'}, [ID]),
     ({'operacion': 'venta', 'moneda': 'COP', 'precio_min': '1000', 'precio_max': '2000'}, [ID, '2-M2']),
-    ({'moneda': 'USD'}, ['3-M3']),
+    ({'moneda': 'USD'}, [ID, '2-M2', '3-M3', '4-M4', '5-M5']),
     ({'area_min_m2': '80', 'area_max_m2': '80'}, [ID, '3-M3']),
     ({'tipo_area': 'construida', 'area_min_m2': '90'}, [ID]),
     ({'tipo_area': 'privada', 'area_min_m2': '80'}, []),
@@ -324,7 +324,7 @@ def test_rango_de_arriendo_usa_precio_correcto_sin_convertir_moneda(catalogo_var
     assert item['price'] == 10 and item['operation'] == 'arriendo' and item['currency'] == 'COP'
     assert item['ofertas'] == [{'operation': 'arriendo', 'price': 10, 'currency': 'COP'}]
     parametros['moneda'] = 'USD'
-    assert client.get('/api/catalog', params=parametros).json()['total'] == 0
+    assert client.get('/api/catalog', params=parametros).json()['total'] == 1
     sin_filtros = client.get('/api/catalog').json()['items'][0]
     assert sin_filtros['price'] == 1000
     assert 'ofertas' not in sin_filtros
@@ -346,10 +346,10 @@ def test_filtros_combinados_orden_total_y_paginacion(catalogo_variado):
             'operacion': 'venta', 'moneda': 'COP', 'orden': 'precio_desc',
             'limit': 1, 'offset': offset,
         }).json()
-        assert respuesta['total'] == 3
+        assert respuesta['total'] == 4
         paginas.extend(respuesta['items'])
-    assert [p['id'] for p in paginas] == ['2-M2', ID, '5-M5']
-    assert len({p['id_interno'] for p in paginas}) == 3
+    assert [p['id'] for p in paginas] == ['2-M2', ID, '3-M3', '5-M5']
+    assert len({p['id_interno'] for p in paginas}) == 4
     assert len(servicio.listar()) == 5  # Varias búsquedas no duplican el inmueble.
 
 
@@ -390,7 +390,6 @@ def test_paginacion_anterior_hasta_1000_y_offset_vacio(catalogo_variado):
     'parqueaderos_min=-1',
     'area_min_m2=NaN',
     'precio_min=Infinity&operacion=venta&moneda=COP',
-    'moneda=cop',
     'tipos=desconocido',
     'operacion=compra',
     'tipo_area=indefinida',

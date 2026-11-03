@@ -136,7 +136,7 @@ class ServicioCatalogo:
         resultado = []
         for inmueble in seleccionados:
             item = items[inmueble.id_interno]
-            if filtros.operacion is not None or filtros.moneda is not None:
+            if filtros.operacion is not None:
                 ofertas = ofertas_compatibles(inmueble, filtros)
                 item['ofertas'] = [
                     {'operation': o.operacion.value, 'price': o.precio, 'currency': o.moneda}

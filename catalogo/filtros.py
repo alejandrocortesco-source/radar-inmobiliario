@@ -29,7 +29,7 @@ class FiltrosCatalogo:
     barrios: tuple[str, ...] = ()
     tipos: tuple[TipoInmueble, ...] = ()
     operacion: Operacion | None = None
-    moneda: str | None = None
+    moneda: str | None = None  # Compatibilidad con URLs/API históricas; no filtra importes COP.
     precio_min: Decimal | None = None
     precio_max: Decimal | None = None
     tipo_area: TipoArea = TipoArea.PUBLICADA
@@ -61,7 +61,6 @@ class FiltrosCatalogo:
         validar.enumeracion(self.tipo_area, TipoArea, 'tipo_area')
         validar.enumeracion(self.disponibilidad, Disponibilidad, 'disponibilidad', opcional=True)
         validar.enumeracion(self.orden, OrdenCatalogo, 'orden')
-        validar.moneda(self.moneda)
         for minimo, maximo in (('precio_min', 'precio_max'), ('area_min_m2', 'area_max_m2')):
             bajo, alto = getattr(self, minimo), getattr(self, maximo)
             validar.decimal_no_negativo(bajo, minimo)
@@ -70,8 +69,8 @@ class FiltrosCatalogo:
                 raise ValueError(f'{minimo} no puede superar {maximo}')
         usa_precio = self.precio_min is not None or self.precio_max is not None
         ordena_precio = self.orden in (OrdenCatalogo.PRECIO_ASC, OrdenCatalogo.PRECIO_DESC)
-        if (usa_precio or ordena_precio) and (self.operacion is None or self.moneda is None):
-            raise ValueError('filtrar u ordenar por precio requiere operación y moneda')
+        if (usa_precio or ordena_precio) and self.operacion is None:
+            raise ValueError('filtrar u ordenar por precio requiere operación')
         for nombre in ('habitaciones_min', 'habitaciones_max', 'banos_min', 'parqueaderos_min',
                        'desplazamiento'):
             validar.entero_no_negativo(getattr(self, nombre), nombre)

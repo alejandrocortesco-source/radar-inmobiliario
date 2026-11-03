@@ -22,7 +22,6 @@ def _en_rango(valor, minimo, maximo):
 def ofertas_compatibles(inmueble, filtros):
     return tuple(o for o in inmueble.ofertas
                  if (filtros.operacion is None or o.operacion == filtros.operacion)
-                 and (filtros.moneda is None or o.moneda == filtros.moneda)
                  and _en_rango(o.precio, filtros.precio_min, filtros.precio_max))
 
 
@@ -71,7 +70,7 @@ def _coincide(inmueble, filtros):
         return False
     if filtros.requiere_revision is not None and inmueble.requiere_revision != filtros.requiere_revision:
         return False
-    usa_oferta = (filtros.operacion is not None or filtros.moneda is not None
+    usa_oferta = (filtros.operacion is not None
                   or filtros.precio_min is not None or filtros.precio_max is not None)
     if usa_oferta and not ofertas_compatibles(inmueble, filtros):
         return False

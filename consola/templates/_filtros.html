@@ -62,10 +62,9 @@
       <summary>Precio <span class="muted">{% if values.get('precio_min') or values.get('precio_max') %}Rango aplicado{% else %}Todos{% endif %}</span></summary>
       <div class="popover-body">
         <label for="operacion">Operación<select aria-label="Operación" id="operacion" name="operacion"><option value="">Venta y arriendo</option>{% for clave,label in [('venta','Venta'),('arriendo','Arriendo')] %}<option value="{{clave}}" {% if values.get('operacion')==clave %}selected{% endif %}>{{label}}</option>{% endfor %}</select></label>
-        <label for="moneda">Moneda<select aria-label="Moneda" id="moneda" name="moneda"><option value="">Todas</option>{% for moneda in ('COP','USD','EUR') %}<option value="{{moneda}}" {% if values.get('moneda')==moneda %}selected{% endif %}>{{moneda}}</option>{% endfor %}</select></label>
         {{input('precio_min', 'Precio desde', 'number')}}
         {{input('precio_max', 'Precio hasta', 'number')}}
-        <p class="muted">Para filtrar u ordenar por precio, elige operación y moneda.</p>
+        <p class="muted">Todos los importes son COP. Para filtrar u ordenar por precio, elige operación.</p>
         <button type="submit">Aplicar precio</button>
       </div>
     </details>

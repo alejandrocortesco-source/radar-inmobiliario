@@ -13,6 +13,7 @@
 - El catálogo es de solo lectura desde la consola. Guardar nombres, fuentes, comentarios, clientes, decisiones y caché en la base auxiliar; nunca escribir esos datos en SQLite del scraper.
 - Clientes y oportunidades son entidades distintas. Las oportunidades cerradas y clientes inactivos no participan en matching automático. Conservar relaciones e historial.
 - Operación, tipo, ubicación, presupuesto y límites de habitaciones son estrictos. Desconocido significa pendiente de verificar; baños, área y otras características son preferencias.
+- La única moneda del sistema es COP, ahora y a futuro. Comparar directamente precios numéricos y presupuesto con límites inclusivos, sin solicitar ni verificar moneda, ni convertir importes. El campo histórico `moneda` no filtra, ordena ni condiciona el matching. Precio ausente o inválido sigue desconocido; no sustituirlo por cero.
 - Gemini solo evalúa candidatos seleccionados por código. No inventar resultados ni presentar IA disponible si falta configuración o falla. No enviar nombre ni teléfono del cliente al proveedor.
 - Las decisiones comerciales (pendiente/preseleccionado/descartado) son independientes de los resultados y de la revisión conservadora técnica del scraper.
 
