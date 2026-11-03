@@ -58,6 +58,13 @@ class ServicioCatalogo:
     def listar_busquedas(self):
         return self.busquedas.listar() if self.busquedas else ()
 
+    def eliminar_busqueda(self, fuente, id_busqueda):
+        if not all(isinstance(v, str) and v.strip() for v in (fuente, id_busqueda)):
+            raise ConsultaInvalida('Indica la búsqueda que quieres eliminar')
+        if self.busquedas is None:
+            raise ErrorLecturaCatalogo('No está configurado el almacenamiento de búsquedas')
+        return self.busquedas.eliminar(normalizar_fuente(fuente), id_busqueda)
+
     def guardar_busqueda(self, fuente, url, nombre):
         if not all(isinstance(v, str) for v in (fuente, url, nombre)):
             raise ConsultaInvalida('Fuente, URL y nombre deben ser texto')

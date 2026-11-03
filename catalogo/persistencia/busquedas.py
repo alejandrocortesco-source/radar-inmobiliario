@@ -32,3 +32,17 @@ class BusquedasSQLite:
                                (fuente, id_busqueda, url, nombre))
         except (sqlite3.Error, OSError) as exc:
             raise ErrorLecturaCatalogo('No se pudo guardar el nombre de la búsqueda') from exc
+
+    def eliminar(self, fuente, id_busqueda):
+        """Quita configuración auxiliar; conserva el catálogo y sus procedencias."""
+        if not self.ruta.exists():
+            return False
+        try:
+            with closing(sqlite3.connect(self.ruta.as_uri() + '?mode=rw', uri=True, timeout=10)) as db:
+                with db:
+                    if not db.execute("SELECT 1 FROM sqlite_master WHERE name='consola_busquedas'").fetchone():
+                        return False
+                    return db.execute('DELETE FROM consola_busquedas WHERE fuente=? AND id_busqueda=?',
+                                      (fuente, id_busqueda)).rowcount > 0
+        except (sqlite3.Error, OSError) as exc:
+            raise ErrorLecturaCatalogo('No se pudo eliminar la búsqueda') from exc

@@ -4,6 +4,8 @@ La entrada vigente es [Inicio v0.6](http://127.0.0.1:8000/v0.6/). Tiene exactame
 
 Consulta la [guía completa v0.6](docs/V06.md), con configuración de Gemini, límites de consumo, decisiones, fuentes y validación. El [documento rector](../RADAR_PROYECTO_RECTOR.md) prevalece sobre los informes históricos.
 
+En «Agregar fuente» se pueden registrar URLs de Metrocuadrado, consultar «Búsquedas registradas» y eliminar una con confirmación. Eliminar quita su configuración para futuras ejecuciones y conserva el catálogo y su historial. Guardar o eliminar no ejecuta scraping.
+
 Las interfaces anteriores `/consola/` y `/v0.4/` siguen disponibles dentro del mismo FastAPI. El catálogo detallado de v0.5 conserva filtros, fichas, historial y exportaciones.
 La versión v0.1 se conserva en el commit `fb49534` y la etiqueta `consola-v0.1`.
 La interfaz técnica sigue en `/`; la API, reportes y exportaciones anteriores conservan sus rutas.

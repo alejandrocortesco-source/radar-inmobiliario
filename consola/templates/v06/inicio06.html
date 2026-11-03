@@ -13,10 +13,24 @@
 </section>
 <section class="tile source" aria-labelledby="fuente-titulo" id="agregar-fuente" data-dashboard-section="fuente">
 <p class="eyebrow">03 / Ampliar la búsqueda</p><h2 id="fuente-titulo">Agregar fuente</h2><p class="muted">Registra una búsqueda de Metrocuadrado para futuras actualizaciones.</p>
+{% if mensaje == 'fuente_eliminada' %}<p class="notice success" role="status">Búsqueda eliminada. Se conservaron los inmuebles y su historial.</p>{% endif %}
 {% if mensaje == 'fuente_guardada' %}<p class="notice success" role="status">Fuente guardada. No se inició una extracción.</p>{% elif mensaje == 'fuente_duplicada' %}<p class="notice" role="status">Esta búsqueda ya está registrada. Se conservó su nombre.</p>{% endif %}
 {% if fuente_error %}<p class="notice" id="fuente-error" role="alert">{{fuente_error}}</p>{% endif %}
 <form action="/v0.6/fuentes" method="post" class="source-form"><label>Nombre descriptivo<input name="nombre" required maxlength="120" value="{{fuente_valores.nombre if fuente_valores else ''}}" placeholder="Ej. Apartamentos en La Carolina"></label><label>URL de búsqueda de Metrocuadrado<input type="url" name="url" required maxlength="4096" value="{{fuente_valores.url if fuente_valores else ''}}" {% if fuente_error %}aria-invalid="true" aria-describedby="fuente-error"{% endif %} placeholder="https://www.metrocuadrado.com/inmuebles/…"></label><button class="secondary" type="submit">Guardar fuente <span aria-hidden="true">+</span></button></form>
-<p class="caption">{{fuentes|length}} fuente(s) registrada(s). Guardar configura la búsqueda; la extracción se ejecuta por separado.</p>
+<p class="caption">Guardar configura la búsqueda; la extracción se ejecuta por separado.</p>
+<details class="registered-sources" {% if mensaje in ('fuente_guardada', 'fuente_duplicada', 'fuente_eliminada') %}open{% endif %}>
+<summary>Búsquedas registradas ({{fuentes|length}})</summary>
+{% if fuentes %}<ul class="source-list">
+{% for fuente in fuentes %}<li data-registered-source>
+<strong>{{fuente.nombre}}</strong><a href="{{fuente.url}}" target="_blank" rel="noopener noreferrer">{{fuente.url}}</a>
+<details class="source-delete"><summary>Eliminar búsqueda: {{fuente.nombre}}</summary>
+<p>Se quitará de las fuentes registradas para futuras ejecuciones. Los inmuebles y su historial se conservan. Una ejecución en curso o reanudada mantiene sus fuentes.</p>
+<form action="/v0.6/fuentes/eliminar" method="post">
+<input type="hidden" name="fuente" value="{{fuente.fuente}}"><input type="hidden" name="id_busqueda" value="{{fuente.id_busqueda}}">
+<button class="secondary" type="submit" name="confirmar" value="1">Confirmar eliminación</button>
+</form></details></li>{% endfor %}</ul>
+{% else %}<p class="caption">No hay búsquedas registradas. Agrega una URL para empezar.</p>{% endif %}
+</details>
 </section>
 <section class="tile new-client" aria-labelledby="nuevo-titulo" data-dashboard-section="nuevo-cliente">
 <p class="eyebrow">04 / Una nueva necesidad</p><h2 id="nuevo-titulo">Nuevo cliente</h2><p>Registra a quién acompañas y qué está buscando. Sus coincidencias tendrán un espacio propio.</p><a class="button primary" href="/v0.6/nuevo">Registrar cliente y necesidad <span aria-hidden="true">→</span></a><p class="caption">También puedes seleccionar un cliente existente.</p>

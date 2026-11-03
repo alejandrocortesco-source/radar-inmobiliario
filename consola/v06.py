@@ -240,4 +240,18 @@ def crear_router(proveedor):
         except (ErrorLecturaCatalogo, OSError) as exc:
             return error(request, exc)
 
+    @router.post('/fuentes/eliminar')
+    async def eliminar_fuente(request: Request, catalogo=Depends(proveedor)):
+        valores = {k: v[-1] for k, v in parse_qs((await request.body()).decode(), keep_blank_values=True).items()}
+        try:
+            if valores.get('confirmar') != '1':
+                raise ConsultaInvalida('Confirma que quieres eliminar esta búsqueda.')
+            if not catalogo.eliminar_busqueda(valores.get('fuente', ''), valores.get('id_busqueda', '')):
+                return error(request, 'La búsqueda ya no está registrada.', 404)
+            return RedirectResponse('/v0.6/?mensaje=fuente_eliminada#agregar-fuente', 303)
+        except ConsultaInvalida as exc:
+            return error(request, exc, 422)
+        except (ErrorLecturaCatalogo, OSError) as exc:
+            return error(request, exc)
+
     return router

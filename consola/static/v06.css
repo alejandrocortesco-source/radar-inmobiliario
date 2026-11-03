@@ -6,3 +6,10 @@
 
 /* Mantener etiquetas accesibles de tablas anchas dentro de su región de scroll. */
 .table-scroll{position:relative}
+
+.registered-sources{margin-top:24px;border-top:1px solid var(--line);padding-top:16px}
+.source-list{list-style:none;padding:0;margin:16px 0 0}
+.source-list>li{padding:16px 0;border-top:1px solid var(--line);overflow-wrap:anywhere}
+.source-list>li>a{display:block;font-size:12px;margin:8px 0}
+.source-delete{font-size:12px}.source-delete>summary{color:var(--accent)}
+.source-delete p{margin:16px 0}.source-delete button{max-width:100%;white-space:normal}
