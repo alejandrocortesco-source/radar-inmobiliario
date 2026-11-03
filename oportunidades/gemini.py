@@ -26,11 +26,11 @@ class Respuesta(BaseModel):
 
 
 class Gemini:
-    version = 'v06-1'
+    version = 'v06-2'
 
     def __init__(self):
         self.clave = os.getenv('GEMINI_API_KEY', '')
-        self.modelo = os.getenv('GEMINI_MODEL', 'gemini-2.5-flash')
+        self.modelo = os.getenv('GEMINI_MODEL', 'gemini-3.8-flash')
         if not re.fullmatch(r'gemini-[a-z0-9.\-]*flash[a-z0-9.\-]*', self.modelo):
             raise ValueError('GEMINI_MODEL debe ser un modelo Gemini Flash')
 
@@ -47,13 +47,16 @@ class Gemini:
             'Los valores desconocidos no son negativos confirmados. No incluyas datos de contacto.'
         )
         try:
+            generacion = {'maxOutputTokens': 12000, 'responseMimeType': 'application/json',
+                          'responseJsonSchema': Respuesta.model_json_schema()}
+            if self.modelo.startswith('gemini-3'):
+                generacion['thinkingConfig'] = {'thinkingLevel': 'LOW'}
             with httpx.Client(timeout=httpx.Timeout(25, connect=5)) as cliente:
                 r = cliente.post('https://generativelanguage.googleapis.com/v1beta/models/' + self.modelo + ':generateContent',
                     headers={'x-goog-api-key': self.clave}, json={
                         'systemInstruction': {'parts': [{'text': instrucciones}]},
                         'contents': [{'parts': [{'text': json.dumps({'necesidades': necesidades, 'candidatos': candidatos}, ensure_ascii=False)}]}],
-                        'generationConfig': {'temperature': 0, 'maxOutputTokens': 12000,
-                            'responseMimeType': 'application/json', 'responseJsonSchema': Respuesta.model_json_schema()},
+                        'generationConfig': generacion,
                     })
                 r.raise_for_status()
                 contenido = r.json()['candidates'][0]

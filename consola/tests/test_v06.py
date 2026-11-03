@@ -300,6 +300,9 @@ def test_gemini_rest_estructurado_y_validacion(monkeypatch):
     cuerpo = cliente.post.call_args.kwargs['json']
     assert cuerpo['generationConfig']['responseMimeType'] == 'application/json'
     assert 'responseJsonSchema' in cuerpo['generationConfig']
+    assert cuerpo['generationConfig']['thinkingConfig']['thinkingLevel'] == 'LOW'
+    assert 'temperature' not in cuerpo['generationConfig']
+    assert 'gemini-3.8-flash:generateContent' in cliente.post.call_args.args[0]
     assert 'nombre' not in cuerpo['contents'][0]['parts'][0]['text']
     for campo, valor in [('id','inventado'),('puntuacion',101),('evidencias',[{'campo':'banos','valor':'99'}])]:
         original = datos['evaluaciones'][0][campo]
