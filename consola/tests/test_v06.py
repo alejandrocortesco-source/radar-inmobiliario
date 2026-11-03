@@ -335,6 +335,8 @@ def test_navegacion_responsive_creacion_revision_y_catalogo(servidor, pagina, wi
     page.locator('.decision-form select').first.select_option('preseleccionado')
     page.locator('.decision-form button').first.click()
     expect(page.locator('.decision-form select').first).to_have_value('preseleccionado')
+    # El valor del select puede estar disponible antes de terminar la navegación y cargar CSS.
+    page.wait_for_load_state('load')
     assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), page.evaluate('''[...document.querySelectorAll('body *')].filter(e=>e.getBoundingClientRect().right>innerWidth && getComputedStyle(e).position!=='absolute').slice(0,12).map(e=>[e.tagName,e.className,e.getBoundingClientRect().right])''')
     page.get_by_role('link', name='Editar necesidades').click()
     expect(page.locator('#crm_nombre')).to_have_value('Cliente v06')
