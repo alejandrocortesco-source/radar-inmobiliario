@@ -56,7 +56,8 @@ def evaluar(n: Necesidades, i: Inmueble):
     elif oferta is None or oferta.moneda is None or oferta.precio is None:
         criterio('presupuesto', 'Presupuesto máximo en COP (precio y moneda)', None)
     else:
-        criterio('presupuesto', 'Presupuesto máximo en COP', oferta.precio <= n.presupuesto_max)
+        criterio('presupuesto', 'Presupuesto en COP', oferta.precio <= n.presupuesto_max and
+                 (n.presupuesto_min is None or oferta.precio >= n.presupuesto_min))
     criterio('tipo', 'Tipo: ' + n.tipo.value, i.tipo == n.tipo if i.tipo is not None else None)
     criterio('ciudad', 'Ciudad: ' + n.ciudad, normalizar_ciudad(i.ciudad) == normalizar_ciudad(n.ciudad) if i.ciudad else None)
     ubicaciones = []
@@ -83,7 +84,7 @@ def evaluar(n: Necesidades, i: Inmueble):
         etiqueta_ubicacion += '; solicitud sin equivalencia controlada: ' + ', '.join(solicitudes_sin_resolver)
     criterio('ubicacion', etiqueta_ubicacion, ubicacion)
     area = getattr(i, f'area_{n.tipo_area.value}_m2')
-    valores = {'habitaciones_min': i.habitaciones, 'banos_min': i.banos,
+    valores = {'habitaciones_min': i.habitaciones, 'habitaciones_max': i.habitaciones, 'banos_min': i.banos,
                'parqueaderos_min': i.parqueaderos, 'area_min_m2': area,
                'area_max_m2': area, 'antiguedad_max': None}
     for campo, nombre in CRITERIOS.items():
@@ -91,9 +92,11 @@ def evaluar(n: Necesidades, i: Inmueble):
         if limite is None:
             continue
         valor = valores[campo]
-        condicion = None if valor is None else valor <= limite if campo in ('area_max_m2', 'antiguedad_max') else valor >= limite
+        condicion = None if valor is None else valor <= limite if campo in ('habitaciones_max', 'area_max_m2', 'antiguedad_max') else valor >= limite
         etiqueta = f'{nombre}: {limite}' + (f' m² ({n.tipo_area.value})' if campo.startswith('area_') else ' años' if campo == 'antiguedad_max' else '')
-        criterio(campo, etiqueta, condicion, campo in n.preferencias)
+        # v0.6: límites de habitaciones estrictos; características secundarias flexibles.
+        # Se aceptan preferencias históricas en el contrato sin mantener su antigua semántica.
+        criterio(campo, etiqueta, condicion, campo not in ('habitaciones_min', 'habitaciones_max'))
     resultado = None if excluido else Coincidencia(i, oferta, tuple(cumple), tuple(pendientes), tuple(preferidas), tuple(pref_pendientes), tuple(pref_no))
     return resultado, tuple(comprobaciones)
 
@@ -150,7 +153,7 @@ def diagnosticar(necesidades: Necesidades, catalogo, orden='coincidencia'):
         # No hay criterios activos en un catálogo vacío; conservar los principales.
         if not obligatorias and (evaluaciones or codigo in CRITERIOS and getattr(necesidades, codigo) is None):
             continue
-        if codigo in necesidades.preferencias:
+        if codigo in CRITERIOS and codigo not in ('habitaciones_min', 'habitaciones_max'):
             continue
         antes = len(vivos)
         vivos -= {k for k, p in obligatorias.items() if p.cumple is False}

@@ -16,6 +16,8 @@ def main():
     sub = parser.add_subparsers(dest='command',required=True)
     scrape = sub.add_parser('scrape',help='Descubrir y procesar fichas sin servidor web')
     scrape.add_argument('--url',action='append',help='URL de búsqueda; repetir para varias URLs')
+    scrape.add_argument('--fuentes-registradas', action='store_true',
+                        help='Incluir búsquedas guardadas en la consola (no inicia nada al guardarlas)')
     scrape.add_argument('--listing-currency',choices=('COP','USD','EUR','unknown'),default='COP',
                         help='Moneda confirmada para importes sin código explícito; unknown obliga a revisar')
     scrape.add_argument('--headed',action='store_true')
@@ -44,6 +46,16 @@ def main():
         print(json.dumps(Store(args['db']).summary(args['run']),ensure_ascii=False,indent=2))
         return
     configured_urls = args.pop('url')
+    if args.pop('fuentes_registradas'):
+        from catalogo.persistencia.busquedas import BusquedasSQLite
+        ruta_catalogo = Path(args['db']).resolve()
+        ruta_crm = Path(os.getenv('RADAR_CRM_DB', str(ruta_catalogo.with_name(ruta_catalogo.stem + '-consola.sqlite')))).resolve()
+        if ruta_crm == ruta_catalogo:
+            parser.error('RADAR_CRM_DB debe ser distinta a la base del catálogo')
+        registradas = [b['id_busqueda'] for b in BusquedasSQLite(ruta_crm).listar() if b['fuente'] == 'metrocuadrado']
+        configured_urls = list(dict.fromkeys((configured_urls or []) + registradas))
+        if not configured_urls:
+            parser.error('No hay fuentes registradas. Agrega una en /v0.6/ o indica --url.')
     args['urls'] = configured_urls
     args['url'] = configured_urls[0] if configured_urls else DEFAULT_URL
     if args['listing_currency'] == 'unknown':

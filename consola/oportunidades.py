@@ -1,7 +1,8 @@
 """Adaptador HTML de captura; las reglas y escrituras residen en oportunidades/."""
 from urllib.parse import parse_qs
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, BackgroundTasks, Depends, Request
+from oportunidades.automatizacion import recalcular_seguro
 from fastapi.responses import RedirectResponse
 from pydantic import ValidationError
 
@@ -103,7 +104,7 @@ def crear_router(proveedor_catalogo, templates):
             return estado(request, exc, 503)
 
     @router.post('/consola/oportunidades', include_in_schema=False)
-    async def guardar(request: Request, catalogo=Depends(proveedor_catalogo), s=Depends(proveedor_oportunidades)):
+    async def guardar(request: Request, tareas: BackgroundTasks, catalogo=Depends(proveedor_catalogo), s=Depends(proveedor_oportunidades)):
         valores = await leer_formulario(request)
         try:
             if valores.get('ubicaciones_ciudad') and valores['ubicaciones_ciudad'] != normalizar_ciudad(valores.get('ciudad', '')):
@@ -115,6 +116,7 @@ def crear_router(proveedor_catalogo, templates):
             necesidades = Necesidades.model_validate(campos)
             o = s.capturar(cliente, necesidades, valores.get('estado', 'abierta'),
                            valores.get('cliente_id') or None, valores.get('oportunidad_id') or None)
+            tareas.add_task(recalcular_seguro, s, catalogo, o.id)
             destino = '/consola/?oportunidad=' + o.id + '&guardada=1'
             if valores.get('accion') == 'buscar':
                 destino += '#matching-resumen'

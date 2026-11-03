@@ -1,0 +1,3 @@
+{% extends 'base06.html' %}{% from '_resumen06.html' import tabla_clientes %}{% block title %}Clientes{% endblock %}
+{% block content %}<div class="page-heading"><div><p class="eyebrow">Relaciones y necesidades</p><h1>Clientes</h1><p class="muted">Cada cliente conserva sus oportunidades y decisiones.</p></div><a class="button primary" href="/v0.6/nuevo">Nuevo cliente <span aria-hidden="true">+</span></a></div>
+<nav class="switcher" aria-label="Estado de clientes"><a href="?vista=activos" {{'aria-current=page' if vista=='activos' else ''}}>Activos</a><a href="?vista=inactivos" {{'aria-current=page' if vista=='inactivos' else ''}}>Inactivos</a></nav><section class="tile">{{tabla_clientes(filas)}}</section>{% endblock %}

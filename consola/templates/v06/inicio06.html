@@ -1,0 +1,23 @@
+{% extends 'base06.html' %}{% from '_resumen06.html' import tabla_clientes %}
+{% block content %}
+<div class="page-heading"><div><p class="eyebrow">Tu espacio de trabajo</p><h1>Cada búsqueda, una oportunidad.</h1><p class="muted">Revisa lo nuevo y encuentra el próximo hogar de tus clientes.</p></div><span class="heading-mark" aria-hidden="true">↗</span></div>
+<div class="dashboard-grid">
+<section class="tile opportunities" aria-labelledby="oportunidades-titulo" data-dashboard-section="oportunidades">
+<div class="tile-heading"><div><p class="eyebrow">01 / Clientes primero</p><h2 id="oportunidades-titulo">Oportunidades recientes</h2></div><a href="/v0.6/clientes">Todos los clientes <span aria-hidden="true">→</span></a></div>
+<p class="muted tile-intro">Primero, los clientes con coincidencias pendientes de revisión.</p>{{tabla_clientes(recientes)}}
+</section>
+<section class="tile catalog-state" aria-labelledby="catalogo-titulo" data-dashboard-section="catalogo">
+<div class="tile-heading"><div><p class="eyebrow">02 / Información al día</p><h2 id="catalogo-titulo">Estado del catálogo</h2></div><a href="/v0.4/" data-catalog-link>Abrir catálogo completo <span aria-hidden="true">↗</span></a></div>
+<dl class="metrics"><div class="metric-total"><dt>Total de inmuebles</dt><dd>{{indicadores.total|numero}}</dd></div><div class="metric-date"><dt>Última actualización exitosa</dt><dd>{{indicadores.ultima|fecha if indicadores.ultima else 'Sin actualización exitosa'}}<small>Hora de Colombia</small></dd></div><div><dt>Nuevos</dt><dd>{{indicadores.nuevos}}</dd></div><div><dt>Actualizados</dt><dd>{{indicadores.actualizados}}</dd></div><div><dt>Ausentes</dt><dd>{{indicadores.ausentes}}</dd></div></dl>
+<p class="caption">Nuevos y actualizados: última ejecución exitosa por búsqueda. Actualizados incluye cambios de precio. Ausentes cuenta inmuebles que faltan en al menos una búsqueda; pueden seguir activos en otra. La ausencia no confirma retiro ni venta.</p>
+</section>
+<section class="tile source" aria-labelledby="fuente-titulo" id="agregar-fuente" data-dashboard-section="fuente">
+<p class="eyebrow">03 / Ampliar la búsqueda</p><h2 id="fuente-titulo">Agregar fuente</h2><p class="muted">Registra una búsqueda de Metrocuadrado para futuras actualizaciones.</p>
+{% if mensaje == 'fuente_guardada' %}<p class="notice success" role="status">Fuente guardada. No se inició una extracción.</p>{% elif mensaje == 'fuente_duplicada' %}<p class="notice" role="status">Esta búsqueda ya está registrada. Se conservó su nombre.</p>{% endif %}
+<form action="/v0.6/fuentes" method="post" class="source-form"><label>Nombre descriptivo<input name="nombre" required maxlength="120" placeholder="Ej. Apartamentos en La Carolina"></label><label>URL de búsqueda de Metrocuadrado<input type="url" name="url" required maxlength="4096" placeholder="https://www.metrocuadrado.com/inmuebles/…"></label><button class="secondary" type="submit">Guardar fuente <span aria-hidden="true">+</span></button></form>
+<p class="caption">{{fuentes|length}} fuente(s) registrada(s). Guardar configura la búsqueda; la extracción se ejecuta por separado.</p>
+</section>
+<section class="tile new-client" aria-labelledby="nuevo-titulo" data-dashboard-section="nuevo-cliente">
+<p class="eyebrow">04 / Una nueva necesidad</p><h2 id="nuevo-titulo">Nuevo cliente</h2><p>Registra a quién acompañas y qué está buscando. Sus coincidencias tendrán un espacio propio.</p><a class="button primary" href="/v0.6/nuevo">Registrar cliente y necesidad <span aria-hidden="true">→</span></a><p class="caption">También puedes seleccionar un cliente existente.</p>
+</section>
+</div>{% endblock %}

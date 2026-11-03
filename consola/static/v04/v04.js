@@ -145,3 +145,7 @@
   }));
   addEventListener('beforeunload',e=>{if(active&&dirty(active)){e.preventDefault();e.returnValue='';}});
 })();
+// Acceso desde v0.6: conservar filtros, orden y página del catálogo completo.
+if (location.pathname === '/v0.4/' && !new URLSearchParams(location.search).has('oportunidad')) {
+  try { sessionStorage.setItem('radar:v06:catalogo', location.pathname + location.search); } catch (_) {}
+}

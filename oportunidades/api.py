@@ -1,5 +1,6 @@
 """API JSON de captura reutilizable, sin integraciones externas."""
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
+from .automatizacion import recalcular_seguro
 
 from catalogo.persistencia.contrato import ErrorLecturaCatalogo
 from .modelos import ClienteDatos, OportunidadDatos
@@ -48,12 +49,18 @@ def crear_router(proveedor_catalogo):
         return ejecutar(s.oportunidad, identificador)
 
     @router.post('/oportunidades', status_code=201)
-    def crear_oportunidad(datos: OportunidadDatos, s=Depends(proveedor_oportunidades)):
-        return ejecutar(s.guardar_oportunidad, datos)
+    def crear_oportunidad(datos: OportunidadDatos, tareas: BackgroundTasks,
+                          s=Depends(proveedor_oportunidades), catalogo=Depends(proveedor_catalogo)):
+        o = ejecutar(s.guardar_oportunidad, datos)
+        tareas.add_task(recalcular_seguro, s, catalogo, o.id)
+        return o
 
     @router.put('/oportunidades/{identificador}')
-    def editar_oportunidad(identificador: str, datos: OportunidadDatos, s=Depends(proveedor_oportunidades)):
-        return ejecutar(s.guardar_oportunidad, datos, identificador)
+    def editar_oportunidad(identificador: str, datos: OportunidadDatos, tareas: BackgroundTasks,
+                           s=Depends(proveedor_oportunidades), catalogo=Depends(proveedor_catalogo)):
+        o = ejecutar(s.guardar_oportunidad, datos, identificador)
+        tareas.add_task(recalcular_seguro, s, catalogo, o.id)
+        return o
 
     @router.get('/oportunidades/{identificador}/coincidencias')
     def coincidencias(identificador: str, orden: str = Query('coincidencia', pattern='^(coincidencia|precio)$'),

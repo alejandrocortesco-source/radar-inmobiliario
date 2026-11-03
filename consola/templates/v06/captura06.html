@@ -1,0 +1,3 @@
+{% extends 'base06.html' %}{% block title %}Necesidades del cliente{% endblock %}
+{% block content %}<a class="back" href="/v0.6/clientes">← Clientes</a><div class="page-heading"><div><p class="eyebrow">Cliente / Necesidades</p><h1>{{'Editar oportunidad' if captura.get('oportunidad_id') else 'Encontrar su próximo hogar'}}</h1><p class="muted">Define lo esencial. Las preferencias ayudan a ordenar las coincidencias.</p></div></div>
+<div class="tile form-tile">{% include '_captura06.html' %}</div><script src="/consola/static/ubicaciones06.js" defer></script>{% endblock %}

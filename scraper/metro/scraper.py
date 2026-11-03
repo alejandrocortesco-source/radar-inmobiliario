@@ -370,6 +370,13 @@ class Scraper:
             self.store.finalize_absences(self.run_id)
             self.event('incremental_summary',self.store.summary(self.run_id)['classifications'])
             self.event('run_finished',{'status':status})
+            if status == 'completed':
+                # Una falla del CRM nunca cambia el resultado ni el historial del scraper.
+                try:
+                    from oportunidades.automatizacion import despues_scraper
+                    await asyncio.to_thread(despues_scraper, self.cfg.db)
+                except Exception:
+                    log.exception('El catálogo se actualizó, pero no se pudo actualizar el matching')
         except Restricted as exc:
             self.store.update_run(self.run_id,status='blocked',finished=now())
             self.event('access_restricted',{'error':str(exc)},'error')
