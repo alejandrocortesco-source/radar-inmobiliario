@@ -2,16 +2,22 @@
 
 Radar Inmobiliario es un proyecto para recopilar y revisar información pública de inmuebles.
 
-El componente implementado actualmente es el **scraper de Metrocuadrado**: recorre búsquedas con Playwright, actualiza incrementalmente un catálogo por cambios de precio, guarda su trazabilidad en SQLite y ofrece una interfaz local con FastAPI para revisar y exportar los resultados.
+La **Consola v0.6** abre en [http://127.0.0.1:8000/v0.6/](http://127.0.0.1:8000/v0.6/): dashboard de cuatro secciones, clientes Activos/Inactivos y ficha individual para revisar coincidencias. Reutiliza catálogo, clientes, oportunidades y matching determinista; añade decisiones persistentes y una segunda capa opcional con Gemini Flash. Guardar una fuente no ejecuta scraping.
 
-La **Consola v0.3** permite consultar el catálogo, registrar clientes y oportunidades, y buscar coincidencias por requisitos y preferencias en [http://127.0.0.1:8000/consola/](http://127.0.0.1:8000/consola/) dentro del mismo FastAPI. Consulta su [guía de inicio y uso](consola/README.md). El servicio y el modelo compartidos están en `catalogo/`; la captura, persistencia y matching independientes están en [`oportunidades/`](oportunidades/README.md). La interfaz técnica permanece en `/`.
+El catálogo detallado de v0.5 se conserva en `/v0.4/`, con filtros, fichas, comentarios, historial y exportaciones. `/consola/` y la interfaz técnica `/` mantienen compatibilidad. No se añadieron frameworks ni infraestructura.
 
-Consulta las [instrucciones de instalación, ejecución y pruebas del scraper](scraper/README.md). Su código, dependencias, herramientas y documentación se encuentran en [`scraper/`](scraper/).
+- [Guía v0.6, Gemini, fuentes, pruebas y limitaciones](consola/docs/V06.md).
+- [Documento rector vigente](RADAR_PROYECTO_RECTOR.md) e [instrucciones de trabajo](AGENTS.md).
+- [Instalación y ejecución del scraper propio](scraper/README.md).
+- [Catálogo](catalogo/README.md), [clientes y matching](oportunidades/README.md) y [guía de consola e interfaces anteriores](consola/README.md).
 
-En la rama **`v0.4`**, la nueva consola está disponible en
-[http://127.0.0.1:8000/v0.4/](http://127.0.0.1:8000/v0.4/), en paralelo a
-v0.3 en su ruta anterior. Reutiliza los mismos datos y añade un comentario
-persistente por inmueble. Consulta [accesos, conservación de v0.3 y evidencia de v0.4](consola/docs/V04.md).
+Inicio local desde la raíz:
+
+```powershell
+.\.venv\Scripts\python.exe scraper/run.py serve
+```
+
+Las evaluaciones reales de Gemini requieren `GEMINI_API_KEY` y un `GEMINI_MODEL` Flash disponible para la cuenta. Sin configuración, o ante error, el motor determinista permanece disponible y se informa la limitación. El objetivo de operación inferior a US$20/mes queda sujeto a medir consumo y alojamiento. No hay despliegue de producción ni migración a Sheets en esta entrega.
 
 ```text
 radar-inmobiliario/

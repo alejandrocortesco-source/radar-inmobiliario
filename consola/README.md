@@ -1,6 +1,10 @@
-# Consola v0.3 — Radar Inmobiliario
+# Consola v0.6 — Radar Inmobiliario
 
-Interfaz de consulta, captura manual y matching en `/consola/`, dentro del FastAPI existente.
+La entrada vigente es [Inicio v0.6](http://127.0.0.1:8000/v0.6/). Tiene exactamente cuatro secciones: oportunidades recientes, estado del catálogo, agregar fuente y nuevo cliente. La actividad se integra en las dos primeras; no existe una quinta sección. La lista Activos/Inactivos y las fichas de clientes son páginas independientes.
+
+Consulta la [guía completa v0.6](docs/V06.md), con configuración de Gemini, límites de consumo, decisiones, fuentes y validación. El [documento rector](../RADAR_PROYECTO_RECTOR.md) prevalece sobre los informes históricos.
+
+Las interfaces anteriores `/consola/` y `/v0.4/` siguen disponibles dentro del mismo FastAPI. El catálogo detallado de v0.5 conserva filtros, fichas, historial y exportaciones.
 La versión v0.1 se conserva en el commit `fb49534` y la etiqueta `consola-v0.1`.
 La interfaz técnica sigue en `/`; la API, reportes y exportaciones anteriores conservan sus rutas.
 
@@ -13,7 +17,7 @@ Set-Location -LiteralPath 'C:\Users\Palex25\Documents\Boch-Lab\Radar Inmobiliari
 & '.\.venv\Scripts\python.exe' '.\scraper\run.py' serve
 ```
 
-Mantener la terminal abierta y visitar [la Consola](http://127.0.0.1:8000/consola/).
+Mantener la terminal abierta y visitar [la Consola v0.6](http://127.0.0.1:8000/v0.6/).
 Para detenerla, pulsar Ctrl+C en esa terminal. Si el servidor ya estaba abierto
 antes de cambiar el código, detenerlo y volver a ejecutar el comando. Recargar
 el navegador con Ctrl+F5 para actualizar CSS y JavaScript.
@@ -38,7 +42,7 @@ No se requieren nuevas dependencias. La base predeterminada continúa siendo
 & '.\.venv\Scripts\python.exe' '.\scraper\run.py' --db 'C:\ruta\catalogo.sqlite' serve
 ```
 
-## Captura y matching v0.3
+## Interfaz histórica de captura v0.3 (rutas conservadas)
 
 La corrección de v0.3 organiza el trabajo en tres áreas numeradas: **Cliente y
 oportunidad**, **Resumen del matching** y **Resultados**. «Guardar y buscar
@@ -71,16 +75,8 @@ causa raíz, el caso real y la validación.
    opciones nuevas. La captura manual adicional anterior sigue disponible.
    Sin JavaScript se utiliza la selección nativa múltiple y «Actualizar barrios»
    después de cambiar de ciudad, conservando el borrador sin guardarlo.
-3. Ingresa habitaciones mínimas o área mínima (o ambas). Es obligatorio al menos
-   uno. Usa números sin separadores de miles; decimales con punto. Presupuesto y
-   áreas deben ser positivos; habitaciones, baños, parqueaderos y antigüedad
-   admiten cero y requieren enteros. El mínimo de área no puede superar el máximo.
-   Los errores se muestran en el formulario conservando lo diligenciado.
-4. «Características adicionales y preferencias» incluye baños, parqueaderos,
-   área máxima, antigüedad, tipo de área, estado y observaciones. Por defecto,
-   cada criterio diligenciado es indispensable. Marca como preferencia aquellos
-   que deban ordenar sin excluir. Una preferencia marcada requiere un valor.
-   Ciudad, ubicación, tipo, operación y presupuesto siempre son indispensables.
+3. En v0.6 ya no es obligatorio indicar habitaciones o área. Los límites de habitaciones especificados son estrictos; presupuesto mínimo opcional y máximo obligatorio. El mínimo no puede superar el máximo. Los datos guardados antes siguen siendo legibles.
+4. Baños, parqueaderos, área y antigüedad son preferencias flexibles. El campo histórico `preferencias` se acepta por compatibilidad, pero no permite hacer flexibles las habitaciones ni estrictos los baños. El formulario v0.6 no muestra controles de obligatoriedad. Observaciones no son requisitos estrictos. Los formularios antiguos permanecen para compatibilidad de navegación; el flujo recomendado es `/v0.6/nuevo`.
 5. Pulsa «Guardar y buscar coincidencias». Se consulta el
    catálogo global completo, independientemente de la URL o filtros del scraper
    y de los filtros activos de la tabla.
@@ -135,8 +131,7 @@ $env:RADAR_CRM_DB = 'C:\ruta\consola.sqlite'
 La ruta debe ser distinta del catálogo. Las migraciones aditivas versionadas
 se ejecutan dentro de la transacción de escritura, conservan registros y no
 modifican tablas del scraper. Para respaldar los datos, detén el servicio y
-copia ambos SQLite. No hay Google Sheets, WhatsApp, webhooks, Gemini, otros
-LLM, servicios externos ni envíos automáticos. La API y los contratos de
+copia ambos SQLite. No hay Google Sheets, WhatsApp, webhooks ni envíos automáticos. v0.6 añade evaluación opcional con Gemini Flash; sin configuración o ante fallos mantiene el motor determinista. La API y los contratos de
 captura están documentados en [oportunidades](../oportunidades/README.md).
 
 ## Catálogo (funciones conservadas)
@@ -241,7 +236,7 @@ local de prueba y lo cierra al terminar. No ejecutan scraping ni usan la base re
 Las pruebas v0.1 de tarjetas/galería se adaptaron al comportamiento aprobado de
 v0.2, conservando la cobertura de filtros, errores, seguridad, navegación y lectura.
 Las pruebas v0.3 añaden el ciclo completo con y sin JavaScript, escritorio y móvil,
-la regla habitaciones/área, criterios indispensables/preferencias, desconocidos,
+las reglas históricas de captura y matching (actualizadas por v0.6), desconocidos,
 edición, relaciones cliente/oportunidades, rollback atómico, reinicio del
 repositorio, migraciones aditivas y huellas de la base del catálogo sin cambios.
 

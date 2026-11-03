@@ -1,7 +1,7 @@
-# Clientes, oportunidades y matching v0.3
+# Clientes, oportunidades y matching v0.6
 
 Este módulo reutiliza `catalogo.modelos.Inmueble` y `ServicioCatalogo.listar()`.
-No importa `metro`, no ejecuta scraping y no invoca servicios externos.
+El motor determinista no importa `metro` ni ejecuta scraping. El adaptador `gemini.py` añade evaluación opcional por REST; `automatizacion.py` coordina tareas y caché. Ver [reglas vigentes v0.6](../RADAR_PROYECTO_RECTOR.md) y [configuración y límites](../consola/docs/V06.md).
 
 - `modelos.py`: contratos Pydantic de entrada y registros con UUID y fechas UTC.
   `Cliente` y `Oportunidad` se guardan separados, con relación uno a muchos.
@@ -16,6 +16,14 @@ No importa `metro`, no ejecuta scraping y no invoca servicios externos.
 - `api.py`: API JSON sobre el FastAPI existente; el adaptador HTML está en
   `consola/oportunidades.py`. Ambos se registran desde el router de la Consola,
   sin cambiar el punto de entrada del scraper.
+
+## Reglas vigentes v0.6
+
+Los límites especificados de presupuesto y habitaciones son estrictos, junto a operación, tipo y ubicación. Barrios múltiples son alternativas. Baños, área y características secundarias son preferencias, sin controles de obligatoriedad. Se leen JSON históricos sin reescribirlos; `preferencias` se conserva por compatibilidad, no cambia esas reglas.
+
+`seguimiento.py` define un protocolo independiente y SQLite aditivo para actividad de clientes, decisiones por oportunidad/inmueble, estado del matching y caché de Gemini. Los repositorios actuales de clientes y oportunidades conservan sus tablas y migración. Las decisiones no se borran al recalcular ni al desaparecer candidatos. Clientes inactivos y oportunidades cerradas no se recalculan automáticamente.
+
+Gemini solo recibe candidatos filtrados por código. El adaptador valida JSON Schema, IDs y evidencias; limita lote, tokens y timeout. La caché depende del modelo, instrucciones, necesidades y hechos del candidato. No se envían nombre ni teléfono del cliente. Sin clave o ante error se informa la limitación, sin simular IA. La prueba contra el proveedor real requiere credenciales y está pendiente.
 
 ## API local
 
@@ -61,8 +69,7 @@ Usa su `id` en una oportunidad:
 del catálogo, incluidos apartamento, casa y otro, sin agruparlos por inferencia.
 PUT reemplaza los datos editables y conserva `id` y `creado_en`. La API valida
 el mismo contrato que la captura manual: campos obligatorios, números finitos,
-áreas positivas, mínimos enteros no negativos, al menos habitaciones o área
-mínima y ubicaciones no vacías. Las entradas inválidas devuelven 422; IDs
+áreas positivas, cantidades enteras no negativas, límites consistentes y ubicaciones no vacías. Habitaciones y área son opcionales en v0.6. Las entradas inválidas devuelven 422; IDs
 inexistentes, 404; almacenamiento no disponible, 503. La captura conjunta de
 cliente y oportunidad es atómica; un fallo revierte ambas escrituras.
 
@@ -72,10 +79,10 @@ Las respuestas de matching incluyen inmueble, oferta de la operación elegida,
 por los datos del catálogo, sin garantizar disponibilidad comercial. El orden
 `coincidencia` usa requisitos confirmados, menos pendientes, más preferencias
 cumplidas e ID; `precio` usa únicamente importes COP conocidos, desconocidos al
-final. No se usan puntuaciones ni modelos de IA.
+final. Esa API devuelve el motor determinista; la ficha v0.6 añade por separado las evaluaciones opcionales de Gemini.
 
 La API es una entrada estructurada reutilizable para futuros capturadores; esta
-entrega no implementa webhooks, WhatsApp, Gemini ni Google Sheets.
+entrega no implementa webhooks, WhatsApp ni Google Sheets. Gemini se integra mediante el adaptador opcional descrito arriba.
 
 El diagnóstico utiliza la misma evaluación que las coincidencias. Devuelve
 `total_catalogo`, `compatibles` (requisitos confirmados), `pendientes`,
@@ -134,7 +141,7 @@ En esa instantánea, el único barrio con anuncios sin contradicciones es La
 Carolina; el selector no ofrece como opciones nuevas los textos ambiguos ni
 todos los nombres del nomenclátor sin anuncios confirmados. Conserva búsqueda,
 selección múltiple y etiquetas históricas. Los otros requisitos del matching
-(precio y moneda, operación, tipo, habitaciones y área) siguen vigentes;
+(precio y moneda, operación, tipo y límites de habitaciones) siguen vigentes; el área es una preferencia flexible en v0.6;
 confirmar la geografía no confirma por sí solo una oportunidad completa.
 
 La API de coincidencias y diagnóstico conserva su contrato completo. La tabla
