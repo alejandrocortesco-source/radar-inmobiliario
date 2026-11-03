@@ -1,38 +1,28 @@
 # Radar Inmobiliario
 
-Radar Inmobiliario es un proyecto para recopilar y revisar información pública de inmuebles.
+**Proyecto privado para Mónica:** herramienta sencilla para registrar necesidades de clientes, mantener un catálogo de inmuebles de Metrocuadrado y encontrar coincidencias útiles. Prioridades: **simplicidad, reutilización del código existente y costo operativo inferior a USD 20/mes**, sujeto a medición.
 
-El componente implementado actualmente es el **scraper de Metrocuadrado**: recorre búsquedas con Playwright, actualiza incrementalmente un catálogo por cambios de precio, guarda su trazabilidad en SQLite y ofrece una interfaz local con FastAPI para revisar y exportar los resultados.
+**Primera referencia para decisiones de producto y desarrollo:** [Documento rector](RADAR_PROYECTO_RECTOR.md).  
+**Instrucciones permanentes para Codex:** [AGENTS.md](AGENTS.md).
 
-La **Consola v0.3** permite consultar el catálogo, registrar clientes y oportunidades, y buscar coincidencias por requisitos y preferencias en [http://127.0.0.1:8000/consola/](http://127.0.0.1:8000/consola/) dentro del mismo FastAPI. Consulta su [guía de inicio y uso](consola/README.md). El servicio y el modelo compartidos están en `catalogo/`; la captura, persistencia y matching independientes están en [`oportunidades/`](oportunidades/README.md). La interfaz técnica permanece en `/`.
+## Estado y ramas
 
-Consulta las [instrucciones de instalación, ejecución y pruebas del scraper](scraper/README.md). Su código, dependencias, herramientas y documentación se encuentran en [`scraper/`](scraper/).
+- **v0.5 cerrada:** cierre técnico en el commit `291ce82b` del 3 de noviembre de 2026, preservado como `release/v0.5`.
+- **`main`:** versión estable y documentación rectora. No desarrollar aquí nuevas funciones de v0.6.
+- **`v0.6`:** rama activa de trabajo para el nuevo dashboard y la evolución del matching.
+- **`v0.4` y `feat/consola-v0.3`:** ramas históricas que se conservan. El nombre de la rama `v0.4` no significa que la versión funcional cerrada sea v0.4.
 
-En la rama **`v0.4`**, la nueva consola está disponible en
-[http://127.0.0.1:8000/v0.4/](http://127.0.0.1:8000/v0.4/), en paralelo a
-v0.3 en su ruta anterior. Reutiliza los mismos datos y añade un comentario
-persistente por inmueble. Consulta [accesos, conservación de v0.3 y evidencia de v0.4](consola/docs/V04.md).
+## Componentes existentes
 
-```text
-radar-inmobiliario/
-├── .gitignore
-├── README.md
-├── catalogo/
-├── consola/
-├── oportunidades/
-└── scraper/
-    ├── README.md
-    ├── docs/
-    ├── metro/
-    ├── tests/
-    ├── tools/
-    ├── run.py
-    ├── pytest.ini
-    ├── requirements.txt
-    ├── requirements.lock.txt
-    ├── start-interface.ps1
-    ├── Dockerfile
-    └── .dockerignore
-```
+- [`scraper/`](scraper/README.md): extracción con Playwright, actualizaciones incrementales, nuevos, cambios de precio, revisión conservadora e historial.
+- [`catalogo/`](catalogo/README.md): modelo compartido, identidad estable, consultas y API.
+- [`oportunidades/`](oportunidades/README.md): clientes, oportunidades, persistencia local y **matching por reglas ya implementado**.
+- [`consola/`](consola/README.md): vistas existentes, filtros, fichas, detalle y exportación. La interfaz histórica está en `/consola/` y la siguiente vista en `/v0.4/`, según la documentación técnica.
 
-El repositorio Git y su historial pertenecen a esta raíz. Los entornos virtuales, credenciales, cachés y resultados locales quedan excluidos de Git. El nombre de la carpeta local puede diferir de `radar-inmobiliario`; no hace falta crear otra carpeta contenedora.
+## Próxima etapa: v0.6
+
+Dashboard de entrada con actividad reciente, clientes y oportunidades, estado de catálogo, agregar URL y nuevo cliente. La revisión detallada se hace en la **ficha del cliente con coincidencias**; el catálogo completo permanece como acceso secundario. Se incorporarán persistencia de preselecciones/descartes, ajustes de criterios y Gemini aprovechando el motor ya existente. La captura manual precede a WhatsApp.
+
+**Tecnología:** Python, FastAPI, Jinja2, JavaScript, SQLite para desarrollo; Google Sheets es el objetivo de persistencia en producción. El despliegue futuro es Cloud Run. No se ha decidido migrar a Firestore.
+
+Antes de cada implementación, contrastar esta guía con el código vigente y conservar sus datos, identificadores, rutas y pruebas.
