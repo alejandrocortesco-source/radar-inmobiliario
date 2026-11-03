@@ -7,7 +7,8 @@ rutas, ramas ni etiquetas como parte de esta mejora.
 
 ## Uso
 
-Encima del listado aparecen **Todos**, **Nuevos**, **Cambio de precio** y
+Bajo el título **Categorías de actualización**, encima de los controles de búsqueda
+y filtros generales, aparecen **Todos**, **Nuevos**, **Cambio de precio** y
 **Revisión conservadora**, cada uno con su contador real. Los contadores
 respetan los filtros generales ya aplicados (texto, ciudad, precio, fuente,
 búsqueda, etc.), independientemente de la categoría seleccionada y la página.
@@ -84,3 +85,6 @@ Comandos desde la raíz (usar directorios temporales dedicados):
 .\.venv\Scripts\python.exe -m pytest -c catalogo/pytest.ini catalogo/tests --basetemp=.tmp/pruebas-categorias-catalogo-02 -q
 .\.venv\Scripts\python.exe -m pytest -c scraper/pytest.ini scraper/tests --basetemp=.tmp/pruebas-categorias-scraper -q
 ```
+
+Corrección de visibilidad: la barra se sitúa antes de los filtros generales y el
+panel móvil se despliega debajo de su control, evitando tapar las categorías.

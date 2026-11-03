@@ -101,6 +101,14 @@ def test_filtros_browser(servidor, chromium, escenario_consola, width, javascrip
     expect(page.locator('tbody tr')).to_have_count(12)
     expect(page.locator('[data-category=nuevos]')).to_have_attribute('aria-current','true')
     assert 'offset=0' in page.url
+    page.locator('[data-filters] > summary').click()
+    # El panel general no debe tapar los accesos rápidos, ni siquiera en móvil.
+    assert page.locator('.category-heading').inner_text() == 'Categorías de actualización'
+    assert page.evaluate("""[...document.querySelectorAll('[data-category]')].every(a => {
+        const r = a.getBoundingClientRect();
+        return a.contains(document.elementFromPoint(r.x + r.width/2, r.y + r.height/2));
+    })""")
+    page.locator('[data-filters] > summary').click()
     if javascript:
         assert page.evaluate('window.pruebaSinRecarga') == 42
         page.locator('[data-auto-submit]').select_option('24')

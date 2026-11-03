@@ -1,7 +1,7 @@
 <section id="catalogo-completo" class="catalog-section" aria-label="Explorar catálogo completo">
 
-{% include '_filtros.html' %}
 {% include '_categorias.html' %}
+{% include '_filtros.html' %}
 {% if error %}<div class="notice" role="alert"><strong>No pudimos aplicar los filtros.</strong><p>{{error}}</p></div>
 {% elif tarjetas %}
 <div class="table-scroll" role="region" aria-label="Catálogo de inmuebles" tabindex="0" data-catalog-scroll>

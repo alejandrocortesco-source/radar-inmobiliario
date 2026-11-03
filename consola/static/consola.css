@@ -345,7 +345,8 @@ small { font-size: 11px; color: var(--muted); }
   .matching-page-heading .actions { flex-wrap: wrap; }
 }
 
-.quick-filters{display:flex;flex-wrap:wrap;gap:.5rem;margin:.75rem 0 1rem}
+.category-heading{font-weight:600;margin:0 0 .5rem}
+.quick-filters{display:flex;flex-wrap:wrap;gap:.5rem;margin:0 0 1rem}
 .quick-filters a{display:inline-flex;align-items:center;gap:.5rem;padding:.45rem .7rem;border:1px solid #bcb3a7;border-radius:.4rem;text-decoration:none;color:inherit}
 .quick-filters a[aria-current]{background:#514639;color:#fff;border-color:#514639}
 .quick-filters span{font-variant-numeric:tabular-nums;font-weight:700}
