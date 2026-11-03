@@ -343,3 +343,55 @@ def test_navegacion_responsive_creacion_revision_y_catalogo(servidor, pagina, wi
     page.goto(servidor + '/v0.6/')
     page.get_by_role('link', name='Abrir catálogo completo').click()
     assert 'offset=12' in page.url
+
+
+@pytest.mark.parametrize('width', [1440, 390])
+def test_selector_barrios_guia_ciudad_y_distingue_estados_vacios(escenario_consola, servidor, pagina, width):
+    # Patrón observado: una ciudad con barrios confirmados y otra sin ellos.
+    for iid, doc in escenario_consola['documentos'].items():
+        if doc['normalized']['city'] == 'Medellín':
+            doc['normalized'].update(city='Cartagena de Indias', neighborhood=None, zone=None)
+            escenario_consola['store'].result(escenario_consola['run'], iid, 'success', doc)
+    page = pagina
+    page.set_viewport_size({'width':width, 'height':900})
+    page.goto(servidor + '/v0.6/')
+    page.get_by_role('link', name='Registrar cliente y necesidad').click()
+    assert page.url == servidor + '/v0.6/nuevo'
+    expect(page.locator('h1')).to_have_text('Registrar cliente y necesidad')
+    expect(page.locator('#crm-form')).to_be_visible()
+    page.locator('[data-location-picker] > summary').click()
+    expect(page.locator('[data-location-empty]')).to_contain_text('Primero selecciona una ciudad')
+    expect(page.locator('[data-location-search]')).to_be_disabled()
+    page.locator('#crm_ciudad').select_option(label='Cartagena de Indias')
+    page.locator('[data-location-picker] > summary').click()
+    expect(page.locator('[data-location-empty]')).to_contain_text('No hay barrios disponibles en el catálogo para esta ciudad')
+    page.locator('#crm_ciudad').select_option(label='Bogotá')
+    page.locator('[data-location-picker] > summary').click()
+    expect(page.locator('[data-location-search]')).to_be_enabled()
+    expect(page.locator('[data-location-row]:visible')).to_have_count(1)
+    page.locator('[data-location-search]').fill('barrio inexistente')
+    expect(page.locator('[data-location-empty]')).to_contain_text('No hay barrios que coincidan con el texto')
+    page.locator('[data-location-search]').fill('carolína')
+    expect(page.locator('[data-location-row]:visible')).to_have_count(1)
+    page.locator('[data-location-row]:visible input').check()
+    page.keyboard.press('Escape')
+    expect(page.locator('[data-location-picker] > summary')).to_be_focused()
+    expect(page.locator('[data-location-tags]')).to_contain_text('La Carolina')
+    page.locator('#crm_nombre').fill('Cliente prueba barrios')
+    page.locator('#crm_tipo').select_option('casa')
+    page.locator('#crm_presupuesto').fill('110000000')
+    assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+    page.get_by_role('button', name='Confirmar y guardar oportunidad').click()
+    expect(page.locator('h1')).to_have_text('Cliente prueba barrios')
+    expect(page.locator('[data-candidate]')).to_have_count(10)
+
+
+def test_selector_barrios_con_ciudad_unica_preseleccionada(escenario_consola, servidor, pagina):
+    for iid, doc in escenario_consola['documentos'].items():
+        doc['normalized']['city'] = 'Bogotá D.C.'
+        escenario_consola['store'].result(escenario_consola['run'], iid, 'success', doc)
+    pagina.goto(servidor + '/v0.6/nuevo')
+    expect(pagina.locator('#crm_ciudad')).to_have_value('Bogotá D.C.')
+    pagina.locator('[data-location-picker] > summary').click()
+    expect(pagina.locator('[data-location-search]')).to_be_enabled()
+    expect(pagina.locator('[data-location-row]:visible')).to_have_count(1)

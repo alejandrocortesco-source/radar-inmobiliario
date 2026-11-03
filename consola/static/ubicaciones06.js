@@ -16,12 +16,19 @@ if (locationField) {
   const cityKey = () => city.tagName === 'SELECT' ? city.selectedOptions[0]?.dataset.cityKey || '' : city.dataset.cityKey;
   function filterChoices() {
     const term = normalizeLocation(search.value);
-    let visible = 0;
+    const selectedCity = cityKey();
+    let visible = 0, available = 0;
     choices.forEach(row => {
-      row.hidden = row.dataset.city !== cityKey() || !normalizeLocation(row.querySelector('span').textContent).includes(term);
+      if (row.dataset.city === selectedCity) available++;
+      row.hidden = row.dataset.city !== selectedCity || !normalizeLocation(row.querySelector('span').textContent).includes(term);
       if (!row.hidden) visible++;
     });
-    locationField.querySelector('[data-location-empty]').hidden = visible > 0;
+    search.disabled = !selectedCity || available === 0;
+    const empty = locationField.querySelector('[data-location-empty]');
+    empty.textContent = !selectedCity ? 'Primero selecciona una ciudad en el campo Ciudad para ver sus barrios.' :
+      available === 0 ? 'No hay barrios disponibles en el catálogo para esta ciudad. Puedes escribirlos en «Características adicionales y preferencias».' :
+      'No hay barrios que coincidan con el texto. Prueba con otro nombre o borra la búsqueda.';
+    empty.hidden = visible > 0;
   }
   function syncSelection() {
     tags.replaceChildren();
@@ -62,7 +69,7 @@ if (locationField) {
     syncSelection();
   });
   search.addEventListener('input', filterChoices);
-  picker.addEventListener('toggle', () => { if (picker.open) { filterChoices(); search.focus(); } });
+  picker.addEventListener('toggle', () => { if (picker.open) { filterChoices(); if (!search.disabled) search.focus(); } });
   locationField.querySelector('[data-location-done]').addEventListener('click', () => { picker.open = false; picker.querySelector('summary').focus(); });
   document.addEventListener('click', event => { if (!event.composedPath().includes(locationField)) picker.open = false; });
   picker.addEventListener('keydown', event => { if (event.key === 'Escape') { picker.open = false; picker.querySelector('summary').focus(); } });
