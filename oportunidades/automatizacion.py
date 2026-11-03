@@ -38,16 +38,17 @@ def recalcular(s, catalogo, identificador, forzar=False, gemini=None, seguimient
     entradas = [candidato(r) for r in resultados]
     try:
         ia = gemini or Gemini()
+        limite = max(1, min(30, int(os.getenv('GEMINI_MAX_CANDIDATES', '20'))))
     except ValueError:
         ia = None
+        limite = 20
     configuracion = (ia.modelo, bool(ia.clave), ia.version) if ia else ('invalido', False)
-    firma = huella([o.necesidades.model_dump(mode='json'), entradas, configuracion])
+    firma = huella([o.necesidades.model_dump(mode='json'), entradas, configuracion, limite])
     if not repo.iniciar(o.id, firma, forzar):
         return False
     evaluaciones, aviso = {}, ''
     try:
         # Un lote por oportunidad/ejecución como máximo; el resto sigue visible sin IA.
-        limite = max(1, min(30, int(os.getenv('GEMINI_MAX_CANDIDATES', '20'))))
         seleccion = entradas[:limite]
         claves = {c['id']: huella([configuracion, o.necesidades.model_dump(mode='json'), c]) for c in seleccion}
         faltantes = []

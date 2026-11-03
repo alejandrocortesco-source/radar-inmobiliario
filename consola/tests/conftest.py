@@ -18,6 +18,11 @@ def chromium():
 
 @pytest.fixture
 def escenario_consola(tmp_path, monkeypatch):
+    # Nunca heredar CRM real ni credenciales al ejecutar pruebas de mutaciones.
+    monkeypatch.delenv('RADAR_CRM_DB', raising=False)
+    monkeypatch.delenv('GEMINI_API_KEY', raising=False)
+    monkeypatch.delenv('GEMINI_MODEL', raising=False)
+    monkeypatch.delenv('GEMINI_MAX_CANDIDATES', raising=False)
     ruta = tmp_path / 'consola.sqlite'
     monkeypatch.setenv('METRO_DB', str(ruta))
     store = Store(ruta)

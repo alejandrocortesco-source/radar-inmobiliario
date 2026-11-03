@@ -17,16 +17,21 @@ def resumen_clientes(s, seguimiento, todos):
         propias = [o for o in oportunidades if o.cliente_id == c.id]
         abiertas = [o for o in propias if o.estado == 'abierta']
         pendientes, actividad = 0, c.actualizado_en.isoformat()
+        actividad_tipo = 'Cliente actualizado'
         for o in propias:
             decisiones = seguimiento.decisiones(o.id)
             ejecucion = seguimiento.leer(o.id)
-            fechas = [o.actualizado_en.isoformat(), *(d['actualizado'] for d in decisiones.values())]
+            eventos = [(o.actualizado_en.isoformat(), 'Necesidades actualizadas'),
+                       *((d['actualizado'], 'Decisión guardada') for d in decisiones.values())]
             if ejecucion:
-                fechas.append(ejecucion['actualizado'])
-            actividad = max(actividad, *fechas)
+                eventos.append((ejecucion['actualizado'], 'Coincidencias actualizadas' if ejecucion['estado'] == 'listo' else 'Matching en curso'))
+            ultima, tipo = max(eventos)
+            if ultima >= actividad:
+                actividad, actividad_tipo = ultima, tipo
             if o.estado == 'abierta':
                 pendientes += sum(decisiones.get(r.inmueble.id_interno, {}).get('estado', 'pendiente') == 'pendiente' for r in buscar(o.necesidades, todos))
         principal = abiertas[0] if abiertas else propias[0] if propias else None
         salida.append({'cliente': c, 'oportunidad': principal, 'abiertas': len(abiertas),
-                       'pendientes': pendientes, 'actividad': actividad, 'activo': seguimiento.activo(c.id)})
+                       'pendientes': pendientes, 'actividad': actividad, 'actividad_tipo': actividad_tipo,
+                       'activo': seguimiento.activo(c.id)})
     return sorted(salida, key=lambda r: (r['pendientes'] > 0, r['actividad']), reverse=True)

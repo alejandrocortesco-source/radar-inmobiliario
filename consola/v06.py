@@ -39,6 +39,13 @@ def crear_router(proveedor):
     def error(request, exc, status=503):
         return render(request, 'error06.html', status, mensaje=str(exc))
 
+    def dashboard(request, catalogo, s, status=200, **extras):
+        todos = catalogo.listar()
+        filas = resumen_clientes(s, seguimiento(s), todos)
+        return render(request, 'inicio06.html', status, recientes=[f for f in filas if f['activo']][:6],
+            indicadores=indicadores(todos, catalogo.ultima_actualizacion()), fuentes=catalogo.listar_busquedas(),
+            mensaje=request.query_params.get('mensaje'), **extras)
+
     @router.get('')
     def entrada():
         return RedirectResponse('/v0.6/', 307)
@@ -46,11 +53,7 @@ def crear_router(proveedor):
     @router.get('/')
     def inicio(request: Request, catalogo=Depends(proveedor), s=Depends(proveedor_oportunidades)):
         try:
-            todos = catalogo.listar()
-            filas = resumen_clientes(s, seguimiento(s), todos)
-            return render(request, 'inicio06.html', recientes=[f for f in filas if f['activo']][:6],
-                indicadores=indicadores(todos, catalogo.ultima_actualizacion()),
-                fuentes=catalogo.listar_busquedas(), mensaje=request.query_params.get('mensaje'))
+            return dashboard(request, catalogo, s)
         except (ErrorPersistencia, ErrorLecturaCatalogo, FileNotFoundError) as exc:
             return error(request, exc)
 
@@ -214,7 +217,7 @@ def crear_router(proveedor):
             return error(request, exc)
 
     @router.post('/fuentes')
-    async def fuente(request: Request, catalogo=Depends(proveedor)):
+    async def fuente(request: Request, catalogo=Depends(proveedor), s=Depends(proveedor_oportunidades)):
         valores = {k: v[-1] for k, v in parse_qs((await request.body()).decode(), keep_blank_values=True).items()}
         try:
             url = valores.get('url', '')
@@ -230,7 +233,10 @@ def crear_router(proveedor):
             catalogo.guardar_busqueda('metrocuadrado', identificador, valores.get('nombre', ''))
             return RedirectResponse('/v0.6/?mensaje=fuente_guardada#agregar-fuente', 303)
         except (ConsultaInvalida, ValueError, TypeError) as exc:
-            return error(request, exc, 422)
+            try:
+                return dashboard(request, catalogo, s, 422, fuente_error=str(exc), fuente_valores=valores)
+            except (ErrorPersistencia, ErrorLecturaCatalogo, FileNotFoundError):
+                return error(request, exc, 422)
         except (ErrorLecturaCatalogo, OSError) as exc:
             return error(request, exc)
 

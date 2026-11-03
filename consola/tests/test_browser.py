@@ -141,16 +141,18 @@ def test_adaptable_sin_desbordamiento_y_filtros(pagina, servidor, tmp_path, anch
     pagina.goto(servidor + '/consola/')
     expect(pagina.locator('[data-filters]')).not_to_have_attribute('open', '')
     expect(pagina.locator('.catalog-table tbody tr')).to_have_count(24)
-    assert pagina.evaluate('document.documentElement.scrollWidth <= innerWidth')
+    assert pagina.evaluate('document.documentElement.scrollWidth <= innerWidth'), pagina.evaluate("[...document.querySelectorAll('body *')].filter(e=>e.getBoundingClientRect().right>innerWidth&&!e.closest('.table-scroll')).map(e=>[e.tagName,e.className,e.getBoundingClientRect().right]).slice(0,20)")
     pagina.locator('[data-filters] > summary').click()
     pagina.get_by_label('Ciudad', exact=True).select_option('Medellín')
     pagina.get_by_role('button', name='Aplicar filtros', exact=True).click()
     expect(pagina.locator('[data-total]')).to_have_text('13')
-    assert pagina.evaluate('document.documentElement.scrollWidth <= innerWidth')
+    # El texto del documento puede estar disponible antes de terminar de cargar su CSS.
+    pagina.wait_for_load_state('load')
+    assert pagina.evaluate('document.documentElement.scrollWidth <= innerWidth'), pagina.evaluate("[...document.querySelectorAll('body *')].filter(e=>e.getBoundingClientRect().right>innerWidth&&!e.closest('.table-scroll')).map(e=>[e.tagName,e.className,e.getBoundingClientRect().right]).slice(0,20)")
     pagina.screenshot(path=str(tmp_path / f'catalogo-{ancho}.png'), full_page=True)
     pagina.locator('.property-link').first.click()
     expect(pagina.get_by_role('heading', name='Descripción')).to_be_visible()
-    assert pagina.evaluate('document.documentElement.scrollWidth <= innerWidth')
+    assert pagina.evaluate('document.documentElement.scrollWidth <= innerWidth'), pagina.evaluate("[...document.querySelectorAll('body *')].filter(e=>e.getBoundingClientRect().right>innerWidth&&!e.closest('.table-scroll')).map(e=>[e.tagName,e.className,e.getBoundingClientRect().right]).slice(0,20)")
     pagina.screenshot(path=str(tmp_path / f'ficha-{ancho}.png'), full_page=True)
 
 
@@ -252,12 +254,7 @@ def test_v03_ciclo_captura_edicion_y_matching(chromium, servidor, tmp_path, java
             page.get_by_role('button', name='Actualizar barrios', exact=True).click()
         page.locator('#crm_presupuesto').fill('110000000')
         seleccionar_barrio(page, javascript)
-        page.get_by_role('button', name='Guardar oportunidad', exact=True).click()
-        if javascript:
-            assert page.locator('#crm_nombre').input_value() == 'Ana de prueba'
-            assert not page.locator('#crm_habitaciones_min').evaluate('(e) => e.checkValidity()')
-        else:
-            expect(page.get_by_role('alert')).to_contain_text('habitaciones mínimas o área mínima')
+        # v0.6: habitaciones y área son opcionales; el flujo conserva la navegación.
         page.locator('#crm_habitaciones_min').fill('3')
         page.get_by_role('button', name='Guardar oportunidad', exact=True).click()
         expect(page.get_by_role('status')).to_contain_text('Guardado correctamente')

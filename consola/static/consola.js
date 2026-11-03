@@ -1,15 +1,5 @@
 "use strict";
 const captureForm = document.querySelector('#crm-form');
-if (captureForm) {
-  const rooms = captureForm.querySelector('[name="habitaciones_min"]');
-  const area = captureForm.querySelector('[name="area_min_m2"]');
-  function validateMinimum() {
-    rooms.setCustomValidity(rooms.value === '' && area.value === '' ? 'Ingresa habitaciones mínimas o área mínima.' : '');
-  }
-  rooms.addEventListener('input', validateMinimum);
-  area.addEventListener('input', validateMinimum);
-  validateMinimum();
-}
 // Mejora progresiva: el select nativo sigue siendo el único valor que se envía.
 const locationField = document.querySelector('[data-location-field]');
 if (locationField) {

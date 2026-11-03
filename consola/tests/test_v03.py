@@ -56,8 +56,7 @@ def test_validacion_numerica_y_ubicaciones(datos):
 
 def test_habitaciones_o_area_y_nombre():
     base = necesidades().model_dump()
-    with pytest.raises(ValidationError, match='habitaciones mínimas o área mínima'):
-        Necesidades.model_validate(base | {'habitaciones_min': None})
+    assert Necesidades.model_validate(base | {'habitaciones_min': None})  # v0.6: rango opcional
     assert Necesidades.model_validate(base | {'habitaciones_min': None, 'area_min_m2': 80})
     assert Necesidades.model_validate(base | {'area_min_m2': 80})
     with pytest.raises(ValidationError):
@@ -139,13 +138,13 @@ def test_datos_faltantes_no_confirman(cambios, pendiente):
 
 def test_minimos_preferencias_areas_antiguedad_y_normalizacion():
     n = necesidades(banos_min=2, parqueaderos_min=1, area_min_m2=80, area_max_m2=90)
-    assert comparar(n, inmueble()) is None
+    assert comparar(n, inmueble()).preferencias_no_cumplidas
     assert comparar(n.model_copy(update={'preferencias': ['parqueaderos_min']}), inmueble()).confirmada
     assert comparar(n, inmueble(parqueaderos=None)) is not None
     n = necesidades(area_min_m2=80, antiguedad_max=10)
     r = comparar(n, inmueble(area_construida_m2=None, area_privada_m2=Decimal('90')))
-    assert not r.confirmada and len(r.pendientes) == 2
-    assert any('Antigüedad' in v for v in r.pendientes)
+    assert r.confirmada and len(r.preferencias_pendientes) == 2
+    assert any('Antigüedad' in v for v in r.preferencias_pendientes)
     assert comparar(necesidades(), inmueble(ciudad='  BOGOTA ', barrio='la carolina')).confirmada
     assert comparar(necesidades(zonas=['Norte']), inmueble(barrio='Otro')).confirmada
     assert not comparar(necesidades(zonas=['Norte']), inmueble(barrio='Otro', zona=None)).confirmada
@@ -209,6 +208,7 @@ def test_api_errores_no_guardan(escenario_consola):
     datos = {'cliente_id': 'no-existe', 'necesidades': necesidades().model_dump(mode='json')}
     assert client.post('/api/oportunidades', json=datos).status_code == 404
     datos['necesidades']['habitaciones_min'] = None
+    datos['necesidades']['presupuesto_max'] = 0
     assert client.post('/api/oportunidades', json=datos).status_code == 422
     assert client.get('/api/clientes').json() == []
 
@@ -217,8 +217,8 @@ def test_formulario_errores_edicion_cliente_y_resultados(escenario_consola):
     client = TestClient(app)
     datos = {'nombre': 'Cliente <script>alert(1)</script>', 'operacion': 'compra', 'tipo': 'casa',
              'ciudad': 'Bogotá', 'ubicaciones': ['barrio:La Carolina', 'zona:Norte'], 'presupuesto_max': '110000000'}
-    mal = client.post('/consola/oportunidades', data=datos)
-    assert mal.status_code == 422 and 'Ingresa habitaciones mínimas o área mínima' in mal.text
+    mal = client.post('/consola/oportunidades', data=datos | {'presupuesto_max': '0'})
+    assert mal.status_code == 422 and 'Presupuesto máximo' in mal.text
     assert '<script>alert(1)</script>' not in mal.text
     assert client.get('/api/clientes').json() == []
     datos['habitaciones_min'] = '3'

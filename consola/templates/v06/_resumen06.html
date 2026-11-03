@@ -3,7 +3,7 @@
 {%- endmacro %}
 {% macro tabla_clientes(filas) %}
 <div class="table-scroll" role="region" aria-label="Clientes y oportunidades" tabindex="0"><table><thead><tr><th scope="col">Cliente</th><th scope="col">Necesidad</th><th scope="col">Por revisar</th><th scope="col">Última actividad</th></tr></thead><tbody>
-{% for f in filas %}<tr><th scope="row"><a href="/v0.6/clientes/{{f.cliente.id}}">{{f.cliente.nombre}}</a>{% if f.abiertas > 1 %}<small>{{f.abiertas}} oportunidades abiertas</small>{% endif %}</th><td>{{necesidad(f.oportunidad)}}</td><td><span class="count {{'attention' if f.pendientes}}">{{f.pendientes}}</span></td><td class="muted">{{f.actividad|fecha}}</td></tr>
+{% for f in filas %}<tr><th scope="row"><a href="/v0.6/clientes/{{f.cliente.id}}">{{f.cliente.nombre}}</a>{% if f.abiertas > 1 %}<small>{{f.abiertas}} oportunidades abiertas</small>{% endif %}</th><td>{{necesidad(f.oportunidad)}}</td><td><span class="count {{'attention' if f.pendientes}}">{{f.pendientes}}</span></td><td class="muted">{{f.actividad|fecha}}<small>{{f.actividad_tipo}}</small></td></tr>
 {% else %}<tr><td colspan="4" class="empty">No hay clientes en esta vista. Registra un cliente para empezar.</td></tr>{% endfor %}
 </tbody></table></div>
 {% endmacro %}

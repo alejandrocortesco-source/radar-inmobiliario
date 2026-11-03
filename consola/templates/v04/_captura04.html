@@ -21,7 +21,7 @@
       {% include '_ubicaciones.html' %}
       {% for campo in ['habitaciones_min','area_min_m2'] %}<label for="crm_{{campo}}">{{criterios_crm[campo]}}{{' (m²)' if campo=='area_min_m2' else ''}}<input id="crm_{{campo}}" name="{{campo}}" type="number" min="{{'0.01' if campo=='area_min_m2' else '0'}}" step="{{'0.01' if campo=='area_min_m2' else '1'}}" max="{{'9999999999.99' if campo=='area_min_m2' else '1000'}}" value="{{captura.get(campo) if captura.get(campo) is not none else ''}}"></label>{% endfor %}
     </div>
-    <p class="capture-help">* Obligatorio. Ingresa habitaciones mínimas o área mínima; puedes ingresar ambas. Los criterios numéricos son indispensables salvo que los marques como preferencia.</p>
+    <p class="capture-help">* Obligatorio. Los límites de habitaciones son estrictos cuando se especifican. Área, baños y características secundarias son preferencias opcionales.</p>
     <details class="capture-extra" {{'open' if errores_captura else ''}}><summary>Características adicionales y preferencias</summary>
       <div class="capture-fields">
         <label for="crm_otros_barrios">Agregar barrios (separados por coma)<input id="crm_otros_barrios" name="otros_barrios" value="{{captura.get('otros_barrios', '')}}"></label>
@@ -30,7 +30,7 @@
         <label for="crm_tipo_area">Tipo de área para comparar<select id="crm_tipo_area" name="tipo_area">{% for tipo in ['construida','privada','publicada'] %}<option {{'selected' if captura.get('tipo_area','construida')==tipo else ''}}>{{tipo}}</option>{% endfor %}</select></label>
         <label for="crm_estado">Estado<select id="crm_estado" name="estado">{% for estado in ['abierta','cerrada'] %}<option {{'selected' if captura.get('estado','abierta')==estado else ''}}>{{estado}}</option>{% endfor %}</select></label>
       </div>
-      <fieldset class="preference-fields"><legend>Tratar como preferencia (ordena, no excluye)</legend>{% for campo, etiqueta in criterios_crm.items() %}<label><input type="checkbox" name="preferencias" value="{{campo}}" {{'checked' if campo in captura.get('preferencias', []) else ''}}> {{etiqueta}}</label>{% endfor %}</fieldset>
+
       <p class="capture-help">Antigüedad: el catálogo actual no tiene este dato estructurado. Se mostrará pendiente de verificar. Las áreas se comparan solo con el tipo elegido, sin sustituirlo.</p>
       <label for="crm_observaciones">Observaciones y preferencias adicionales<textarea id="crm_observaciones" name="observaciones" rows="2" maxlength="5000">{{captura.get('observaciones', '')}}</textarea></label>
       <p class="capture-help">El texto libre se conserva para consulta de Mónica; no se interpreta automáticamente.</p>
