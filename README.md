@@ -17,7 +17,7 @@ Inicio local desde la raíz:
 .\.venv\Scripts\python.exe scraper/run.py serve
 ```
 
-Las evaluaciones reales de Gemini requieren `GEMINI_API_KEY` y un `GEMINI_MODEL` Flash disponible para la cuenta. Sin configuración, o ante error, el motor determinista permanece disponible y se informa la limitación. El objetivo de operación inferior a US$20/mes queda sujeto a medir consumo y alojamiento. No hay despliegue de producción ni migración a Sheets en esta entrega.
+Las evaluaciones reales de Gemini requieren `GEMINI_API_KEY` y un `GEMINI_MODEL` Flash disponible para la cuenta. Sin configuración, o ante error, el motor determinista permanece disponible y se informa la limitación. El objetivo de operación inferior a US$10/mes queda sujeto a medir consumo y alojamiento. No hay despliegue de producción ni migración a Sheets en esta entrega.
 
 ```text
 radar-inmobiliario/
