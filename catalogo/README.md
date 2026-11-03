@@ -286,3 +286,13 @@ Desde la raíz, con el entorno existente:
 
 Quedan fuera de esta entrega: interfaz de Mónica, adaptador Sheets, migraciones,
 historial general de cambios, nuevas fuentes, oportunidades, matching y despliegue.
+
+## Categorías de la última actualización
+
+`FiltrosCatalogo.categoria` admite `CategoriaActualizacion`: `todos`, `nuevos`,
+`cambio_precio`, `revision_conservadora`. `PresenciaBusqueda.categorias_actualizacion`
+contiene la evidencia traducida por el repositorio, por búsqueda. Las consultas
+`seleccionar` y `contar_categorias` son independientes del almacenamiento y del UX;
+los conteos respetan los demás filtros y preceden a la paginación. El endpoint
+`/api/catalog` admite el parámetro `categoria`. Véanse las
+[reglas de ejecución relevante y validación](../consola/docs/FILTROS_V05.md).

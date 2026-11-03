@@ -1,10 +1,11 @@
 """Filtrado en memoria del modelo común, sin HTTP ni conocimiento de SQLite."""
 
 import unicodedata
+from dataclasses import replace
 from .geografia import normalizar_ciudad, resolver_barrio
 
 from .filtros import FiltrosCatalogo, OrdenCatalogo
-from .modelos import TipoArea
+from .modelos import CategoriaActualizacion, TipoArea
 
 
 def _texto(valor):
@@ -38,6 +39,11 @@ def _presencia(inmueble, filtros):
 
 
 def _coincide(inmueble, filtros):
+    if filtros.categoria != CategoriaActualizacion.TODOS:
+        presencias = (p for p in inmueble.origen.busquedas
+                      if filtros.id_busqueda is None or p.id_busqueda == filtros.id_busqueda)
+        if not any(filtros.categoria in p.categorias_actualizacion for p in presencias):
+            return False
     if filtros.texto and not any(
         _texto(filtros.texto) in _texto(v)
         for v in (inmueble.titulo, inmueble.descripcion, inmueble.origen.id_original)
@@ -124,3 +130,11 @@ def paginar(items, limite, desplazamiento):
     inicio = max(0, desplazamiento)
     pagina = items[inicio:] if limite < 0 else items[inicio:inicio + limite]
     return {'total': len(items), 'items': pagina, 'limit': limite, 'offset': desplazamiento}
+
+
+def contar_categorias(inmuebles, filtros):
+    """Cuenta UUID únicos después de filtros generales y antes de paginar."""
+    base = seleccionar(inmuebles, replace(filtros, categoria=CategoriaActualizacion.TODOS))
+    return {categoria.value: len(base) if categoria == CategoriaActualizacion.TODOS else
+            sum(_coincide(i, replace(filtros, categoria=categoria)) for i in base)
+            for categoria in CategoriaActualizacion}

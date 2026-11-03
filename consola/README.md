@@ -275,3 +275,12 @@ Normalización geográfica posterior: consulta el
 El selector y el matching usan barrios controlados; los textos originales y
 los casos ambiguos quedan disponibles en la ficha. El catálogo del scraper se
 mantiene de solo lectura y la proyección se persiste en `metro-geografia.sqlite`.
+
+## Filtros rápidos — entrega v0.5
+
+La barra del catálogo incorpora Todos, Nuevos, Cambio de precio y Revisión
+conservadora, con contadores reales y selección compatible con los filtros,
+paginación y CSV. En `/v0.4/` cambia el listado sin recargar la página; también
+funciona sin JavaScript. Se reutilizan las clasificaciones registradas en la
+última ejecución completada por búsqueda, conservando todo el historial.
+Consulta [semántica, arquitectura, rutas conservadas y validación](docs/FILTROS_V05.md).

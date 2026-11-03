@@ -46,6 +46,13 @@ class TipoArea(StrEnum):
     PRIVADA = 'privada'
 
 
+class CategoriaActualizacion(StrEnum):
+    TODOS = 'todos'
+    NUEVOS = 'nuevos'
+    CAMBIO_PRECIO = 'cambio_precio'
+    REVISION = 'revision_conservadora'
+
+
 @dataclass(frozen=True, slots=True, kw_only=True)
 class Oferta:
     operacion: Operacion
@@ -69,6 +76,7 @@ class PresenciaBusqueda:
     url: str | None = None
     disponibilidad: Disponibilidad = Disponibilidad.DESCONOCIDA
     ultima_verificacion: datetime | None = None
+    categorias_actualizacion: tuple[CategoriaActualizacion, ...] = ()
 
     def __post_init__(self):
         if not isinstance(self.id_busqueda, str) or not self.id_busqueda.strip():
@@ -77,6 +85,7 @@ class PresenciaBusqueda:
         validar.texto(self.url, 'url')
         validar.enumeracion(self.disponibilidad, Disponibilidad, 'disponibilidad')
         validar.fecha(self.ultima_verificacion, 'ultima_verificacion')
+        validar.tupla(self.categorias_actualizacion, CategoriaActualizacion, 'categorias_actualizacion')
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)

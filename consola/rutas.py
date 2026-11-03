@@ -11,7 +11,7 @@ from pydantic import ValidationError
 
 from catalogo.filtros import FiltrosCatalogo
 from catalogo.modelos import TipoInmueble
-from catalogo.consultas import seleccionar, paginar, ofertas_compatibles
+from catalogo.consultas import seleccionar, paginar, ofertas_compatibles, contar_categorias
 from catalogo.persistencia.contrato import ErrorLecturaCatalogo
 from catalogo.servicio import InmuebleNoEncontrado
 from .presentacion import (
@@ -85,6 +85,9 @@ def crear_router(proveedor_servicio, plantillas=None):
         return render(
             request, 'catalogo.html', ciudades=ciudades, barrios=barrios, filtros=filtros,
             zonas=zonas, fuentes=fuentes, busquedas_opciones=busquedas_opciones,
+            categorias=[{'clave': clave, 'nombre': CATEGORIAS[clave], 'cantidad': cantidad,
+                         'url': url_catalogo(request.query_params, categoria=clave, offset=0)}
+                        for clave, cantidad in contar_categorias(todos, filtros).items()],
             activos=[(ETIQUETAS[k], v) for k, v in request.query_params.multi_items()
                      if k in ETIQUETAS and v.strip()],
             exportar='/consola/exportar.csv' + ('?' + request.url.query if request.url.query else ''),
@@ -186,3 +189,6 @@ ETIQUETAS = {
     'banos_min': 'Baños mín.', 'parqueaderos_min': 'Parqueaderos mín.', 'estratos': 'Estrato',
     'fuente': 'Fuente', 'id_busqueda': 'Búsqueda', 'disponibilidad': 'Estado', 'requiere_revision': 'Revisión',
 }
+
+CATEGORIAS = {'todos': 'Todos', 'nuevos': 'Nuevos', 'cambio_precio': 'Cambio de precio',
+              'revision_conservadora': 'Revisión conservadora'}

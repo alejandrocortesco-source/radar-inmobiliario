@@ -6,7 +6,7 @@ from enum import StrEnum
 
 from . import _validacion as validar
 from .identidad import normalizar_fuente
-from .modelos import Disponibilidad, Operacion, TipoArea, TipoInmueble
+from .modelos import CategoriaActualizacion, Disponibilidad, Operacion, TipoArea, TipoInmueble
 
 
 class OrdenCatalogo(StrEnum):
@@ -22,6 +22,7 @@ class OrdenCatalogo(StrEnum):
 
 @dataclass(frozen=True, slots=True, kw_only=True)
 class FiltrosCatalogo:
+    categoria: CategoriaActualizacion = CategoriaActualizacion.TODOS
     texto: str | None = None
     ciudad: str | None = None
     zonas: tuple[str, ...] = ()
@@ -48,6 +49,7 @@ class FiltrosCatalogo:
     desplazamiento: int = 0
 
     def __post_init__(self):
+        validar.enumeracion(self.categoria, CategoriaActualizacion, 'categoria')
         for nombre in ('texto', 'ciudad', 'id_busqueda'):
             validar.texto(getattr(self, nombre), nombre)
         for nombre in ('zonas', 'barrios'):

@@ -1,0 +1,7 @@
+{% if categorias %}
+<nav class="quick-filters" aria-label="Filtrar por última actualización">
+{% for categoria in categorias %}
+  <a href="{{categoria.url}}" data-category="{{categoria.clave}}" {% if filtros.categoria.value == categoria.clave %}aria-current="true"{% endif %}>{{categoria.nombre}} <span>{{categoria.cantidad}}</span></a>
+{% endfor %}
+</nav>
+{% endif %}

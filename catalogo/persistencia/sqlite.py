@@ -8,7 +8,7 @@ from pathlib import Path
 from decimal import Decimal
 
 from ..identidad import identificar_inmueble
-from ..modelos import Inmueble
+from ..modelos import CategoriaActualizacion, Inmueble
 from ..geografia.persistencia import leer as leer_geografia, recuperar as recuperar_geografia
 from ._metrocuadrado import convertir
 from .contrato import ErrorLecturaCatalogo, RegistroCatalogo, RevisionCatalogo
@@ -47,7 +47,39 @@ class CatalogoSQLite:
             if db is not None:
                 db.close()
 
+    def _categorias_actualizacion(self, db):
+        # Última ejecución exitosa por búsqueda, incluso si no observó inmuebles.
+        # Se lee en la misma transacción que las fichas; no se recalculan decisiones.
+        actualizaciones = {}
+        tablas = {r['name'] for r in db.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+        if not {'run_searches', 'listing_observations', 'price_changes'} <= tablas:
+            # Catálogos anteriores sin evidencia incremental: ninguna categoría inferida.
+            return actualizaciones
+        for r in db.execute('''
+            WITH ultimas AS (
+                SELECT s.search_url, max(r.id) run_id FROM run_searches s
+                JOIN runs r ON r.id=s.run_id WHERE r.status='completed'
+                GROUP BY s.search_url
+            )
+            SELECT o.search_url, j.property_id, j.classification,
+                   c.id cambio FROM ultimas u
+            JOIN listing_observations o ON o.run_id=u.run_id AND o.search_url=u.search_url
+            JOIN jobs j ON j.run_id=o.run_id AND j.property_id=o.property_id
+            LEFT JOIN price_changes c ON c.run_id=j.run_id AND c.property_id=j.property_id
+        '''):
+            categorias = set()
+            categoria = {'new': CategoriaActualizacion.NUEVOS,
+                         'modified': CategoriaActualizacion.CAMBIO_PRECIO,
+                         'review': CategoriaActualizacion.REVISION}.get(r['classification'])
+            if categoria:
+                categorias.add(categoria)
+            if r['cambio'] is not None:
+                categorias.add(CategoriaActualizacion.CAMBIO_PRECIO)
+            actualizaciones[(r['search_url'], r['property_id'])] = tuple(sorted(categorias))
+        return actualizaciones
+
     def _leer_registros(self, db, id_original=None):
+        actualizaciones = self._categorias_actualizacion(db)
         condicion = ' WHERE p.id=?' if id_original is not None else ''
         args = (id_original,) if id_original is not None else ()
         filas = db.execute(
@@ -72,7 +104,8 @@ class CatalogoSQLite:
                 config = json.loads(fila['captura_config']) if fila['captura_config'] else {}
                 resultado.append(RegistroCatalogo(
                     inmueble=convertir(fila, documento, por_anuncio[fila['id']], config,
-                                       geografia=recuperar_geografia(geografia, fila)),
+                                       geografia=recuperar_geografia(geografia, fila),
+                                       actualizaciones=actualizaciones),
                     documento=json.loads(fila['data_json']) if fila['data_json'] else None,
                     resumen={k: fila[k] for k in (
                         'id', 'url', 'title', 'price', 'city', 'property_type', 'needs_refresh')},

@@ -81,7 +81,6 @@ if (locationField) {
   enhanced.hidden = false;
   syncSelection();
 }
-const form = document.querySelector("[data-filter-form]");
 const scrollRegion = document.querySelector("[data-catalog-scroll]");
 const storageKey = "radar:catalogo";
 const address = location.pathname + location.search;
@@ -104,33 +103,38 @@ if (scrollRegion) {
     } catch (_) { /* Sin almacenamiento, se conserva la URL con los filtros. */ }
   });
 }
-if (form) {
-  form.addEventListener("submit", () => {
-    for (const input of form.elements) {
-      if (input.name && typeof input.value === "string" && !input.value.trim()) input.disabled = true;
-    }
-    try { sessionStorage.removeItem(storageKey); } catch (_) {}
+function prepararFiltrosCatalogo() {
+  const form = document.querySelector("[data-filter-form]");
+  if (form) {
+    form.addEventListener("submit", () => {
+      for (const input of form.elements) {
+        if (input.name && typeof input.value === "string" && !input.value.trim()) input.disabled = true;
+      }
+      try { sessionStorage.removeItem(storageKey); } catch (_) {}
+    });
+    document.querySelectorAll("[data-auto-submit]").forEach(control => {
+      control.addEventListener("change", () => form.requestSubmit());
+    });
+  }
+  // Los paneles nativos siguen funcionando sin JavaScript.
+  const panels = document.querySelectorAll(".popover");
+  document.querySelectorAll("[data-price-order]").forEach(link => {
+    link.addEventListener("click", event => {
+      const operation = document.querySelector("#operacion");
+      const currency = document.querySelector("#moneda");
+      if (operation.value && currency.value) return;
+      event.preventDefault();
+      document.querySelector("#orden").value = link.dataset.priceOrder;
+      document.querySelector(".price-filter").open = true;
+      (operation.value ? currency : operation).focus();
+    });
   });
-  document.querySelectorAll("[data-auto-submit]").forEach(control => {
-    control.addEventListener("change", () => form.requestSubmit());
-  });
+  panels.forEach(panel => panel.addEventListener("toggle", () => {
+    if (panel.open) panels.forEach(other => { if (other !== panel) other.open = false; });
+  }));
 }
-// Los paneles nativos siguen funcionando sin JavaScript.
-const panels = document.querySelectorAll(".popover");
-document.querySelectorAll("[data-price-order]").forEach(link => {
-  link.addEventListener("click", event => {
-    const operation = document.querySelector("#operacion");
-    const currency = document.querySelector("#moneda");
-    if (operation.value && currency.value) return;
-    event.preventDefault();
-    document.querySelector("#orden").value = link.dataset.priceOrder;
-    document.querySelector(".price-filter").open = true;
-    (operation.value ? currency : operation).focus();
-  });
-});
-panels.forEach(panel => panel.addEventListener("toggle", () => {
-  if (panel.open) panels.forEach(other => { if (other !== panel) other.open = false; });
-}));
+prepararFiltrosCatalogo();
+document.addEventListener("catalogo:actualizado", prepararFiltrosCatalogo);
 document.addEventListener("keydown", event => {
   if (event.key === "Escape") {
     document.querySelectorAll(".popover[open], .photo-links[open]").forEach(panel => {
@@ -141,5 +145,5 @@ document.addEventListener("keydown", event => {
 });
 document.addEventListener("click", event => {
   if (event.target.closest("[data-price-order]")) return;
-  panels.forEach(panel => { if (!panel.contains(event.target)) panel.open = false; });
+  document.querySelectorAll(".popover").forEach(panel => { if (!panel.contains(event.target)) panel.open = false; });
 });

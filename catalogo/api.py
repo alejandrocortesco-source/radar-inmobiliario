@@ -5,7 +5,7 @@ from decimal import Decimal
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from .filtros import FiltrosCatalogo, OrdenCatalogo
-from .modelos import Disponibilidad, Operacion, TipoArea, TipoInmueble
+from .modelos import CategoriaActualizacion, Disponibilidad, Operacion, TipoArea, TipoInmueble
 from .persistencia.contrato import ErrorLecturaCatalogo
 from .servicio import ConsultaInvalida, InmuebleNoEncontrado, ServicioCatalogo
 
@@ -30,6 +30,7 @@ def consultar_catalogo(servicio, **parametros):
 
 
 def filtros_desde_query(
+    categoria: CategoriaActualizacion = Query(CategoriaActualizacion.TODOS),
     texto: str | None = Query(None), ciudad: str | None = Query(None),
     zonas: list[str] | None = Query(None), barrios: list[str] | None = Query(None),
     tipos: list[TipoInmueble] | None = Query(None),
@@ -49,6 +50,7 @@ def filtros_desde_query(
     # su paginación propia (30 por defecto, hasta 200) para Servicio.consultar.
     try:
         return FiltrosCatalogo(
+            categoria=categoria,
             texto=texto, ciudad=ciudad, zonas=tuple(zonas or ()), barrios=tuple(barrios or ()),
             tipos=tuple(tipos or ()), operacion=operacion, moneda=moneda,
             precio_min=precio_min, precio_max=precio_max, tipo_area=tipo_area,

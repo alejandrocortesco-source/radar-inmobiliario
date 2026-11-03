@@ -10,6 +10,45 @@
   const restore=()=>{try{const p=JSON.parse(store.get('position:'+positionKey()));if(p){scrollTo(0,p.y);const region=document.querySelector('main .table-scroll');if(region)region.scrollLeft=p.x;}}catch{}};
   requestAnimationFrame(restore);
   const matching = !!document.querySelector('.opportunity-summary');
+  let categoryRequest;
+  async function actualizarCatalogo(url, push = true, focus = null) {
+    categoryRequest?.abort();
+    const controller = new AbortController(); categoryRequest = controller;
+    const current = document.querySelector('#catalogo-completo');
+    current?.setAttribute('aria-busy', 'true');
+    announce('Actualizando resultados…');
+    try {
+      const response = await fetch(url, {signal: controller.signal});
+      if (!response.ok) throw Error();
+      const parsed = new DOMParser().parseFromString(await response.text(), 'text/html');
+      const catalog = parsed.querySelector('#catalogo-completo');
+      if (!catalog) throw Error();
+      current.replaceWith(catalog);
+      if (push) history.pushState(null, '', url);
+      store.set('catalogo', location.pathname + location.search);
+      document.querySelector('[data-context="catalogo"]').href = location.href;
+      document.querySelectorAll('[data-new],[data-management]').forEach(a => {
+        const destination = new URL(location.href);
+        destination.searchParams.set('panel', a.hasAttribute('data-new') ? 'nueva' : 'clientes');
+        a.href = destination.pathname + destination.search;
+      });
+      document.dispatchEvent(new Event('catalogo:actualizado'));
+      catalog.querySelectorAll('[data-filters]>summary').forEach(s => s.textContent = 'Más filtros');
+      if (focus) catalog.querySelector(`[data-category="${focus}"]`)?.focus();
+      announce('Catálogo actualizado. ' + catalog.querySelector('[data-total]').textContent + ' inmuebles.');
+    } catch (error) {
+      if (error.name !== 'AbortError') location.assign(url);
+    }
+  }
+  document.addEventListener('click', e => {
+    const link = e.target.closest('[data-category]');
+    if (!link || e.defaultPrevented || e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey || active) return;
+    e.preventDefault();
+    actualizarCatalogo(link.href, true, link.dataset.category);
+  });
+  addEventListener('popstate', () => {
+    if (document.querySelector('#catalogo-completo')) actualizarCatalogo(location.href, false);
+  });
   const key = matching ? 'matching' : 'catalogo';
   if (!params.has('panel') && !document.querySelector('.detail')) store.set(key, location.pathname+location.search);
   document.querySelectorAll('[data-context]').forEach(a => {

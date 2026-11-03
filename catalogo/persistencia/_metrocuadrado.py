@@ -75,7 +75,7 @@ def _objeto(valor, nombre):
     return valor
 
 
-def convertir(fila, documento, presencias, config, *, geografia=None):
+def convertir(fila, documento, presencias, config, *, geografia=None, actualizaciones=None):
     documento = _objeto(documento, 'documento')
     normal = _objeto(documento.get('normalized'), 'normalized')
     extra = _objeto(documento.get('extra'), 'extra')
@@ -114,6 +114,7 @@ def convertir(fila, documento, presencias, config, *, geografia=None):
         id_busqueda=p['search_url'], url=p['search_url'],
         disponibilidad=estados.get(p['state'], Disponibilidad.DESCONOCIDA),
         ultima_verificacion=_fecha(p['last_verified_at']),
+        categorias_actualizacion=(actualizaciones or {}).get((p['search_url'], fila['id']), ()),
     ) for p in presencias)
     primeras = [f for p in presencias if (f := _fecha(p['first_seen'])) is not None]
     verificaciones = [b.ultima_verificacion for b in busquedas if b.ultima_verificacion is not None]

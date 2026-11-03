@@ -1,6 +1,7 @@
 <section id="catalogo-completo" class="catalog-section" aria-label="Explorar catálogo completo">
 
 {% include '_filtros.html' %}
+{% include '_categorias.html' %}
 {% if error %}<div class="notice" role="alert"><strong>No pudimos aplicar los filtros.</strong><p>{{error}}</p></div>
 {% elif tarjetas %}
 <div class="table-scroll" role="region" aria-label="Catálogo de inmuebles" tabindex="0" data-catalog-scroll>
@@ -32,6 +33,6 @@
 </nav>
 <p class="legend">Publicación · Fotografías · OpenStreetMap. En ubicaciones aproximadas, el punto es el centro de la zona, no una dirección exacta. Accesos deshabilitados: no disponibles. Área mostrada: construida, luego privada y luego publicada. Filtros y orden de área: solo {{filtros.tipo_area.value}}, sin sustituir por otro tipo.</p>
 {% else %}
-<section class="empty-state"><h1>{{'Esta página ya no tiene inmuebles' if total else ('No encontramos inmuebles con estos filtros' if activos else 'El catálogo está vacío')}}</h1><p>{{'Regresa a la primera página para continuar.' if total else 'Amplía los rangos o limpia los filtros.'}}</p><a href="{{primera if total else '/consola/'}}">{{'Ir a la primera página' if total else 'Limpiar filtros'}}</a></section>
+<section class="empty-state"><h1>{{'Esta página ya no tiene inmuebles' if total else ('No hay inmuebles en esta categoría con los filtros actuales' if filtros and filtros.categoria.value != 'todos' else ('No encontramos inmuebles con estos filtros' if activos else 'El catálogo está vacío'))}}</h1><p>{{'Regresa a la primera página para continuar.' if total else 'Selecciona Todos, amplía los rangos o limpia los filtros.'}}</p><a href="{{primera if total else '/consola/'}}">{{'Ir a la primera página' if total else 'Limpiar filtros'}}</a></section>
 {% endif %}
 </section>
