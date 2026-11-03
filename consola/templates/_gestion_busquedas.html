@@ -1,0 +1,24 @@
+<div class="catalog-update" data-catalog-update>
+  <p><strong>Última actualización del catálogo:</strong> {% if ultima_actualizacion %}<time datetime="{{ultima_actualizacion.isoformat()}}">{{ultima_actualizacion|fecha}}</time> <small>(Colombia · ejecución exitosa)</small>{% else %}Sin actualización exitosa registrada{% endif %}</p>
+  <details id="busquedas-origen" class="search-management"><summary>Nombrar búsquedas de origen</summary>
+    <p>Estos nombres describen la búsqueda elegida por Mónica; no confirman el barrio del inmueble. Un inmueble puede aparecer en varias búsquedas.</p>
+    {% for b in busquedas_registradas %}
+    <form action="/consola/busquedas" method="post" class="search-name-form">
+      <input type="hidden" name="volver" value="{{request.url.path}}{% if request.url.query %}?{{request.url.query}}{% endif %}">
+      <input type="hidden" name="fuente" value="{{b.fuente}}"><input type="hidden" name="url" value="{{b.url}}">
+      <label>Nombre de la búsqueda<input name="nombre" value="{{b.nombre}}" required maxlength="120"></label>
+      <span class="search-source">{{b.fuente|capitalize}} · {{b.url}}</span><button type="submit">Guardar nombre</button>
+    </form>
+    {% endfor %}
+    <details><summary>Registrar otra URL con nombre</summary>
+    <form action="/consola/busquedas" method="post" class="search-name-form" data-new-search>
+      <input type="hidden" name="volver" value="{{request.url.path}}{% if request.url.query %}?{{request.url.query}}{% endif %}">
+      <label>Fuente<input name="fuente" value="metrocuadrado" required maxlength="80"></label>
+      <label>URL de búsqueda<input name="url" type="url" required maxlength="4096" placeholder="https://..."></label>
+      <label>Nombre de la búsqueda<input name="nombre" required maxlength="120" placeholder="Zona Country Club"></label>
+      <button type="submit">Guardar búsqueda</button>
+    </form>
+    <p class="muted">Guardar registra el nombre y la URL. La captura se ejecuta con el mecanismo de actualización existente; registrar una URL aquí no inicia el scraper ni crea inmuebles.</p>
+    </details>
+  </details>
+</div>

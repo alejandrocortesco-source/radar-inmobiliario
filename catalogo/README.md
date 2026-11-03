@@ -296,3 +296,10 @@ contiene la evidencia traducida por el repositorio, por búsqueda. Las consultas
 los conteos respetan los demás filtros y preceden a la paginación. El endpoint
 `/api/catalog` admite el parámetro `categoria`. Véanse las
 [reglas de ejecución relevante y validación](../consola/docs/FILTROS_V05.md).
+
+Los nombres opcionales se incorporan en `ServicioCatalogo` mediante el repositorio
+inyectado `busquedas` (`listar`/`guardar`). `listar`, `consultar` y `obtener` reutilizan
+`PresenciaBusqueda.nombre`. `ultima_actualizacion()` devuelve la finalización
+exitosa más reciente, o `None` si el repositorio no la expone. La implementación
+SQLite y el formulario se detallan en
+[fecha y búsquedas](../consola/docs/FECHA_Y_BUSQUEDAS_V05.md).

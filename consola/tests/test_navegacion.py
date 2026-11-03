@@ -19,7 +19,7 @@ def test_catalogo_consolidado_tabla_compacta_sin_fotografias(escenario_consola):
     assert 'Radar Inmobiliario' in pagina.get_text(' ', strip=True)
     assert '1-M1' not in pagina.get_text()
     assert identificar_inmueble('metrocuadrado', '1-M1') not in pagina.get_text()
-    assert [th.text.strip() for th in pagina.select('.catalog-table th')] == ['Zona', 'Tipo', 'Precio', 'Área', 'Habitaciones', 'Links']
+    assert [th.text.strip() for th in pagina.select('.catalog-table th')] == ['Zona', 'Búsqueda de origen', 'Tipo', 'Precio', 'Área', 'Habitaciones', 'Links']
     assert not pagina.select('img, iframe, .property-card')
     assert len({a['href'] for a in pagina.select('.property-link')}) == 24
     assert pagina.select_one('#limit option[selected]')['value'] == '24'

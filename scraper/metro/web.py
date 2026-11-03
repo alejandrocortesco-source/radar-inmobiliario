@@ -11,6 +11,9 @@ from .paths import DEFAULT_DB
 from .prices import search_identity
 from catalogo.api import crear_router, consultar_catalogo, consultar_ficha
 from catalogo.persistencia.sqlite import CatalogoSQLite
+from catalogo.persistencia.busquedas import BusquedasSQLite
+from oportunidades.servicio import servicio_oportunidades
+from oportunidades.persistencia import ErrorPersistencia
 from catalogo.servicio import ServicioCatalogo
 from consola.rutas import crear_router as crear_router_consola, ESTATICOS
 from consola.v04 import crear_router as crear_router_v04, ESTATICOS as ESTATICOS_V04
@@ -24,8 +27,14 @@ def store():
 
 def servicio():
     repositorio = CatalogoSQLite(os.getenv('METRO_DB', str(DEFAULT_DB)))
+    try:
+        busquedas = BusquedasSQLite(servicio_oportunidades().repositorio.ruta)
+    except ErrorPersistencia:
+        # Una configuración auxiliar inválida no impide leer el catálogo.
+        busquedas = None
     return ServicioCatalogo(
-        repositorio, revision=repositorio, normalizar_busqueda=search_identity)
+        repositorio, revision=repositorio, normalizar_busqueda=search_identity,
+        busquedas=busquedas)
 
 
 app.include_router(crear_router(servicio))

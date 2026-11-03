@@ -47,7 +47,7 @@ def test_tabla_ficha_y_csv_sin_unidades_guardadas(escenario_consola, construida,
     datos['store'].result(datos['run'], '1-M1', 'success', doc)
     client = TestClient(app)
     pagina = BeautifulSoup(client.get('/consola/', params={'texto': 'Casa con jardín 01'}).text, 'html.parser')
-    assert pagina.select_one('.catalog-table tbody tr').select('td')[3].text.strip() == esperado
+    assert pagina.select_one('.catalog-table tbody tr .area-cell').text.strip() == esperado
     ficha = BeautifulSoup(client.get(pagina.select_one('.property-link')['href']).text, 'html.parser')
     assert 'Área: ' + esperado in ficha.select_one('.essentials').get_text(' ', strip=True)
     filas = list(csv.DictReader(io.StringIO(client.get('/consola/exportar.csv', params={
@@ -73,4 +73,4 @@ def test_filtros_y_orden_comparan_solo_el_tipo_seleccionado():
 def test_comparacion_identificada_en_pantalla(escenario_consola):
     pagina = BeautifulSoup(TestClient(app).get('/consola/?tipo_area=privada&orden=area_asc').text, 'html.parser')
     assert 'Filtros y orden de área: solo privada' in pagina.select_one('.legend').text
-    assert pagina.select_one('.catalog-table tbody tr').select('td')[3]['title'].startswith('Filtros y orden por área privada:')
+    assert pagina.select_one('.catalog-table tbody tr .area-cell')['title'].startswith('Filtros y orden por área privada:')

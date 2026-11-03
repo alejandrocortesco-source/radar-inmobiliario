@@ -3,6 +3,7 @@
 from pathlib import Path
 import csv
 from io import StringIO
+from urllib.parse import parse_qs
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
@@ -13,7 +14,7 @@ from catalogo.filtros import FiltrosCatalogo
 from catalogo.modelos import TipoInmueble
 from catalogo.consultas import seleccionar, paginar, ofertas_compatibles, contar_categorias
 from catalogo.persistencia.contrato import ErrorLecturaCatalogo
-from catalogo.servicio import InmuebleNoEncontrado
+from catalogo.servicio import InmuebleNoEncontrado, ConsultaInvalida
 from .presentacion import (
     ESTADOS, enlace_publico, fecha, leer_filtros, mensaje_filtros, nombre_busqueda,
     numero, ofertas_visibles, regreso_seguro, tarjeta, url_catalogo, historial_visible,
@@ -49,6 +50,14 @@ def crear_router(proveedor_servicio, plantillas=None):
     def catalogo(request: Request, servicio=Depends(proveedor_servicio)):
         try:
             todos = servicio.listar()
+            ultima_actualizacion = servicio.ultima_actualizacion()
+            busquedas_registradas = {(b['fuente'], b['id_busqueda']): b
+                                     for b in servicio.listar_busquedas()}
+            for i in todos:
+                for n, p in enumerate(i.origen.busquedas, 1):
+                    busquedas_registradas.setdefault((i.origen.fuente, p.id_busqueda), {
+                        'fuente': i.origen.fuente, 'id_busqueda': p.id_busqueda,
+                        'url': p.url or p.id_busqueda, 'nombre': nombre_busqueda(p, n)})
             ciudades = sorted({i.ciudad for i in todos if i.ciudad})
             barrios = sorted({i.barrio for i in todos if i.barrio})
             zonas = sorted({i.zona for i in todos if i.zona})
@@ -85,6 +94,9 @@ def crear_router(proveedor_servicio, plantillas=None):
         return render(
             request, 'catalogo.html', ciudades=ciudades, barrios=barrios, filtros=filtros,
             zonas=zonas, fuentes=fuentes, busquedas_opciones=busquedas_opciones,
+            ultima_actualizacion=ultima_actualizacion,
+            busquedas_registradas=sorted(busquedas_registradas.values(), key=lambda b: (b['fuente'], b['nombre'])),
+            nombres_busquedas={k: b['nombre'] for k, b in busquedas_registradas.items()},
             categorias=[{'clave': clave, 'nombre': CATEGORIAS[clave], 'cantidad': cantidad,
                          'url': url_catalogo(request.query_params, categoria=clave, offset=0)}
                         for clave, cantidad in contar_categorias(todos, filtros).items()],
@@ -101,6 +113,21 @@ def crear_router(proveedor_servicio, plantillas=None):
             primera=url_catalogo(request.query_params, offset=0),
             **captura,
         )
+
+    @router.post('/consola/busquedas', include_in_schema=False)
+    async def guardar_busqueda(request: Request, servicio=Depends(proveedor_servicio)):
+        valores = parse_qs((await request.body()).decode('utf-8'), keep_blank_values=True)
+        datos = {k: v[-1] for k, v in valores.items()}
+        volver = getattr(templates, 'regreso_seguro', regreso_seguro)(datos.get('volver'))
+        try:
+            servicio.guardar_busqueda(datos.get('fuente'), datos.get('url'), datos.get('nombre'))
+        except (ConsultaInvalida, ValueError, TypeError) as exc:
+            return render(request, 'estado.html', 422, titulo='Revisa la búsqueda',
+                          mensaje=str(exc), reintentar=volver)
+        except (ErrorLecturaCatalogo, OSError):
+            return render(request, 'estado.html', 503, titulo='No se pudo guardar la búsqueda',
+                          mensaje='Vuelve a intentar. Los inmuebles y sus búsquedas de origen se conservan.', reintentar=volver)
+        return RedirectResponse(volver + '#busquedas-origen', status_code=303)
 
     @router.get('/consola/exportar.csv', include_in_schema=False)
     def exportar(request: Request, servicio=Depends(proveedor_servicio)):
@@ -128,7 +155,7 @@ def crear_router(proveedor_servicio, plantillas=None):
                 return buffer.getvalue()
 
             yield fila(['ID', 'Fuente', 'Zona', 'Barrio', 'Ciudad', 'Tipo', 'Operación', 'Precio',
-                        'Moneda', 'Área m²', 'Tipo de área', 'Habitaciones', 'Publicación'])
+                        'Moneda', 'Área m²', 'Tipo de área', 'Habitaciones', 'Publicación', 'Búsquedas de origen'])
             for i in items:
                 card = tarjeta(i, filtros, '/consola/')
                 for oferta in ofertas_compatibles(i, filtros) or (None,):
@@ -137,7 +164,7 @@ def crear_router(proveedor_servicio, plantillas=None):
                                 oferta.operacion.value if oferta else None,
                                 oferta.precio if oferta else None, oferta.moneda if oferta else None,
                                 card['area_valor'], card['area_tipo'], i.habitaciones,
-                                enlace_publico(i.origen.url)])
+                                enlace_publico(i.origen.url), ' | '.join(b['nombre'] for b in card['busquedas'])])
 
         return StreamingResponse(contenido(), media_type='text/csv; charset=utf-8',
                                  headers={'Content-Disposition': 'attachment; filename="radar-catalogo.csv"'})

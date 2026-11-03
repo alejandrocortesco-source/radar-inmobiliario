@@ -142,7 +142,7 @@ captura están documentados en [oportunidades](../oportunidades/README.md).
 ## Catálogo (funciones conservadas)
 
 - Encabezado sencillo, contador, herramientas y una fila con Zona, Precio y Tipo.
-- Tabla de seis columnas: Zona, Tipo, Precio, Área, Habitaciones y Links.
+- Tabla: Zona, Búsqueda de origen, Tipo, Precio, Área, Habitaciones y Links.
   Zona presenta el barrio, o la zona/ciudad si no hay barrio; abre la ficha.
 - 24 inmuebles inicialmente; selector de 12, 24 o 48 por página.
 - Un precio por fila en formato local `$1.250.000`, con operación. La presentación
@@ -284,3 +284,11 @@ paginación y CSV. En `/v0.4/` cambia el listado sin recargar la página; tambi�
 funciona sin JavaScript. Se reutilizan las clasificaciones registradas en la
 última ejecución completada por búsqueda, conservando todo el historial.
 Consulta [semántica, arquitectura, rutas conservadas y validación](docs/FILTROS_V05.md).
+
+### Fecha del catálogo y búsquedas con nombre
+
+La barra muestra la última actualización exitosa en hora de Colombia. La tabla,
+la ficha y el CSV muestran las búsquedas de origen con nombres elegidos por
+Mónica. **Nombrar búsquedas de origen** permite editarlos y registrar otra URL
+con nombre. Guardar una URL no ejecuta el scraper. Consulta
+[uso, semántica y almacenamiento](docs/FECHA_Y_BUSQUEDAS_V05.md).

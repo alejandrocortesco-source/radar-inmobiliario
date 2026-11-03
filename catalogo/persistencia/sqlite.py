@@ -6,6 +6,7 @@ from collections import defaultdict
 from contextlib import contextmanager
 from pathlib import Path
 from decimal import Decimal
+from datetime import datetime
 
 from ..identidad import identificar_inmueble
 from ..modelos import CategoriaActualizacion, Inmueble
@@ -121,6 +122,22 @@ class CatalogoSQLite:
         """Todos los anuncios globales una vez, ordenados por ID interno."""
         with self._conexion() as db:
             return tuple(sorted(self._leer(db), key=lambda ficha: ficha.id_interno))
+
+    def ultima_actualizacion(self):
+        """Finalización exitosa más reciente del catálogo global, sin filtros."""
+        with self._conexion() as db:
+            columnas = {r['name'] for r in db.execute('PRAGMA table_info(runs)')}
+            if not {'finished', 'status'} <= columnas:
+                return None
+            fechas = []
+            for r in db.execute("SELECT finished FROM runs WHERE status='completed' AND finished IS NOT NULL"):
+                try:
+                    valor = datetime.fromisoformat(r['finished'].replace('Z', '+00:00'))
+                    if valor.tzinfo is not None:
+                        fechas.append(valor)
+                except (ValueError, TypeError):
+                    continue
+            return max(fechas, default=None)
 
     def obtener(self, id_interno: str) -> Inmueble | None:
         """Identidad interna del paso 1; nunca interpreta el parámetro como SQL."""

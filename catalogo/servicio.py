@@ -4,12 +4,14 @@ import json
 from dataclasses import asdict
 from collections.abc import Callable
 from dataclasses import replace
+from urllib.parse import urlsplit
+from .identidad import normalizar_fuente
 
 from .consultas import ofertas_compatibles, paginar, seleccionar
 from .filtros import FiltrosCatalogo
 
 from .modelos import Inmueble
-from .persistencia.contrato import RepositorioCatalogo, RepositorioRevision
+from .persistencia.contrato import RepositorioCatalogo, RepositorioRevision, ErrorLecturaCatalogo
 
 
 class ConsultaInvalida(ValueError):
@@ -30,21 +32,63 @@ def _geografia(inmueble):
 class ServicioCatalogo:
     def __init__(self, repositorio: RepositorioCatalogo, *,
                  revision: RepositorioRevision | None = None,
+                 busquedas=None,
                  normalizar_busqueda: Callable[[str], str] = lambda valor: valor):
         self.repositorio = repositorio
         self.revision = revision
+        self.busquedas = busquedas
         self.normalizar_busqueda = normalizar_busqueda
 
     def listar(self) -> tuple[Inmueble, ...]:
-        return self.repositorio.listar()
+        nombres = {(b['fuente'], b['id_busqueda']): b['nombre'] for b in self.listar_busquedas()}
+        return tuple(self._nombrar(i, nombres) for i in self.repositorio.listar())
+
+    @staticmethod
+    def _nombrar(inmueble, nombres):
+        if inmueble is None or not nombres:
+            return inmueble
+        return replace(inmueble, origen=replace(inmueble.origen, busquedas=tuple(
+            replace(p, nombre=nombres.get((inmueble.origen.fuente, p.id_busqueda), p.nombre))
+            for p in inmueble.origen.busquedas)))
+
+    def ultima_actualizacion(self):
+        leer = getattr(self.repositorio, 'ultima_actualizacion', None)
+        return leer() if leer else None
+
+    def listar_busquedas(self):
+        return self.busquedas.listar() if self.busquedas else ()
+
+    def guardar_busqueda(self, fuente, url, nombre):
+        if not all(isinstance(v, str) for v in (fuente, url, nombre)):
+            raise ConsultaInvalida('Fuente, URL y nombre deben ser texto')
+        fuente, url, nombre = normalizar_fuente(fuente), url.strip(), nombre.strip()
+        if not nombre or len(nombre) > 120:
+            raise ConsultaInvalida('El nombre debe tener entre 1 y 120 caracteres')
+        try:
+            partes = urlsplit(url)
+            valido = (partes.scheme in ('http', 'https') and partes.hostname and
+                      not partes.username and not partes.password and len(url) <= 4096 and
+                      not any(ord(c) < 32 or c.isspace() for c in url))
+            if fuente == 'metrocuadrado':
+                valido = valido and partes.hostname in ('metrocuadrado.com', 'www.metrocuadrado.com')
+        except ValueError:
+            valido = False
+        if not valido:
+            raise ConsultaInvalida('Ingresa una URL pública válida de la fuente indicada')
+        if self.busquedas is None:
+            raise ErrorLecturaCatalogo('No está configurado el almacenamiento de búsquedas')
+        identificador = self.normalizar_busqueda(url) if fuente == 'metrocuadrado' else url
+        self.busquedas.guardar(fuente, identificador, url, nombre)
+        return {'fuente': fuente, 'id_busqueda': identificador, 'url': url, 'nombre': nombre}
 
     def consultar(self, filtros: FiltrosCatalogo | None = None):
         filtros = filtros if filtros is not None else FiltrosCatalogo()
-        items = seleccionar(self.repositorio.listar(), filtros)
+        items = seleccionar(self.listar(), filtros)
         return paginar(items, filtros.limite, filtros.desplazamiento)
 
     def obtener(self, id_interno: str) -> Inmueble | None:
-        return self.repositorio.obtener(id_interno)
+        nombres = {(b['fuente'], b['id_busqueda']): b['nombre'] for b in self.listar_busquedas()}
+        return self._nombrar(self.repositorio.obtener(id_interno), nombres)
 
     def _revision(self):
         if self.revision is None:

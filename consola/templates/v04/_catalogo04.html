@@ -8,16 +8,17 @@
   <table class="catalog-table">
     <caption class="sr-only">Catálogo consolidado. Área prioritaria: construida, privada o publicada, en m². Filtros y orden comparan únicamente área {{filtros.tipo_area.value}}. Selecciona una zona para abrir la ficha.</caption>
     <thead><tr>
-      <th scope="col">Zona</th><th scope="col">Tipo</th>
+      <th scope="col">Zona</th><th scope="col">Búsqueda de origen</th><th scope="col">Tipo</th>
       <th scope="col" class="numeric" {% if filtros.orden.value.startswith('precio_') %}aria-sort="{{'ascending' if filtros.orden.value=='precio_asc' else 'descending'}}"{% endif %}><a data-price-order="{{'precio_desc' if filtros.orden.value=='precio_asc' else 'precio_asc'}}" href="{{orden_url('precio_desc' if filtros.orden.value=='precio_asc' else 'precio_asc')}}" title="Ordenar precio; requiere operación y moneda">Precio{% if filtros.orden.value.startswith('precio_') %} {{'↑' if filtros.orden.value=='precio_asc' else '↓'}}{% endif %}</a></th>
       <th scope="col" class="numeric" {% if filtros.orden.value.startswith('area_') %}aria-sort="{{'ascending' if filtros.orden.value=='area_asc' else 'descending'}}"{% endif %}><a href="{{orden_url('area_desc' if filtros.orden.value=='area_asc' else 'area_asc')}}" title="Área {{filtros.tipo_area.value}} en m²">Área {{filtros.tipo_area.value}}{% if filtros.orden.value.startswith('area_') %} {{'↑' if filtros.orden.value=='area_asc' else '↓'}}{% endif %}</a></th>
       <th scope="col" class="numeric">Habitaciones</th><th scope="col">Comentario</th><th scope="col">Links</th>
     </tr></thead>
     <tbody>{% for card in tarjetas %}{% set i=card.inmueble %}<tr>
       <td><a class="property-link" href="{{card.url}}" aria-label="Ver ficha de {{i.titulo or i.origen.id_original}}" title="{{card.ubicacion}} · {{i.titulo or i.origen.id_original}}">{{i.barrio or i.zona or i.ciudad or 'Sin ubicación'}}</a></td>
+      <td>{% include '_busquedas_origen.html' %}</td>
       <td>{{i.tipo.value|capitalize if i.tipo else '—'}}</td>
       <td class="numeric prices">{% set o=card.oferta_principal %}{% if o %}<span>{{o.precio}} <small>· {{o.operacion}}</small></span>{% else %}Sin dato{% endif %}</td>
-      <td class="numeric" title="Filtros y orden por área {{filtros.tipo_area.value}}: {{card.area_comparacion}}">{{card.area}}</td>
+      <td class="numeric area-cell" title="Filtros y orden por área {{filtros.tipo_area.value}}: {{card.area_comparacion}}">{{card.area}}</td>
       <td class="numeric">{{i.habitaciones if i.habitaciones is not none else '—'}}</td>
       <td><a data-detail-comment href="{{card.url}}#comentario">{{'Ver comentario' if comentario(i.id_interno) else 'Agregar'}}</a></td><td>{% include '_links.html' %}</td>
     </tr>{% endfor %}</tbody>

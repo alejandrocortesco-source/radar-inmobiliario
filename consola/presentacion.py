@@ -136,6 +136,9 @@ def tarjeta(inmueble, filtros, volver):
     area_valor, area_tipo = area_disponible(inmueble)
     return {
         'inmueble': inmueble, 'estado': etiqueta, 'clase_estado': clase,
+        'busquedas': [{'nombre': nombre_busqueda(p, n), 'url': enlace_publico(p.url),
+                       'fuente': inmueble.origen.fuente}
+                      for n, p in enumerate(inmueble.origen.busquedas, 1)],
         'ubicacion': ' · '.join(dict.fromkeys(
             v for v in (inmueble.barrio, inmueble.zona, inmueble.ciudad) if v
         )) or 'Ubicación no informada',

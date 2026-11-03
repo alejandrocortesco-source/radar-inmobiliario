@@ -11,6 +11,7 @@
 </section>
 <dl class="metadata">
   <dt>Ubicación</dt><dd>{{datos.ubicacion}}{% if inmueble.direccion %} · {{inmueble.direccion}}{% endif %}</dd>
+  <dt>Búsquedas de origen</dt><dd>{% set card=datos %}{% include '_busquedas_origen.html' %}</dd>
   <dt>Fuente</dt><dd>{{datos.fuente}}</dd><dt>Estado</dt><dd>{{datos.estado}}</dd>
   <dt>Enlaces</dt><dd>{% set original=enlace_publico(inmueble.origen.url) %}{% if original %}<a href="{{original}}" target="_blank" rel="noopener noreferrer">Publicación original ↗</a>{% else %}<span>Publicación no disponible</span>{% endif %}
     {% if datos.mapa %} · <a href="{{datos.mapa}}" target="_blank" rel="noopener noreferrer">Mapa en OpenStreetMap ↗</a>{% if inmueble.ubicacion_aproximada is sameas true %} <small>Centro de una zona aproximada; no es una dirección exacta</small>{% elif inmueble.ubicacion_aproximada is none %} <small>Precisión no informada; no confirma una dirección exacta</small>{% endif %}{% else %} · <span class="muted">Mapa no disponible</span>{% endif %}

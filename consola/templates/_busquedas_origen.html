@@ -1,0 +1,1 @@
+{% if card.busquedas %}<ul class="origin-searches">{% for b in card.busquedas %}<li>{% if b.url %}<a href="{{b.url}}" target="_blank" rel="noopener noreferrer">{{b.nombre}} ↗</a>{% else %}{{b.nombre}}{% endif %}<small>{{b.fuente|capitalize}}</small></li>{% endfor %}</ul>{% else %}<span class="muted">Sin búsqueda registrada</span>{% endif %}

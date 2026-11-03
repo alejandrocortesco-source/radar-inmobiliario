@@ -351,3 +351,10 @@ small { font-size: 11px; color: var(--muted); }
 .quick-filters a[aria-current]{background:#514639;color:#fff;border-color:#514639}
 .quick-filters span{font-variant-numeric:tabular-nums;font-weight:700}
 .quick-filters a:focus-visible{outline:3px solid #a47545;outline-offset:2px}
+
+.catalog-update{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:.5rem;margin-bottom:.75rem}
+.catalog-update p{margin:0}.search-management{width:100%;font-size:13px}.search-management>summary{cursor:pointer;color:var(--accent);margin:.25rem 0 .5rem}
+.search-name-form{display:flex;flex-wrap:wrap;align-items:end;gap:.5rem;padding:.75rem 0;border-bottom:1px solid var(--line)}
+.search-name-form label{display:grid;gap:.25rem;min-width:160px;flex:1}.search-name-form input{width:100%}
+.search-source{flex:2;overflow-wrap:anywhere;min-width:160px;font-size:12px}.origin-searches{list-style:none;margin:0;padding:0;min-width:140px}
+.origin-searches li+li{margin-top:.4rem}.origin-searches small{display:block;color:var(--muted)}
