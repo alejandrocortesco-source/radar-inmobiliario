@@ -1,0 +1,1 @@
+{% if i.anunciante and i.anunciante.strip() %}<a class="advertiser-link" data-advertiser href="{{url_anunciante(i)}}">{{i.anunciante}}</a>{% else %}<span class="advertiser-missing">No disponible</span>{% endif %}

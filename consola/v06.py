@@ -18,13 +18,14 @@ from oportunidades.matching import buscar
 from .oportunidades import contexto_captura, leer_formulario, mensajes_validacion
 from .ubicaciones import actualizar_ciudad
 from oportunidades.normalizacion import normalizar_ciudad
+from .anunciantes import url_anunciante
 from .presentacion import fecha, numero, enlace_publico
 from .inicio import indicadores, resumen_clientes
 
 RAIZ = Path(__file__).parent
 templates = Jinja2Templates(directory=[str(RAIZ / 'templates' / 'v06'), str(RAIZ / 'templates')])
 templates.env.filters.update(fecha=fecha, numero=numero)
-templates.env.globals.update(enlace_publico=enlace_publico)
+templates.env.globals.update(enlace_publico=enlace_publico, url_anunciante=url_anunciante)
 
 
 def crear_router(proveedor):

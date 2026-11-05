@@ -137,3 +137,11 @@ def contar_categorias(inmuebles, filtros):
     return {categoria.value: len(base) if categoria == CategoriaActualizacion.TODOS else
             sum(_coincide(i, replace(filtros, categoria=categoria)) for i in base)
             for categoria in CategoriaActualizacion}
+
+
+def inmuebles_anunciante(inmuebles, nombre):
+    """Igualdad literal; los nombres vacíos nunca constituyen un grupo."""
+    if not isinstance(nombre, str) or not nombre.strip():
+        return []
+    unicos = {i.id_interno: i for i in inmuebles if i.anunciante == nombre}
+    return sorted(unicos.values(), key=lambda i: (i.origen.id_original, i.id_interno))

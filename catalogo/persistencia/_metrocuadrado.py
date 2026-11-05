@@ -157,7 +157,20 @@ def convertir(fila, documento, presencias, config, *, geografia=None, actualizac
         ciudad=_texto(normal.get('city')) or _texto(fila['city']),
         barrio=normal.get('neighborhood'), barrio_comun=normal.get('common_neighborhood'),
         zona=normal.get('zone'), sector=normal.get('sector'))
+    def contacto(campo, origen):
+        # No recortar el nombre: espacios y mayúsculas también distinguen anunciantes.
+        valores = (original.get(origen), normal.get(campo)) if campo == 'advertiser' else (normal.get(campo), original.get(origen))
+        for valor in valores:
+            if isinstance(valor, str) and valor.strip():
+                return valor
+        return None
+
     return Inmueble(
+        anunciante=contacto('advertiser', 'companyName'),
+        anunciante_direccion=contacto('advertiser_address', 'companyAddress'),
+        telefono=contacto('phone', 'contactPhone'),
+        whatsapp=contacto('whatsapp', 'whatsapp'),
+        telefono_fijo=contacto('local_phone', 'localPhone'),
         origen=Origen(
             fuente='metrocuadrado', id_original=fila['id'], url=_texto(fila['url']),
             tipo_original=tipo_original, operacion_original=operacion_original,

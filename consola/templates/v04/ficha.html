@@ -10,6 +10,7 @@
   <p>{{inmueble.habitaciones|numero}} habitaciones <span>·</span> {{inmueble.banos|numero}} baños <span>·</span> {{inmueble.parqueaderos|numero}} parqueaderos</p>
 </section>
 <dl class="metadata">
+  <dt>Anunciante</dt><dd>{% with i=inmueble %}{% include '_anunciante_link.html' %}{% endwith %}</dd>
   <dt>Ubicación</dt><dd>{{datos.ubicacion}}{% if inmueble.direccion %} · {{inmueble.direccion}}{% endif %}</dd>
   <dt>Búsquedas de origen</dt><dd>{% set card=datos %}{% include '_busquedas_origen.html' %}</dd>
   <dt>Fuente</dt><dd>{{datos.fuente}}</dd><dt>Estado</dt><dd>{{datos.estado}}</dd>

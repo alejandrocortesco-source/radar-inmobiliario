@@ -296,3 +296,10 @@ inyectado `busquedas` (`listar`/`guardar`/`eliminar`). `listar`, `consultar` y `
 exitosa más reciente, o `None` si el repositorio no la expone. La implementación
 SQLite y el formulario se detallan en
 [fecha y búsquedas](../consola/docs/FECHA_Y_BUSQUEDAS_V05.md).
+
+
+## Anunciantes — v0.7
+
+`Inmueble` expone `anunciante`, `anunciante_direccion`, `telefono`, `telefono_fijo` y `whatsapp`, todos opcionales. El adaptador lee `normalized` y los originales públicos ya capturados (`sources.flight_property` o `extra`). Ignora objetos, booleanos y campos ausentes; conserva el texto de contacto, sin inferir teléfonos. El nombre original tiene prioridad para no perder diferencias de espacios. No cambia el esquema ni escribe en el catálogo.
+
+`consultas.inmuebles_anunciante` selecciona por igualdad literal y excluye nombres vacíos. No usa el filtrado geográfico/textual ni las normalizaciones del matching. La consulta HTTP del panel parte de una lectura global y excluye el inmueble de origen solo de la lista de otros anuncios, conservándolo como procedencia de sus contactos. Ver [v0.7](../consola/docs/V07.md).

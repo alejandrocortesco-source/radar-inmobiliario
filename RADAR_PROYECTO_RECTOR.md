@@ -1,6 +1,14 @@
-# Radar Inmobiliario — documento rector v0.6
+# Radar Inmobiliario — documento rector v0.7
 
 La especificación funcional del usuario de 3 de noviembre de 2026 gobierna esta entrega. El producto acompaña el trabajo de Mónica con unos 30 clientes activos. Debe permanecer sencillo y de bajo mantenimiento; el objetivo de operación inferior a US$10/mes está **pendiente de validación de consumo y alojamiento**, no es una garantía.
+
+## Ampliación v0.7 — anunciantes
+
+La siguiente versión funcional es v0.7, desarrollada sobre el estado más reciente de la rama v0.6 (base `a2eae95`). Se conservan las rutas `/v0.6/` y `/v0.4/`, el dashboard, los formularios, las búsquedas y las reglas/caché de matching y Gemini. La entrega se guarda y sincroniza con GitHub por solicitud expresa; no incluye despliegue ni publicación en producción.
+
+El catálogo completo añade Anunciante; la ficha del inmueble, la ficha del cliente y los resultados históricos de matching acceden al mismo panel adaptable. La agrupación usa igualdad literal del nombre capturado, incluyendo espacios, tildes y mayúsculas; nombres vacíos no forman un grupo. Los originales públicos `companyName` tienen prioridad sobre el nombre normalizado para conservar diferencias. No se crean identidades persistentes ni se deducen equivalencias.
+
+Los contactos se presentan por combinación publicada con procedencia hacia sus anuncios; un contacto no se atribuye a todos los inmuebles. Solo se generan enlaces validados, sin completar indicativos. Abrir el panel no llama ni envía mensajes. Los enlaces explícitos de WhatsApp son parte de esta consulta; no se incorpora mensajería automática. Otros inmuebles consulta todo el catálogo, excluye el anuncio de origen y pagina de 12 en 12. CSV añade cinco columnas conservando filtros, orden, COP y protección contra fórmulas. Ver `consola/docs/V07.md` para datos disponibles, arquitectura y validación.
 
 ## Experiencia implementada
 

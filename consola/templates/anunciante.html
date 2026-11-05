@@ -1,0 +1,12 @@
+{% extends 'base.html' %}{% block content %}
+<section data-advertiser-content>
+<h1>{{anunciante_nombre}}</h1><p>Contactos publicados por anuncio; pueden variar entre inmuebles.</p>
+{% for grupo in contactos %}<section class="advertiser-contact"><h2>Contacto {{loop.index}}</h2><dl>
+{% for etiqueta, valor, enlace in grupo.campos %}<dt>{{etiqueta}}</dt><dd>{% if enlace %}<a href="{{enlace}}" {% if etiqueta=='WhatsApp' %}target="_blank" rel="noopener noreferrer"{% endif %}>{{valor}} · {{'Abrir WhatsApp' if etiqueta=='WhatsApp' else 'Llamar'}}</a>{% else %}{{valor}} <small>Sin enlace: formato {{'internacional ' if etiqueta=='WhatsApp' else ''}}sin verificar.</small>{% endif %}</dd>{% endfor %}
+{% if grupo.direccion %}<dt>Dirección</dt><dd>{{grupo.direccion}}</dd>{% endif %}</dl>
+<details><summary>Publicado en {{grupo.inmuebles|length}} inmueble(s)</summary><ul>{% for i in grupo.inmuebles %}<li><a href="/v0.4/inmuebles/{{i.id_interno}}">{{i.origen.id_original}}</a>{{' · Inmueble de origen' if i.id_interno==origen.id_interno else ''}}</li>{% endfor %}</ul></details></section>
+{% else %}<p>No hay datos de contacto disponibles.</p>{% endfor %}
+<h2>Otros inmuebles de este anunciante</h2><p>{{cantidad}} inmueble(s) capturado(s), sin aplicar los filtros de origen.</p>
+<ul class="advertiser-properties">{% for i in otros %}<li><a href="/v0.4/inmuebles/{{i.id_interno}}">{{i.barrio or i.zona or 'Ubicación pendiente'}} · {{i.ciudad or 'Ciudad pendiente'}} · {{i.origen.id_original}}</a><p>{{i.tipo.value|capitalize if i.tipo else 'Tipo sin dato'}} · {{i.habitaciones|numero}} hab. · {{i.banos|numero}} baños · {{i.area_construida_m2|numero}} m² construidos</p><p>{% for o in i.ofertas %}{{o.operacion.value|capitalize}}: {{'$' ~ (o.precio|numero) ~ ' COP' if o.precio is not none else 'Precio sin dato'}}{{' · ' if not loop.last else ''}}{% else %}Precio sin dato{% endfor %}</p></li>{% else %}<li>No hay otros inmuebles capturados de este anunciante.</li>{% endfor %}</ul>
+<nav class="advertiser-pagination" aria-label="Otros inmuebles del anunciante">{% if anterior %}<a data-advertiser-page href="{{anterior}}">← Anterior</a>{% endif %}<span>Página {{pagina}} de {{paginas}}</span>{% if siguiente %}<a data-advertiser-page href="{{siguiente}}">Siguiente →</a>{% endif %}</nav>
+</section>{% endblock %}

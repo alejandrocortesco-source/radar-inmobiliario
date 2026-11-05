@@ -2,12 +2,13 @@
 
 Radar Inmobiliario es un proyecto para recopilar y revisar información pública de inmuebles.
 
-La **Consola v0.6** abre en [http://127.0.0.1:8000/v0.6/](http://127.0.0.1:8000/v0.6/): dashboard de cuatro secciones, clientes Activos/Inactivos y ficha individual para revisar coincidencias. Reutiliza catálogo, clientes, oportunidades y matching determinista; añade decisiones persistentes y una segunda capa opcional con Gemini Flash. Guardar una fuente no ejecuta scraping.
+La **Consola v0.7** abre en [http://127.0.0.1:8000/v0.6/](http://127.0.0.1:8000/v0.6/): dashboard de cuatro secciones, clientes Activos/Inactivos y ficha individual para revisar coincidencias. Reutiliza catálogo, clientes, oportunidades y matching determinista; añade decisiones persistentes y una segunda capa opcional con Gemini Flash. Guardar una fuente no ejecuta scraping.
 
 Todos los precios y presupuestos inmobiliarios son COP. El presupuesto se compara directamente con el precio numérico, con límites inclusivos, sin solicitar ni verificar moneda y sin conversiones. Los campos históricos de moneda se conservan como metadatos.
 
 El catálogo detallado de v0.5 se conserva en `/v0.4/`, con filtros, fichas, comentarios, historial y exportaciones. `/consola/` y la interfaz técnica `/` mantienen compatibilidad. No se añadieron frameworks ni infraestructura.
 
+- [Anunciantes v0.7, contactos y límites de datos](consola/docs/V07.md).
 - [Guía v0.6, Gemini, fuentes, pruebas y limitaciones](consola/docs/V06.md).
 - [Documento rector vigente](RADAR_PROYECTO_RECTOR.md) e [instrucciones de trabajo](AGENTS.md).
 - [Instalación y ejecución del scraper propio](scraper/README.md).
@@ -23,7 +24,7 @@ Las evaluaciones reales de Gemini requieren `GEMINI_API_KEY` y un `GEMINI_MODEL`
 
 ## Estado y ramas
 
-- `v0.6`: implementación del mini dashboard, clientes y matching descrita en la guía actual.
+- `v0.6`: rama actual; conserva mini dashboard, clientes y matching e incorpora la ampliación funcional v0.7 de anunciantes.
 - `main`: referencia estable; no desarrollar ni integrar v0.6 allí sin autorización.
 - `release/v0.5`: conserva el cierre funcional `291ce82b`.
 - `v0.4` y `feat/consola-v0.3`: ramas históricas. El nombre `v0.4` no cambia que el hito funcional cerrado sea v0.5.

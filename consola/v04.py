@@ -121,7 +121,9 @@ def crear_router(proveedor):
     templates.env.filters.update(rutas.templates.env.filters)
     templates.env.filters['v04url'] = destino
     templates.env.globals.update(rutas.templates.env.globals)
-    templates.env.globals.update(shared_css='/consola/static/consola.css', shared_js='/consola/static/consola.js')
+    templates.env.globals.update(shared_css='/consola/static/consola.css', shared_js='/consola/static/consola.js',
+                                 advertiser_css='/consola/static/anunciantes.css',
+                                 advertiser_js='/consola/static/anunciantes.js')
     from oportunidades.modelos import CRITERIOS
     templates.env.globals['etiquetas_necesidades'] = dict(CRITERIOS, operacion='Operación',
         tipo='Tipo de inmueble', ciudad='Ciudad', barrios='Barrios', zonas='Zonas',

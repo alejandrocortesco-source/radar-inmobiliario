@@ -289,3 +289,8 @@ la ficha y el CSV muestran las búsquedas de origen con nombres elegidos por
 Mónica. **Nombrar búsquedas de origen** permite editarlos y registrar otra URL
 con nombre. Guardar una URL no ejecuta el scraper. Consulta
 [uso, semántica y almacenamiento](docs/FECHA_Y_BUSQUEDAS_V05.md).
+
+
+## Anunciantes — v0.7
+
+El catálogo `/v0.4/` añade la columna Anunciante. Las fichas y los resultados de matching comparten el componente de contacto, sin alterar sus reglas ni Gemini. `anunciantes.py` prepara contactos/enlaces; `anunciantes.js` y `anunciantes.css` ofrecen un diálogo lateral con foco nativo, Escape, cierre y restauración del origen. `anunciante.html` también se puede consultar como página sin JavaScript. La consulta de solo lectura `/consola/anunciante?inmueble=UUID&pagina=1` (alias `/v0.4/anunciante`) carga el catálogo global, agrupa literalmente y pagina los otros anuncios. Los cinco campos se añaden al final del CSV. Consulta [uso, límites y validación v0.7](docs/V07.md).

@@ -5,7 +5,7 @@ import csv
 from io import StringIO
 from urllib.parse import parse_qs
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, HTTPException, Query
 from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import ValidationError
@@ -15,6 +15,9 @@ from catalogo.modelos import TipoInmueble
 from catalogo.consultas import seleccionar, paginar, ofertas_compatibles, contar_categorias
 from catalogo.persistencia.contrato import ErrorLecturaCatalogo
 from catalogo.servicio import InmuebleNoEncontrado, ConsultaInvalida
+from .anunciantes import url_anunciante, contactos
+from catalogo.consultas import inmuebles_anunciante
+from urllib.parse import urlencode
 from .presentacion import (
     ESTADOS, enlace_publico, fecha, leer_filtros, mensaje_filtros, nombre_busqueda,
     numero, ofertas_visibles, regreso_seguro, tarjeta, url_catalogo, historial_visible,
@@ -26,7 +29,7 @@ RAIZ = Path(__file__).resolve().parent
 ESTATICOS = RAIZ / 'static'
 templates = Jinja2Templates(directory=str(RAIZ / 'templates'))
 templates.env.filters.update(numero=numero, fecha=fecha)
-templates.env.globals.update(enlace_publico=enlace_publico)
+templates.env.globals.update(enlace_publico=enlace_publico, url_anunciante=url_anunciante)
 
 
 def crear_router(proveedor_servicio, plantillas=None):
@@ -40,6 +43,28 @@ def crear_router(proveedor_servicio, plantillas=None):
                 'error': None, 'total': 0, 'activos': (), 'ordenes': ORDENES}
         return templates.TemplateResponse(request=request, name=nombre,
                                           context={**base, **contexto}, status_code=status)
+
+    @router.get('/consola/anunciante', response_class=HTMLResponse, include_in_schema=False)
+    def anunciante(request: Request, inmueble: str, pagina: int = Query(1, ge=1),
+                   servicio=Depends(proveedor_servicio)):
+        try:
+            todos = servicio.listar()
+        except (FileNotFoundError, ErrorLecturaCatalogo):
+            raise HTTPException(503, 'El catálogo no está disponible. Vuelve a intentar.')
+        origen = next((i for i in todos if i.id_interno == inmueble), None)
+        if origen is None or not origen.anunciante or not origen.anunciante.strip():
+            raise HTTPException(404, 'Anunciante no disponible')
+        grupo = inmuebles_anunciante(todos, origen.anunciante)
+        otros = [i for i in grupo if i.id_interno != inmueble]
+        paginas = max(1, (len(otros) + 11) // 12)
+        pagina = min(pagina, paginas)
+        def url(p):
+            return '/consola/anunciante?' + urlencode({'inmueble': inmueble, 'pagina': p})
+        return render(request, 'anunciante.html', anunciante_nombre=origen.anunciante,
+                      contactos=contactos(grupo), origen=origen, cantidad=len(otros),
+                      otros=otros[(pagina-1)*12:pagina*12], pagina=pagina, paginas=paginas,
+                      anterior=url(pagina-1) if pagina > 1 else None,
+                      siguiente=url(pagina+1) if pagina < paginas else None)
 
     @router.get('/consola', include_in_schema=False)
     def entrada(request: Request):
@@ -155,7 +180,8 @@ def crear_router(proveedor_servicio, plantillas=None):
                 return buffer.getvalue()
 
             yield fila(['ID', 'Fuente', 'Zona', 'Barrio', 'Ciudad', 'Tipo', 'Operación', 'Precio',
-                        'Moneda', 'Área m²', 'Tipo de área', 'Habitaciones', 'Publicación', 'Búsquedas de origen'])
+                        'Moneda', 'Área m²', 'Tipo de área', 'Habitaciones', 'Publicación', 'Búsquedas de origen',
+                        'Anunciante', 'Teléfono móvil', 'Teléfono fijo', 'WhatsApp', 'Dirección del anunciante'])
             for i in items:
                 card = tarjeta(i, filtros, '/consola/')
                 for oferta in ofertas_compatibles(i, filtros) or (None,):
@@ -164,7 +190,8 @@ def crear_router(proveedor_servicio, plantillas=None):
                                 oferta.operacion.value if oferta else None,
                                 oferta.precio if oferta else None, 'COP',
                                 card['area_valor'], card['area_tipo'], i.habitaciones,
-                                enlace_publico(i.origen.url), ' | '.join(b['nombre'] for b in card['busquedas'])])
+                                enlace_publico(i.origen.url), ' | '.join(b['nombre'] for b in card['busquedas']),
+                                i.anunciante, i.telefono, i.telefono_fijo, i.whatsapp, i.anunciante_direccion])
 
         return StreamingResponse(contenido(), media_type='text/csv; charset=utf-8',
                                  headers={'Content-Disposition': 'attachment; filename="radar-catalogo.csv"'})
