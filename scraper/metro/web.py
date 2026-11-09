@@ -11,6 +11,7 @@ from .paths import DEFAULT_DB
 from .prices import search_identity
 from catalogo.api import crear_router, consultar_catalogo, consultar_ficha
 from catalogo.persistencia.sqlite import CatalogoSQLite
+from catalogo.persistencia.integrado import catalogo_configurado
 from catalogo.persistencia.busquedas import BusquedasSQLite
 from oportunidades.servicio import servicio_oportunidades
 from oportunidades.persistencia import ErrorPersistencia
@@ -27,7 +28,7 @@ def store():
     return Store(os.getenv('METRO_DB',str(DEFAULT_DB)))
 
 def servicio():
-    repositorio = CatalogoSQLite(os.getenv('METRO_DB', str(DEFAULT_DB)))
+    repositorio = catalogo_configurado(os.getenv('METRO_DB', str(DEFAULT_DB)))
     try:
         busquedas = BusquedasSQLite(servicio_oportunidades().repositorio.ruta)
     except ErrorPersistencia:

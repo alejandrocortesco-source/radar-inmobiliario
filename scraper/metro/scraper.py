@@ -88,10 +88,11 @@ async def wait_data(page, extract, timeout):
 
 
 class Scraper:
+    store_type = Store
     def __init__(self, config):
         config.validate()
         self.cfg = config
-        self.store = Store(config.db)
+        self.store = self.store_type(config.db)
         self.stopping = asyncio.Event()
         self.rate_lock = asyncio.Lock()
         self.next_request = 0.0
@@ -299,6 +300,16 @@ class Scraper:
                 await self.detail(context,job)
         await asyncio.gather(*(worker() for _ in range(self.cfg.concurrency)))
 
+    async def create_context(self, browser):
+        return await browser.new_context(locale='es-CO',viewport={'width':1366,'height':900})
+
+    async def prepare_context(self, context):
+        """Hook de autenticación; Metrocuadrado conserva navegación pública."""
+
+    async def update_matching(self):
+        from oportunidades.automatizacion import despues_scraper
+        await asyncio.to_thread(despues_scraper, self.cfg.db)
+
     async def run(self):
         # Envuelve la ejecución existente; no cambia descubrimiento ni extracción.
         monitor = None
@@ -343,13 +354,14 @@ class Scraper:
             async with async_playwright() as p:
                 browser = await p.chromium.launch(headless=not self.cfg.headed)
                 try:
-                    context = await browser.new_context(locale='es-CO',viewport={'width':1366,'height':900})
+                    context = await self.create_context(browser)
                     async def resources(route):
                         if route.request.resource_type in ('image','media','font'):
                             await route.abort()
                         else:
-                            await route.continue_()
+                            await route.fallback()
                     await context.route('**/*',resources)
+                    await self.prepare_context(context)
                     for search in self.store.searches(self.run_id):
                         try:
                             await self.discover(context,search['source_url'])
@@ -373,8 +385,7 @@ class Scraper:
             if status == 'completed':
                 # Una falla del CRM nunca cambia el resultado ni el historial del scraper.
                 try:
-                    from oportunidades.automatizacion import despues_scraper
-                    await asyncio.to_thread(despues_scraper, self.cfg.db)
+                    await self.update_matching()
                 except Exception:
                     log.exception('El catálogo se actualizó, pero no se pudo actualizar el matching')
         except Restricted as exc:

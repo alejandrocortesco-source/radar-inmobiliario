@@ -11,7 +11,7 @@ from .consultas import ofertas_compatibles, paginar, seleccionar
 from .filtros import FiltrosCatalogo
 
 from .modelos import Inmueble
-from .persistencia.contrato import RepositorioCatalogo, RepositorioRevision, ErrorLecturaCatalogo
+from .persistencia.contrato import RepositorioCatalogo, RepositorioRevision, ErrorLecturaCatalogo, IdentificadorAmbiguo
 
 
 class ConsultaInvalida(ValueError):
@@ -69,6 +69,8 @@ class ServicioCatalogo:
         if not all(isinstance(v, str) for v in (fuente, url, nombre)):
             raise ConsultaInvalida('Fuente, URL y nombre deben ser texto')
         fuente, url, nombre = normalizar_fuente(fuente), url.strip(), nombre.strip()
+        if fuente == 'wasi':
+            raise ConsultaInvalida('Configura o edita los filtros Wasi en Agregar fuente del inicio.')
         if not nombre or len(nombre) > 120:
             raise ConsultaInvalida('El nombre debe tener entre 1 y 120 caracteres')
         try:
@@ -105,13 +107,13 @@ class ServicioCatalogo:
     def catalogo_compatible(self, *, state=None, search_url=None, limit=100, offset=0,
                             filtros: FiltrosCatalogo | None = None):
         """Filtra el modelo común y conserva el formato y parámetros HTTP anteriores."""
-        busqueda = self.normalizar_busqueda(search_url) if search_url else None
+        busqueda = (search_url if search_url.startswith('wasi:') else self.normalizar_busqueda(search_url)) if search_url else None
         filtros = filtros if filtros is not None else FiltrosCatalogo()
         if busqueda:
             if filtros.id_busqueda is not None and filtros.id_busqueda != busqueda:
                 raise ConsultaInvalida('search_url e id_busqueda deben identificar la misma búsqueda')
             filtros = replace(filtros, id_busqueda=busqueda,
-                              fuente=filtros.fuente or 'metrocuadrado')
+                              fuente=filtros.fuente or ('wasi' if busqueda.startswith('wasi:') else 'metrocuadrado'))
         elif filtros.id_busqueda is not None:
             busqueda = filtros.id_busqueda
         items = {}
@@ -134,6 +136,7 @@ class ServicioCatalogo:
                 'last_verified_at': max(fechas, default=None),
                 'state': estado,
                 'id_interno': registro.inmueble.id_interno,
+                'fuente': registro.inmueble.origen.fuente,
                 'neighborhood': registro.inmueble.barrio,
                 'zone': registro.inmueble.zona,
                 'building': registro.inmueble.edificio,
@@ -158,7 +161,10 @@ class ServicioCatalogo:
 
     def ficha_compatible(self, identificador, run_id=None):
         """Admite ID original o interno y mantiene las instantáneas por ejecución."""
-        revision = self._revision().obtener_revision(identificador)
+        try:
+            revision = self._revision().obtener_revision(identificador)
+        except IdentificadorAmbiguo as exc:
+            raise ConsultaInvalida(str(exc)) from exc
         if revision is None:
             raise InmuebleNoEncontrado(identificador)
         registro = revision.registro
@@ -171,6 +177,7 @@ class ServicioCatalogo:
         return {
             'id': registro.resumen['id'], 'url': registro.resumen['url'],
             'id_interno': registro.inmueble.id_interno,
+            'fuente': registro.inmueble.origen.fuente,
             'geografia': _geografia(registro.inmueble),
             'job': job, 'data': seleccionado, 'catalog_data': revision.documento,
             'needs_refresh': registro.inmueble.requiere_revision,

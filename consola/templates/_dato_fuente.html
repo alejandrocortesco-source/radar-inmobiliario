@@ -1,0 +1,6 @@
+{% macro dato_fuente(valor, campo) -%}
+{%- if valor is not none -%}{{valor|numero}}
+{%- elif inmueble.origen.fuente == 'wasi' and campos_fuente.get(campo,{}).get('status') == 'absent' -%}Información no disponible en esta fuente
+{%- elif inmueble.origen.fuente == 'wasi' and campos_fuente.get(campo,{}).get('status') == 'error' -%}Pendiente por error de captura
+{%- else -%}Sin dato{%- endif -%}
+{%- endmacro %}

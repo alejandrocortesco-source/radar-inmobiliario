@@ -1,0 +1,2 @@
+# SDK oficial; solo necesario para snapshots de Cloud Run Jobs.
+google-cloud-storage==3.17.1

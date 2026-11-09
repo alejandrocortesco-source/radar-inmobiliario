@@ -23,8 +23,9 @@ class ErrorCatalogoSQLite(ErrorLecturaCatalogo):
 
 
 class CatalogoSQLite:
-    def __init__(self, ruta: str | Path = BASE_PREDETERMINADA):
+    def __init__(self, ruta: str | Path = BASE_PREDETERMINADA, *, fuente='metrocuadrado'):
         self.ruta = Path(ruta).resolve()
+        self.fuente = fuente
 
     @contextmanager
     def _conexion(self):
@@ -106,10 +107,11 @@ class CatalogoSQLite:
                 resultado.append(RegistroCatalogo(
                     inmueble=convertir(fila, documento, por_anuncio[fila['id']], config,
                                        geografia=recuperar_geografia(geografia, fila),
-                                       actualizaciones=actualizaciones),
+                                       actualizaciones=actualizaciones, fuente=self.fuente),
                     documento=json.loads(fila['data_json']) if fila['data_json'] else None,
-                    resumen={k: fila[k] for k in (
+                    resumen={**{k: fila[k] for k in (
                         'id', 'url', 'title', 'price', 'city', 'property_type', 'needs_refresh')},
+                        **({'url': (documento.get('normalized') or {}).get('url')} if self.fuente == 'wasi' else {})},
                     presencias=tuple(dict(p) for p in por_anuncio[fila['id']]),
                 ))
             except (ValueError, TypeError, KeyError, IndexError) as exc:
@@ -147,7 +149,7 @@ class CatalogoSQLite:
             # UUID5 no es reversible. Sin añadir columnas ni índices a la BD,
             # se recorre solo la lista de IDs y se carga una única ficha.
             for fila in db.execute('SELECT id FROM properties'):
-                if identificar_inmueble('metrocuadrado', fila['id']) == id_interno:
+                if identificar_inmueble(self.fuente, fila['id']) == id_interno:
                     return self._leer(db, fila['id'])[0]
             return None
 
@@ -163,7 +165,7 @@ class CatalogoSQLite:
             fila = db.execute('SELECT id FROM properties WHERE id=?', (identificador,)).fetchone()
             if fila is None:
                 fila = next((r for r in db.execute('SELECT id FROM properties')
-                             if identificar_inmueble('metrocuadrado', r['id']) == identificador), None)
+                             if identificar_inmueble(self.fuente, r['id']) == identificador), None)
             if fila is None:
                 return None
             original = fila['id']

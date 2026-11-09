@@ -6,7 +6,7 @@
 
 - Herramienta privada para Mónica, unos 30 clientes activos y presupuesto operativo objetivo inferior a 10 USD/mes, sujeto a medición. Priorizar simplicidad, mantenimiento y reutilización.
 
-- La especificación vigente está en `RADAR_PROYECTO_RECTOR.md`. v0.6 se desarrolla en `v0.6`; no hacer merge a main ni push sin solicitud.
+- La especificación vigente está en `RADAR_PROYECTO_RECTOR.md`. La versión funcional v0.8 se desarrolla en `v0.6`, conservando las rutas existentes; no hacer merge a main ni push sin solicitud.
 - Reutilizar scraper, catálogo, identidades, historial, clientes, oportunidades y matching determinista. No reconstruirlos para un cambio visual.
 - FastAPI, Jinja2, CSS y JavaScript nativo. Sin React, Carbon instalado, Firestore ni infraestructura adicional.
 - El dashboard tiene **exactamente cuatro secciones**: oportunidades recientes, estado del catálogo, agregar fuente y nuevo cliente. La actividad pertenece a las dos primeras; no existe una quinta sección.
@@ -27,7 +27,7 @@
 
 ## Fuera de alcance
 
-WhatsApp, comunicaciones automáticas, otros portales, CRM empresarial, migración integral a Sheets y despliegue a producción. Sheets y Cloud Run son objetivos futuros.
+WhatsApp, comunicaciones automáticas, portales distintos de Metrocuadrado y Wasi, CRM empresarial, migración integral a Sheets y despliegue a producción. La ampliación Wasi y preparación de Cloud Run están autorizadas por la solicitud del 8 de noviembre de 2026; el despliegue y la validación real desatendida siguen siendo posteriores. Sheets permanece como objetivo futuro.
 
 ## Disciplina Git e informes
 

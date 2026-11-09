@@ -2,7 +2,7 @@
 
 Radar Inmobiliario es un proyecto para recopilar y revisar información pública de inmuebles.
 
-La **Consola v0.7** abre en [http://127.0.0.1:8000/v0.6/](http://127.0.0.1:8000/v0.6/): dashboard de cuatro secciones, clientes Activos/Inactivos y ficha individual para revisar coincidencias. Reutiliza catálogo, clientes, oportunidades y matching determinista; añade decisiones persistentes y una segunda capa opcional con Gemini Flash. Guardar una fuente no ejecuta scraping.
+La **Consola v0.8** abre en [http://127.0.0.1:8000/v0.6/](http://127.0.0.1:8000/v0.6/): dashboard de cuatro secciones, clientes Activos/Inactivos y ficha individual para revisar coincidencias. Integra Wasi y Metrocuadrado reutilizando catálogo, clientes, oportunidades y matching determinista; conserva decisiones persistentes y una segunda capa opcional con Gemini Flash. Guardar una fuente no ejecuta scraping.
 
 Todos los precios y presupuestos inmobiliarios son COP. El presupuesto se compara directamente con el precio numérico, con límites inclusivos, sin solicitar ni verificar moneda y sin conversiones. Los campos históricos de moneda se conservan como metadatos.
 
@@ -24,12 +24,12 @@ Las evaluaciones reales de Gemini requieren `GEMINI_API_KEY` y un `GEMINI_MODEL`
 
 ## Estado y ramas
 
-- `v0.6`: rama actual; conserva mini dashboard, clientes y matching e incorpora la ampliación funcional v0.7 de anunciantes.
+- `v0.6`: rama actual; entrega funcional v0.8 de Wasi y preparación de Cloud Run Jobs, sobre v0.7 de anunciantes (`9db935a`). Se conservan las rutas existentes.
 - `main`: referencia estable; no desarrollar ni integrar v0.6 allí sin autorización.
 - `release/v0.5`: conserva el cierre funcional `291ce82b`.
 - `v0.4` y `feat/consola-v0.3`: ramas históricas. El nombre `v0.4` no cambia que el hito funcional cerrado sea v0.5.
 
-La herramienta es privada para Mónica, con unos 30 clientes activos. Se mantiene la arquitectura existente; Sheets y Cloud Run son objetivos futuros. El presupuesto objetivo vigente es inferior a 10 USD/mes, sujeto a medición.
+La herramienta es privada para Mónica, con unos 30 clientes activos. Se mantiene la arquitectura existente; Sheets sigue como adaptación futura. Cloud Run Jobs tiene preparación local, sin despliegue ni operación desatendida real validada. El presupuesto objetivo vigente es inferior a 10 USD/mes, sujeto a medición.
 
 ```text
 radar-inmobiliario/
@@ -54,3 +54,7 @@ radar-inmobiliario/
 ```
 
 El repositorio Git y su historial pertenecen a esta raíz. Los entornos virtuales, credenciales, cachés y resultados locales quedan excluidos de Git. El nombre de la carpeta local puede diferir de `radar-inmobiliario`; no hace falta crear otra carpeta contenedora.
+
+## Ampliación Wasi — v0.8
+
+La consola integra Metrocuadrado y Wasi mediante el catálogo común. Configuración de búsquedas, credenciales externas, captura incremental, recuperación y preparación de Jobs: [guía Wasi](scraper/docs/WASI.md). La operación real desatendida y el coste siguen pendientes; no se desplegó.

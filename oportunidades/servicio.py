@@ -51,7 +51,8 @@ class ServicioOportunidades:
 def servicio_oportunidades():
     catalogo = Path(os.getenv('METRO_DB', str(BASE_PREDETERMINADA))).resolve()
     ruta = Path(os.getenv('RADAR_CRM_DB', str(catalogo.with_name(catalogo.stem + '-consola.sqlite')))).resolve()
-    if ruta == catalogo:
+    wasi = Path(os.getenv('WASI_DB', str(catalogo.with_name('wasi.sqlite')))).resolve()
+    if ruta in (catalogo, wasi):
         from .persistencia import ErrorPersistencia
         raise ErrorPersistencia('RADAR_CRM_DB debe ser diferente de la base del catálogo')
     return ServicioOportunidades(SQLite(ruta))

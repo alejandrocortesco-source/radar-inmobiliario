@@ -10,6 +10,10 @@ class ErrorLecturaCatalogo(RuntimeError):
     """Un almacenamiento no puede entregar el catálogo solicitado."""
 
 
+class IdentificadorAmbiguo(ValueError):
+    """Un código original requiere fuente o UUID para resolver el anuncio."""
+
+
 class RepositorioCatalogo(Protocol):
     def listar(self) -> tuple[Inmueble, ...]:
         ...

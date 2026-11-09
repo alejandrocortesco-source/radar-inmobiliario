@@ -294,3 +294,7 @@ con nombre. Guardar una URL no ejecuta el scraper. Consulta
 ## Anunciantes — v0.7
 
 El catálogo `/v0.4/` añade la columna Anunciante. Las fichas y los resultados de matching comparten el componente de contacto, sin alterar sus reglas ni Gemini. `anunciantes.py` prepara contactos/enlaces; `anunciantes.js` y `anunciantes.css` ofrecen un diálogo lateral con foco nativo, Escape, cierre y restauración del origen. `anunciante.html` también se puede consultar como página sin JavaScript. La consulta de solo lectura `/consola/anunciante?inmueble=UUID&pagina=1` (alias `/v0.4/anunciante`) carga el catálogo global, agrupa literalmente y pagina los otros anuncios. Los cinco campos se añaden al final del CSV. Consulta [uso, límites y validación v0.7](docs/V07.md).
+
+## Búsquedas Wasi — v0.8
+
+El inicio conserva cuatro secciones. Agregar fuente selecciona Metrocuadrado (URL) o Wasi (controles dependientes); no inicia captura al guardar o editar. Una acción separada actualiza opciones del portal sin capturar anuncios, usando acceso configurado externamente. El catálogo común incorpora ambas fuentes en filtros, fichas, anunciantes, CSV, indicadores y matching; las decisiones continúan por UUID. Configuración y verificación: [Wasi](../scraper/docs/WASI.md).

@@ -75,7 +75,7 @@ def _objeto(valor, nombre):
     return valor
 
 
-def convertir(fila, documento, presencias, config, *, geografia=None, actualizaciones=None):
+def convertir(fila, documento, presencias, config, *, geografia=None, actualizaciones=None, fuente='metrocuadrado'):
     documento = _objeto(documento, 'documento')
     normal = _objeto(documento.get('normalized'), 'normalized')
     extra = _objeto(documento.get('extra'), 'extra')
@@ -87,6 +87,10 @@ def convertir(fila, documento, presencias, config, *, geografia=None, actualizac
     tipo = {t.value: t for t in TipoInmueble}.get(_clave(tipo_original))
     if _clave(tipo_original) in ('apartaestudio', 'apartamento'):
         tipo = TipoInmueble.APARTAMENTO
+    if fuente == 'wasi':
+        tipo = {'casa campestre': TipoInmueble.CASA, 'casa de playa': TipoInmueble.CASA,
+                'lote / terreno': TipoInmueble.LOTE, 'lote comercial': TipoInmueble.LOTE,
+                'lote de playa': TipoInmueble.LOTE, 'terreno': TipoInmueble.LOTE}.get(_clave(tipo_original), tipo)
     if tipo is None and tipo_original is not None:
         tipo = TipoInmueble.OTRO
     codigo_moneda = _moneda(normal.get('currency')) or _moneda(original.get('currency'))
@@ -111,7 +115,7 @@ def convertir(fila, documento, presencias, config, *, geografia=None, actualizac
         'removed': Disponibilidad.RETIRADO,
     }
     busquedas = tuple(PresenciaBusqueda(
-        id_busqueda=p['search_url'], url=p['search_url'],
+        id_busqueda=p['search_url'], url=('https://wasi.co/usuario/inmuebles/red' if fuente == 'wasi' else p['search_url']),
         disponibilidad=estados.get(p['state'], Disponibilidad.DESCONOCIDA),
         ultima_verificacion=_fecha(p['last_verified_at']),
         categorias_actualizacion=(actualizaciones or {}).get((p['search_url'], fila['id']), ()),
@@ -172,7 +176,7 @@ def convertir(fila, documento, presencias, config, *, geografia=None, actualizac
         whatsapp=contacto('whatsapp', 'whatsapp'),
         telefono_fijo=contacto('local_phone', 'localPhone'),
         origen=Origen(
-            fuente='metrocuadrado', id_original=fila['id'], url=_texto(fila['url']),
+            fuente=fuente, id_original=fila['id'], url=(_texto(normal.get('url')) if fuente == 'wasi' else _texto(fila['url'])),
             tipo_original=tipo_original, operacion_original=operacion_original,
             primera_observacion=min(primeras, default=None),
             ultima_verificacion=max(verificaciones, default=None),

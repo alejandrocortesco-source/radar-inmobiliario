@@ -1,0 +1,736 @@
+{
+  "id_pais:": [
+    {
+      "value": "1",
+      "label": "Colombia"
+    }
+  ],
+  "id_dpto:1": [
+    {
+      "value": "1",
+      "label": "Amazonas"
+    },
+    {
+      "value": "2",
+      "label": "Antioquia"
+    },
+    {
+      "value": "3",
+      "label": "Arauca"
+    },
+    {
+      "value": "4",
+      "label": "Atlántico"
+    },
+    {
+      "value": "6",
+      "label": "Bolívar"
+    },
+    {
+      "value": "7",
+      "label": "Boyacá"
+    },
+    {
+      "value": "10",
+      "label": "Caldas"
+    },
+    {
+      "value": "11",
+      "label": "Caquetá"
+    },
+    {
+      "value": "12",
+      "label": "Casanare"
+    },
+    {
+      "value": "13",
+      "label": "Cauca"
+    },
+    {
+      "value": "9",
+      "label": "Córdoba"
+    },
+    {
+      "value": "8",
+      "label": "Cesar"
+    },
+    {
+      "value": "14",
+      "label": "Chocó"
+    },
+    {
+      "value": "15",
+      "label": "Cundinamarca"
+    },
+    {
+      "value": "18",
+      "label": "Guaviare"
+    },
+    {
+      "value": "19",
+      "label": "Huila"
+    },
+    {
+      "value": "20",
+      "label": "La Guajira"
+    },
+    {
+      "value": "21",
+      "label": "Magdalena"
+    },
+    {
+      "value": "22",
+      "label": "Meta"
+    },
+    {
+      "value": "23",
+      "label": "Nariño"
+    },
+    {
+      "value": "24",
+      "label": "Norte de Santander"
+    },
+    {
+      "value": "25",
+      "label": "Putumayo"
+    },
+    {
+      "value": "26",
+      "label": "Quindío"
+    },
+    {
+      "value": "27",
+      "label": "Risaralda"
+    },
+    {
+      "value": "28",
+      "label": "San Andrés y Providencia"
+    },
+    {
+      "value": "29",
+      "label": "Santander"
+    },
+    {
+      "value": "30",
+      "label": "Sucre"
+    },
+    {
+      "value": "31",
+      "label": "Tolima"
+    },
+    {
+      "value": "32",
+      "label": "Valle del Cauca"
+    },
+    {
+      "value": "34",
+      "label": "Vichada"
+    }
+  ],
+  "id_ciudad:1/15": [
+    {
+      "value": "794",
+      "label": "Bogotá D.C."
+    }
+  ],
+  "id_localidad:1/15/794": [
+    {
+      "value": "15",
+      "label": "Antonio Nariño"
+    },
+    {
+      "value": "12",
+      "label": "Barrios Unidos"
+    },
+    {
+      "value": "7",
+      "label": "Bosa"
+    },
+    {
+      "value": "2",
+      "label": "Chapinero"
+    },
+    {
+      "value": "19",
+      "label": "Ciudad Bolívar"
+    },
+    {
+      "value": "10",
+      "label": "Engativá"
+    },
+    {
+      "value": "9",
+      "label": "Fontibón"
+    },
+    {
+      "value": "8",
+      "label": "Kennedy"
+    },
+    {
+      "value": "17",
+      "label": "La Candelaria"
+    },
+    {
+      "value": "14",
+      "label": "Los Mártires"
+    },
+    {
+      "value": "16",
+      "label": "Puente Aranda"
+    },
+    {
+      "value": "18",
+      "label": "Rafael Uribe"
+    },
+    {
+      "value": "4",
+      "label": "San Cristóbal"
+    },
+    {
+      "value": "3",
+      "label": "Santa Fe"
+    },
+    {
+      "value": "11",
+      "label": "Suba"
+    },
+    {
+      "value": "20",
+      "label": "Sumapaz"
+    },
+    {
+      "value": "13",
+      "label": "Teusaquillo"
+    },
+    {
+      "value": "6",
+      "label": "Tunjuelito"
+    },
+    {
+      "value": "1",
+      "label": "Usaquén"
+    },
+    {
+      "value": "5",
+      "label": "Usme"
+    }
+  ],
+  "id_zona:1/15/794/1": [
+    {
+      "value": "538894",
+      "label": "Alameda"
+    },
+    {
+      "value": "538898",
+      "label": "Bella Suiza"
+    },
+    {
+      "value": "137161",
+      "label": "Cedritos"
+    },
+    {
+      "value": "538900",
+      "label": "Cedro Golf"
+    },
+    {
+      "value": "538897",
+      "label": "Chicó Navarra"
+    },
+    {
+      "value": "137802",
+      "label": "Country Club"
+    },
+    {
+      "value": "137804",
+      "label": "El Refugio"
+    },
+    {
+      "value": "137158",
+      "label": "La Uribe"
+    },
+    {
+      "value": "538899",
+      "label": "Molinos Norte"
+    },
+    {
+      "value": "137159",
+      "label": "San Cristóbal Norte"
+    },
+    {
+      "value": "538896",
+      "label": "San Patricio"
+    },
+    {
+      "value": "137803",
+      "label": "Santa Bárbara"
+    },
+    {
+      "value": "538895",
+      "label": "Santa Paula"
+    },
+    {
+      "value": "137160",
+      "label": "Toberín"
+    },
+    {
+      "value": "137163",
+      "label": "Usaquén"
+    },
+    {
+      "value": "137156",
+      "label": "Verbenal"
+    }
+  ],
+  "property_type_id:": [
+    {
+      "value": "14",
+      "label": "Apartaestudio"
+    },
+    {
+      "value": "2",
+      "label": "Apartamento"
+    },
+    {
+      "value": "8",
+      "label": "Bodega"
+    },
+    {
+      "value": "22",
+      "label": "Bungalow"
+    },
+    {
+      "value": "28",
+      "label": "Cabaña"
+    },
+    {
+      "value": "31",
+      "label": "Campos, Chacras y Quintas"
+    },
+    {
+      "value": "1",
+      "label": "Casa"
+    },
+    {
+      "value": "11",
+      "label": "Casa Campestre"
+    },
+    {
+      "value": "24",
+      "label": "Casa de Playa"
+    },
+    {
+      "value": "10",
+      "label": "Chalet"
+    },
+    {
+      "value": "19",
+      "label": "Condominio"
+    },
+    {
+      "value": "15",
+      "label": "Consultorio"
+    },
+    {
+      "value": "27",
+      "label": "Cortijo"
+    },
+    {
+      "value": "20",
+      "label": "Dúplex"
+    },
+    {
+      "value": "16",
+      "label": "Edificio"
+    },
+    {
+      "value": "34",
+      "label": "Edificio Apartamentos"
+    },
+    {
+      "value": "7",
+      "label": "Finca"
+    },
+    {
+      "value": "13",
+      "label": "Finca - Hoteles"
+    },
+    {
+      "value": "23",
+      "label": "Galpon Industrial"
+    },
+    {
+      "value": "26",
+      "label": "Garaje"
+    },
+    {
+      "value": "18",
+      "label": "Hostal"
+    },
+    {
+      "value": "12",
+      "label": "Hoteles"
+    },
+    {
+      "value": "29",
+      "label": "Isla"
+    },
+    {
+      "value": "3",
+      "label": "Local"
+    },
+    {
+      "value": "5",
+      "label": "Lote / Terreno"
+    },
+    {
+      "value": "6",
+      "label": "Lote Comercial"
+    },
+    {
+      "value": "17",
+      "label": "Lote de Playa"
+    },
+    {
+      "value": "30",
+      "label": "Nave Industrial"
+    },
+    {
+      "value": "4",
+      "label": "Oficina"
+    },
+    {
+      "value": "21",
+      "label": "Penthouse"
+    },
+    {
+      "value": "33",
+      "label": "Ph"
+    },
+    {
+      "value": "25",
+      "label": "Piso"
+    },
+    {
+      "value": "32",
+      "label": "Terreno"
+    }
+  ],
+  "business_type_id:": [
+    {
+      "value": "1",
+      "label": "Vender"
+    },
+    {
+      "value": "2",
+      "label": "Alquiler"
+    },
+    {
+      "value": "5",
+      "label": "Vender - Alquiler"
+    }
+  ],
+  "garage:": [
+    {
+      "value": "0",
+      "label": "0 o más"
+    },
+    {
+      "value": "1",
+      "label": "1 o más"
+    },
+    {
+      "value": "2",
+      "label": "2 o más"
+    },
+    {
+      "value": "3",
+      "label": "3 o más"
+    },
+    {
+      "value": "4",
+      "label": "4 o más"
+    },
+    {
+      "value": "5",
+      "label": "5 o más"
+    },
+    {
+      "value": "6",
+      "label": "6 o más"
+    },
+    {
+      "value": "7",
+      "label": "7 o más"
+    },
+    {
+      "value": "8",
+      "label": "8 o más"
+    },
+    {
+      "value": "9",
+      "label": "9 o más"
+    },
+    {
+      "value": "10",
+      "label": "10 o más"
+    },
+    {
+      "value": "11",
+      "label": "11 o más"
+    },
+    {
+      "value": "12",
+      "label": "12 o más"
+    },
+    {
+      "value": "13",
+      "label": "13 o más"
+    },
+    {
+      "value": "14",
+      "label": "14 o más"
+    },
+    {
+      "value": "15",
+      "label": "15 o más"
+    },
+    {
+      "value": "16",
+      "label": "16 o más"
+    },
+    {
+      "value": "17",
+      "label": "17 o más"
+    },
+    {
+      "value": "18",
+      "label": "18 o más"
+    },
+    {
+      "value": "19",
+      "label": "19 o más"
+    },
+    {
+      "value": "20",
+      "label": "20 o más"
+    },
+    {
+      "value": "21",
+      "label": "21 o más"
+    },
+    {
+      "value": "22",
+      "label": "22 o más"
+    },
+    {
+      "value": "23",
+      "label": "23 o más"
+    },
+    {
+      "value": "24",
+      "label": "24 o más"
+    },
+    {
+      "value": "25",
+      "label": "25 o más"
+    },
+    {
+      "value": "26",
+      "label": "26 o más"
+    },
+    {
+      "value": "27",
+      "label": "27 o más"
+    },
+    {
+      "value": "28",
+      "label": "28 o más"
+    },
+    {
+      "value": "29",
+      "label": "29 o más"
+    }
+  ],
+  "beedroms:": [
+    {
+      "value": "1",
+      "label": "1 o más"
+    },
+    {
+      "value": "2",
+      "label": "2 o más"
+    },
+    {
+      "value": "3",
+      "label": "3 o más"
+    },
+    {
+      "value": "4",
+      "label": "4 o más"
+    },
+    {
+      "value": "5",
+      "label": "5 o más"
+    },
+    {
+      "value": "6",
+      "label": "6 o más"
+    },
+    {
+      "value": "7",
+      "label": "7 o más"
+    },
+    {
+      "value": "8",
+      "label": "8 o más"
+    },
+    {
+      "value": "9",
+      "label": "9 o más"
+    },
+    {
+      "value": "10",
+      "label": "10 o más"
+    },
+    {
+      "value": "11",
+      "label": "11 o más"
+    },
+    {
+      "value": "12",
+      "label": "12 o más"
+    },
+    {
+      "value": "13",
+      "label": "13 o más"
+    },
+    {
+      "value": "14",
+      "label": "14 o más"
+    },
+    {
+      "value": "15",
+      "label": "15 o más"
+    },
+    {
+      "value": "16",
+      "label": "16 o más"
+    },
+    {
+      "value": "17",
+      "label": "17 o más"
+    },
+    {
+      "value": "18",
+      "label": "18 o más"
+    },
+    {
+      "value": "19",
+      "label": "19 o más"
+    },
+    {
+      "value": "20",
+      "label": "20 o más"
+    },
+    {
+      "value": "21",
+      "label": "21 o más"
+    },
+    {
+      "value": "22",
+      "label": "22 o más"
+    },
+    {
+      "value": "23",
+      "label": "23 o más"
+    },
+    {
+      "value": "24",
+      "label": "24 o más"
+    },
+    {
+      "value": "25",
+      "label": "25 o más"
+    },
+    {
+      "value": "26",
+      "label": "26 o más"
+    },
+    {
+      "value": "27",
+      "label": "27 o más"
+    },
+    {
+      "value": "28",
+      "label": "28 o más"
+    },
+    {
+      "value": "29",
+      "label": "29 o más"
+    },
+    {
+      "value": "30+",
+      "label": "30 o más"
+    }
+  ],
+  "bathrooms:": [
+    {
+      "value": "1",
+      "label": "1 o más"
+    },
+    {
+      "value": "2",
+      "label": "2 o más"
+    },
+    {
+      "value": "3",
+      "label": "3 o más"
+    },
+    {
+      "value": "4",
+      "label": "4 o más"
+    },
+    {
+      "value": "5",
+      "label": "5 o más"
+    },
+    {
+      "value": "6",
+      "label": "6 o más"
+    },
+    {
+      "value": "7",
+      "label": "7 o más"
+    },
+    {
+      "value": "8",
+      "label": "8 o más"
+    },
+    {
+      "value": "9",
+      "label": "9 o más"
+    },
+    {
+      "value": "10+",
+      "label": "10 o más"
+    }
+  ],
+  "typeAccount:": [
+    {
+      "value": "1",
+      "label": "Empresa"
+    },
+    {
+      "value": "2",
+      "label": "Agente"
+    },
+    {
+      "value": "4",
+      "label": "Broker"
+    },
+    {
+      "value": "3",
+      "label": "Propietario de inmueble"
+    }
+  ]
+}

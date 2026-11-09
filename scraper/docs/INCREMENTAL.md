@@ -76,3 +76,7 @@ Tablas añadidas: `run_searches` (avance de cada URL), `listing_observations` (p
 La página principal muestra los contadores incrementales y permite filtrar `unchanged`. `/catalog` conserva anuncios activos, posiblemente retirados y retirados, con su última verificación. La ficha muestra disponibilidad por búsqueda y el historial de precios. API: `/api/catalog`, `/api/properties/{id}`, `/api/runs/{id}/report` y exportación existente. Se preservan las instantáneas de documentos por ejecución para auditar qué información se reutilizó.
 
 Los respaldos, CSV de recursos, bases y demás salidas siguen excluidos de Git. El monitor de recursos mide toda la invocación incremental, incluyendo los recorridos de listado; sus datos permiten comparar el ahorro real de fichas abiertas.
+
+## Aplicación a Wasi
+
+La ampliación del 8 de noviembre de 2026 reutiliza esta cola y persistencia mediante `WasiStore`, inyectando la identidad de búsqueda por filtros. La base separada aísla ausencias por fuente; el servicio ofrece un catálogo integrado. Se recorren todas las páginas sin límites, se planifica una sola cola global y se reabren listados únicamente cuando quedan fichas pendientes. No hay refresco por fecha. La normalización Wasi siempre compara COP; la CLI histórica de moneda de Metrocuadrado no añade otra moneda al negocio. Los párrafos anteriores sobre etiquetas USD/EUR documentan compatibilidad técnica del capturador histórico, no soporte multimoneda del catálogo ni matching. Ver [configuración, autenticación, recuperación y límites Wasi](WASI.md).

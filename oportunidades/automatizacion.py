@@ -97,12 +97,13 @@ def recalcular_abiertas(s, catalogo):
 
 def despues_scraper(ruta):
     """Solo se invoca después de una ejecución completada; usa el catálogo en lectura."""
-    from catalogo.persistencia.sqlite import CatalogoSQLite
+    from catalogo.persistencia.integrado import catalogo_configurado
     from catalogo.servicio import ServicioCatalogo
     from .persistencia import SQLite
     from .servicio import ServicioOportunidades
     ruta = Path(ruta).resolve()
     crm = Path(os.getenv('RADAR_CRM_DB', str(ruta.with_name(ruta.stem + '-consola.sqlite')))).resolve()
-    if crm == ruta:
+    wasi = Path(os.getenv('WASI_DB', str(ruta.with_name('wasi.sqlite')))).resolve()
+    if crm in (ruta, wasi):
         raise ValueError('La base auxiliar debe ser distinta al catálogo')
-    recalcular_abiertas(ServicioOportunidades(SQLite(crm)), ServicioCatalogo(CatalogoSQLite(ruta)))
+    recalcular_abiertas(ServicioOportunidades(SQLite(crm)), ServicioCatalogo(catalogo_configurado(ruta)))

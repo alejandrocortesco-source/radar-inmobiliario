@@ -21,6 +21,7 @@ from oportunidades.normalizacion import normalizar_ciudad
 from .anunciantes import url_anunciante
 from .presentacion import fecha, numero, enlace_publico
 from .inicio import indicadores, resumen_clientes
+from catalogo.fuentes import wasi
 
 RAIZ = Path(__file__).parent
 templates = Jinja2Templates(directory=[str(RAIZ / 'templates' / 'v06'), str(RAIZ / 'templates')])
@@ -43,8 +44,13 @@ def crear_router(proveedor):
     def dashboard(request, catalogo, s, status=200, **extras):
         todos = catalogo.listar()
         filas = resumen_clientes(s, seguimiento(s), todos)
+        registros = catalogo.busquedas.opciones_wasi() if catalogo.busquedas else wasi.opciones_iniciales()
+        valores = {'id_pais': '1', 'id_dpto': '15', **(extras.get('fuente_valores') or {})}
+        extras['fuente_valores'] = valores
         return render(request, 'inicio06.html', status, recientes=[f for f in filas if f['activo']][:6],
             indicadores=indicadores(todos, catalogo.ultima_actualizacion()), fuentes=catalogo.listar_busquedas(),
+            wasi_campos=wasi.SELECTS, wasi_numeros=wasi.INPUTS, wasi_labels=wasi.LABELS,
+            wasi_registros=registros, wasi_opciones={c: wasi.opciones(c, valores, registros) for c in wasi.SELECTS},
             mensaje=request.query_params.get('mensaje'), **extras)
 
     @router.get('')
@@ -54,6 +60,13 @@ def crear_router(proveedor):
     @router.get('/')
     def inicio(request: Request, catalogo=Depends(proveedor), s=Depends(proveedor_oportunidades)):
         try:
+            editar = request.query_params.get('editar_wasi')
+            if editar and catalogo.busquedas:
+                config = catalogo.busquedas.configuracion_wasi(editar)
+                registrada = next((b for b in catalogo.listar_busquedas() if b['fuente'] == 'wasi' and b['id_busqueda'] == editar), None)
+                if not config or not registrada:
+                    return error(request, 'Búsqueda Wasi no encontrada.', 404)
+                return dashboard(request, catalogo, s, fuente_valores={**config['filtros'], 'fuente': 'wasi', 'nombre': registrada['nombre'], 'reemplazar': editar})
             return dashboard(request, catalogo, s)
         except (ErrorPersistencia, ErrorLecturaCatalogo, FileNotFoundError) as exc:
             return error(request, exc)
@@ -221,6 +234,14 @@ def crear_router(proveedor):
     async def fuente(request: Request, catalogo=Depends(proveedor), s=Depends(proveedor_oportunidades)):
         valores = {k: v[-1] for k, v in parse_qs((await request.body()).decode(), keep_blank_values=True).items()}
         try:
+            if valores.get('fuente') == 'wasi':
+                if catalogo.busquedas is None:
+                    raise ErrorLecturaCatalogo('Almacenamiento auxiliar no disponible')
+                config = wasi.configurar(valores, catalogo.busquedas.opciones_wasi())
+                catalogo.busquedas.guardar_wasi(valores.get('nombre', ''), config, valores.get('reemplazar'))
+                return RedirectResponse('/v0.6/?mensaje=fuente_guardada#agregar-fuente', 303)
+            if valores.get('fuente', 'metrocuadrado') != 'metrocuadrado':
+                raise ConsultaInvalida('Fuente no compatible')
             url = valores.get('url', '')
             from urllib.parse import urlsplit
             partes = urlsplit(url.strip())
@@ -240,6 +261,45 @@ def crear_router(proveedor):
                 return error(request, exc, 422)
         except (ErrorLecturaCatalogo, OSError) as exc:
             return error(request, exc)
+
+    @router.post('/fuentes/opciones')
+    async def opciones_fuente(request: Request, catalogo=Depends(proveedor), s=Depends(proveedor_oportunidades)):
+        valores = {k: v[-1] for k, v in parse_qs((await request.body()).decode(), keep_blank_values=True).items()}
+        try:
+            # Solo prepara el formulario desde opciones verificadas. No navega ni captura.
+            registros = catalogo.busquedas.opciones_wasi() if catalogo.busquedas else wasi.opciones_iniciales()
+            for campo in wasi.GEO:
+                if valores.get(campo) and not any(o['value'] == valores[campo] for o in wasi.opciones(campo, valores, registros)):
+                    valores[campo] = ''
+            return dashboard(request, catalogo, s, fuente_valores=valores)
+        except (ErrorLecturaCatalogo, ErrorPersistencia, FileNotFoundError) as exc:
+            return error(request, exc)
+
+    @router.post('/fuentes/wasi/opciones')
+    async def sincronizar_wasi(request: Request, catalogo=Depends(proveedor), s=Depends(proveedor_oportunidades)):
+        valores = {k: v[-1] for k, v in parse_qs((await request.body()).decode(), keep_blank_values=True).items()}
+        try:
+            from wasi.options import actualizar_opciones
+            from wasi.__main__ import rutas
+            from wasi.locking import bloqueo
+            from metro.extraction import Restricted
+            if catalogo.busquedas is None:
+                raise ErrorLecturaCatalogo('Almacenamiento auxiliar no disponible')
+            padres = {}
+            for campo in wasi.GEO:
+                if valores.get(campo):
+                    padres[campo] = valores[campo]
+                else:
+                    break
+            _, base_wasi, _ = rutas(crm=catalogo.busquedas.ruta)
+            with bloqueo(base_wasi):
+                # Acción separada de guardar: solo opciones, nunca capturas.
+                await actualizar_opciones(catalogo.busquedas, padres)
+            return dashboard(request, catalogo, s, fuente_valores=valores,
+                             fuente_aviso='Opciones de Wasi actualizadas. Revisa los filtros y guarda la búsqueda cuando esté lista.')
+        except (ValueError, OSError, ErrorLecturaCatalogo, Restricted) as exc:
+            return dashboard(request, catalogo, s, 503, fuente_valores=valores,
+                             fuente_error='No se pudieron actualizar las opciones de Wasi. Verifica el acceso configurado o reintenta cuando no haya una captura en curso.')
 
     @router.post('/fuentes/eliminar')
     async def eliminar_fuente(request: Request, catalogo=Depends(proveedor)):

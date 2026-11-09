@@ -16,7 +16,8 @@ def dumps(value):
 
 
 class Store:
-    def __init__(self, path=DEFAULT_DB):
+    def __init__(self, path=DEFAULT_DB, *, normalizar_busqueda=search_identity):
+        self.search_identity = normalizar_busqueda
         self.path = str(path)
         Path(path).parent.mkdir(parents=True, exist_ok=True)
         with self.connect() as db:
@@ -76,11 +77,11 @@ class Store:
           property_id TEXT NOT NULL,url TEXT NOT NULL,PRIMARY KEY(run_id,search_url,page,property_id))''')
         for row in old_pages:
             db.execute('INSERT INTO pages_v2 VALUES(?,?,?,?,?,?,?,?,?)',
-                       (row['run_id'],search_identity(runs[row['run_id']]['url']),row['number'],row['active'],
+                       (row['run_id'],self.search_identity(runs[row['run_id']]['url']),row['number'],row['active'],
                         row['url'],row['fingerprint'],row['links_json'],row['next_json'],row['visited']))
         for row in old_appearances:
             db.execute('INSERT INTO appearances_v2 VALUES(?,?,?,?,?)',
-                       (row['run_id'],search_identity(runs[row['run_id']]['url']),row['page'],row['property_id'],row['url']))
+                       (row['run_id'],self.search_identity(runs[row['run_id']]['url']),row['page'],row['property_id'],row['url']))
         db.execute('DROP TABLE pages')
         db.execute('ALTER TABLE pages_v2 RENAME TO pages')
         db.execute('DROP TABLE appearances')
@@ -114,10 +115,10 @@ class Store:
         for run_id, run in runs.items():
             # No se calculan retirados de manera retroactiva durante la migración.
             db.execute('INSERT INTO run_searches VALUES(?,?,?,?,?,1)',
-                       (run_id,search_identity(run['url']),run['url'],run['listing_complete'],run['advertised_json']))
+                       (run_id,self.search_identity(run['url']),run['url'],run['listing_complete'],run['advertised_json']))
         for row in old_pages:
             for item in json.loads(row['links_json']):
-                self._observe(db,row['run_id'],search_identity(runs[row['run_id']]['url']),item,row['visited'])
+                self._observe(db,row['run_id'],self.search_identity(runs[row['run_id']]['url']),item,row['visited'])
         db.execute('PRAGMA user_version=1')
 
     @contextmanager
@@ -140,7 +141,7 @@ class Store:
                                 (url, now(), 'running', dumps(config))).lastrowid
             for source in config.get('urls') or [url]:
                 db.execute('INSERT OR IGNORE INTO run_searches(run_id,search_url,source_url) VALUES(?,?,?)',
-                           (run_id,search_identity(source),source))
+                           (run_id,self.search_identity(source),source))
             return run_id
 
     def run(self, run_id):
@@ -169,13 +170,13 @@ class Store:
             args = [run_id]
             if search_url is not None:
                 query += ' AND search_url=?'
-                args.append(search_identity(search_url))
+                args.append(self.search_identity(search_url))
             return [dict(r) for r in db.execute(query+' ORDER BY search_url,number',args)]
 
     def save_page(self, run_id, number, active, url, fingerprint, links, next_action, search_url=None):
         # Página, procedencias y cola se confirman en una única transacción.
         with self.connect() as db:
-            search_url = search_identity(search_url or db.execute('SELECT url FROM runs WHERE id=?',(run_id,)).fetchone()[0])
+            search_url = self.search_identity(search_url or db.execute('SELECT url FROM runs WHERE id=?',(run_id,)).fetchone()[0])
             visited = now()
             db.execute('INSERT INTO pages VALUES(?,?,?,?,?,?,?,?,?)',
                        (run_id, search_url, number, active, url, fingerprint, dumps(links), dumps(next_action), visited))
@@ -214,7 +215,7 @@ class Store:
             return [dict(r) for r in db.execute('SELECT * FROM run_searches WHERE run_id=? ORDER BY search_url',(run_id,))]
 
     def update_search(self, run_id, search_url, *, advertised=None, complete=False):
-        search_url = search_identity(search_url)
+        search_url = self.search_identity(search_url)
         with self.connect() as db:
             if advertised is not None:
                 db.execute('UPDATE run_searches SET advertised_json=? WHERE run_id=? AND search_url=?',
@@ -372,7 +373,12 @@ class Store:
             conflicts = db.execute('''SELECT count(*) FROM jobs WHERE run_id=? AND
               (decision_reason='conflicting_listing_prices' OR property_id IN
                (SELECT property_id FROM listing_observations WHERE run_id=? AND conflict=1))''',(run_id,run_id)).fetchone()[0]
+            opened = db.execute('SELECT count(*) FROM jobs WHERE run_id=? AND attempts>0', (run_id,)).fetchone()[0]
+            errors = db.execute("SELECT count(*) FROM events WHERE run_id=? AND level='error'", (run_id,)).fetchone()[0]
         return {**run, 'pages': pages, 'unique': sum(counts.values()), 'statuses': counts,
+                'details_opened': opened, 'details_reused': counts.get('unchanged', 0),
+                'errors': sum(counts.get(s, 0) for s in ('partial', 'failed', 'blocked')),
+                'error_events': errors,
                 'duplicates': appearances-sum(counts.values()), 'retries': retries,
                 'classifications':classifications,'search_states':lifecycle,'searches':self.searches(run_id),
                 'listing_conflicts':conflicts}

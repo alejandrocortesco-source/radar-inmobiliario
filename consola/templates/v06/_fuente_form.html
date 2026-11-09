@@ -1,0 +1,17 @@
+{% set es_wasi = fuente_valores.get('fuente') == 'wasi' %}
+<form action="/v0.6/fuentes" method="post" class="source-form" data-source-form>
+<label>Fuente<select name="fuente" data-source-select><option value="metrocuadrado" {{'selected' if not es_wasi else ''}}>Metrocuadrado</option><option value="wasi" {{'selected' if es_wasi else ''}}>Wasi</option></select></label>
+<button class="secondary" type="submit" formaction="/v0.6/fuentes/opciones" formnovalidate>Actualizar formulario</button>
+<label>Nombre descriptivo<input name="nombre" required maxlength="120" value="{{fuente_valores.get('nombre','')}}" placeholder="Ej. Apartamentos en La Carolina"></label>
+<label data-metro-field {% if es_wasi %}hidden{% endif %}>URL de búsqueda de Metrocuadrado<input type="url" name="url" {{'disabled' if es_wasi else 'required'}} maxlength="4096" value="{{fuente_valores.get('url','')}}" placeholder="https://www.metrocuadrado.com/inmuebles/…"></label>
+<div data-wasi-fields {% if not es_wasi %}hidden{% endif %}>
+<p>Elige ciudad y al menos una localidad o zona / barrio. Las opciones corresponden a Wasi. Si falta una opción, actualiza las opciones de la fuente con los filtros anteriores elegidos.</p>
+<button class="secondary" type="submit" formaction="/v0.6/fuentes/wasi/opciones" formnovalidate>Actualizar opciones de Wasi</button>
+{% for campo in wasi_campos %}<label>{{wasi_labels[campo]}}<select name="{{campo}}" data-wasi-control {{'disabled' if not es_wasi else ''}}><option value="">{{'Seleccionar' if campo in ('id_pais','id_dpto','id_ciudad') else 'Todos'}}</option>{% for o in wasi_opciones[campo] %}<option value="{{o.value}}" {{'selected' if fuente_valores.get(campo)==o.value else ''}}>{{o.label}}</option>{% endfor %}</select></label>{% endfor %}
+{% for campo in wasi_numeros %}<label>{{wasi_labels[campo]}}<input type="{{'text' if campo=='title' else 'number'}}" name="{{campo}}" {% if campo=='title' %}maxlength="256"{% else %}min="0" step="1"{% endif %} value="{{fuente_valores.get(campo,'')}}" data-wasi-control {{'disabled' if not es_wasi else ''}}></label>{% endfor %}
+<input type="hidden" name="reemplazar" value="{{fuente_valores.get('reemplazar','')}}" data-wasi-control {{'disabled' if not es_wasi else ''}}>
+<p class="caption">Cambiar filtros crea una nueva revisión de búsqueda. Las procedencias y el historial anterior se conservan.</p>
+</div>
+<button class="secondary" type="submit">Guardar fuente <span aria-hidden="true">+</span></button></form>
+<script type="application/json" id="wasi-options">{{wasi_registros|tojson}}</script>
+<script src="/consola/static/wasi.js" defer></script>

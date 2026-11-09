@@ -1,6 +1,6 @@
-# Scraper de Metrocuadrado — Radar Inmobiliario
+# Scrapers de Metrocuadrado y Wasi — Radar Inmobiliario
 
-Componente de [Radar Inmobiliario](../README.md) para descubrir anuncios, mantener un catálogo incremental por cambios de precio y revisar los resultados con FastAPI. Recorre todos los listados y abre las fichas nuevas, con precio modificado o que requieren revisión de integridad. Puede ejecutarse por consola sin iniciar la interfaz. No necesita Apify, Sheets, Gemini ni WhatsApp. No envía formularios ni contacta anunciantes.
+Componente de [Radar Inmobiliario](../README.md) para descubrir anuncios, mantener un catálogo incremental por cambios de precio y revisar los resultados con FastAPI. Recorre todos los listados y abre las fichas nuevas, con precio modificado o que requieren revisión de integridad. Puede ejecutarse por consola sin iniciar la interfaz. No necesita Apify, Sheets, Gemini ni WhatsApp. No contacta anunciantes. Metrocuadrado usa búsquedas públicas; Wasi aplica controles de búsqueda y el login normal con secretos externos. La [guía Wasi](docs/WASI.md) documenta acceso, búsquedas, recuperación y preparación de Cloud Run; los comandos siguientes conservan el uso de Metrocuadrado.
 
 ## Instalación (Windows / PowerShell)
 
@@ -132,4 +132,8 @@ docker run --rm -v "${PWD}/data:/data" metro-local scrape
 
 Estos comandos se ejecutan dentro de `scraper/`. Si se construye desde la raíz, usar `docker build -f scraper/Dockerfile -t metro-local scraper`: el contexto es el componente y utiliza su `.dockerignore`.
 
-El filesystem de Cloud Run es efímero: esta primera versión necesita planificar un volumen compatible con los bloqueos de SQLite o copiar la base cerrada a almacenamiento durable entre ejecuciones. No usar SQLite WAL directamente sobre un montaje de objetos/FUSE sin verificar sus garantías. Una alternativa posterior es un adaptador de base durable. Ejecutar una sola tarea por base; dimensionar timeout y memoria para Chromium. No se desplegó ni se configuró infraestructura de Google Cloud en esta entrega.
+El filesystem de Cloud Run es efímero. v0.8 prepara `Dockerfile.jobs` y un adaptador de snapshots SQLite en Cloud Storage, con disco local durante la ejecución, precondiciones de generación y lock remoto. No monta SQLite/WAL sobre objetos/FUSE. Ejecutar una sola tarea por base y dimensionar timeout y memoria para Chromium mediante medición. La imagen, permisos y operación real desatendida siguen pendientes de validar; no se desplegó ni se configuró infraestructura de Google Cloud en esta entrega.
+
+## Fuente Wasi y ejecución de ambas fuentes — v0.8
+
+`wasi/` adapta navegación, login normal y normalización al mismo motor `metro.storage.Store` y ciclo de ejecución. Mantiene una base técnica separada, integrada por el catálogo de lectura. `python wasi_run.py scrape` captura búsquedas Wasi registradas; `python job.py --source all` procesa las dos fuentes sin FastAPI. Configuración, secretos, snapshots durables y limitaciones: [Wasi](docs/WASI.md). `Dockerfile.jobs` utiliza el contexto raíz; el Dockerfile histórico se conserva.

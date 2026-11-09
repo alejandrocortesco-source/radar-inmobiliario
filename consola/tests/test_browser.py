@@ -163,10 +163,14 @@ def test_error_de_precio_y_vacio_se_muestran_en_pantalla(pagina, servidor):
 
 
 def test_busqueda_paginacion_tamano_y_exportacion(pagina, servidor):
+    errores_js = []
+    pagina.on('pageerror', lambda error: errores_js.append(str(error)))
     pagina.goto(servidor + '/consola/')
     pagina.get_by_text('Buscar', exact=True).click()
     pagina.get_by_label('Buscar por texto').fill('jardín')
     pagina.get_by_role('button', name='Buscar inmuebles').click()
+    pagina.wait_for_load_state('load')
+    assert not errores_js
     expect(pagina.locator('[data-total]')).to_have_text('26')
     pagina.get_by_label('Filas', exact=True).select_option('12')
     expect(pagina.locator('.catalog-table tbody tr')).to_have_count(12)

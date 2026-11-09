@@ -303,3 +303,7 @@ SQLite y el formulario se detallan en
 `Inmueble` expone `anunciante`, `anunciante_direccion`, `telefono`, `telefono_fijo` y `whatsapp`, todos opcionales. El adaptador lee `normalized` y los originales públicos ya capturados (`sources.flight_property` o `extra`). Ignora objetos, booleanos y campos ausentes; conserva el texto de contacto, sin inferir teléfonos. El nombre original tiene prioridad para no perder diferencias de espacios. No cambia el esquema ni escribe en el catálogo.
 
 `consultas.inmuebles_anunciante` selecciona por igualdad literal y excluye nombres vacíos. No usa el filtrado geográfico/textual ni las normalizaciones del matching. La consulta HTTP del panel parte de una lectura global y excluye el inmueble de origen solo de la lista de otros anuncios, conservándolo como procedencia de sus contactos. Ver [v0.7](../consola/docs/V07.md).
+
+## Catálogo integrado Metrocuadrado y Wasi
+
+`persistencia/integrado.py` compone repositorios `CatalogoSQLite` con fuente explícita, sin modificar las identidades ni los campos de `Inmueble`. `WASI_DB` selecciona la base técnica de Wasi; ambas son de solo lectura desde este componente. UUID o `fuente:ID` resuelven códigos compartidos; un ID simple ambiguo devuelve 422. La API agrega la procedencia técnica `fuente`. La configuración versionada y las opciones dependientes viven en tablas auxiliares, separadas del catálogo. Detalles y límites: [guía Wasi](../scraper/docs/WASI.md).

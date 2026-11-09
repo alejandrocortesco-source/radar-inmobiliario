@@ -13,3 +13,9 @@
 .source-list>li>a{display:block;font-size:12px;margin:8px 0}
 .source-delete{font-size:12px}.source-delete>summary{color:var(--accent)}
 .source-delete p{margin:16px 0}.source-delete button{max-width:100%;white-space:normal}
+[hidden]{display:none!important}
+[data-wasi-fields]{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+[data-wasi-fields]>p{grid-column:1/-1;font-size:13px;color:var(--muted)}
+[data-wasi-fields]>button{grid-column:1/-1}
+.source-form select{max-width:100%;min-width:0;width:100%}
+@media(max-width:1055px){[data-wasi-fields]{grid-template-columns:1fr}}

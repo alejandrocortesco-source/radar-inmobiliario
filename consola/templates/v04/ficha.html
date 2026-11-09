@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'base.html' %}{% from '_dato_fuente.html' import dato_fuente with context %}
 {% block title %}{{inmueble.titulo or 'Detalle del inmueble'}} · Radar Inmobiliario{% endblock %}
 {% block content %}
 <article class="detail">
@@ -7,7 +7,7 @@
 <section class="essentials" aria-label="Características principales">
   <div class="offers">{% for o in ofertas %}<span>{{o.operacion}} <strong>{{o.precio}}</strong></span>{% else %}<span>Precio no informado</span>{% endfor %}</div>
   <p>Área: {{datos.area}}</p>
-  <p>{{inmueble.habitaciones|numero}} habitaciones <span>·</span> {{inmueble.banos|numero}} baños <span>·</span> {{inmueble.parqueaderos|numero}} parqueaderos</p>
+  <p>{{dato_fuente(inmueble.habitaciones, 'rooms')}} habitaciones <span>·</span> {{dato_fuente(inmueble.banos, 'bathrooms')}} baños <span>·</span> {{dato_fuente(inmueble.parqueaderos, 'garages')}} parqueaderos</p>
 </section>
 <dl class="metadata">
   <dt>Anunciante</dt><dd>{% with i=inmueble %}{% include '_anunciante_link.html' %}{% endwith %}</dd>
@@ -20,11 +20,11 @@
   </dd>
 </dl>
 <section id="comentario" class="detail-section"><h2>Comentario de Mónica sobre el inmueble</h2><form data-comment-form data-id="{{inmueble.id_interno}}"><label for="comment-text">Texto libre</label><textarea id="comment-text" name="texto" rows="5" {{'disabled' if comentario_texto is none else ''}}>{{comentario_texto or ''}}</textarea><p>Comentario compartido en todas las vistas de este inmueble. Observación de Mónica, no dato publicado verificado.</p><p role="status" data-comment-status>{{'No se pudo leer. Cierra y vuelve a abrir para reintentar.' if comentario_texto is none else 'Sin cambios'}}</p><button type="submit" {{'disabled' if comentario_texto is none else ''}}>Guardar comentario</button></form></section>
-<p>ID interno: {{inmueble.id_interno}}</p>{% if error_evidencia %}<p role="alert">{{error_evidencia}}</p>{% endif %}{% if evidencia %}<section><h2>Evidencia de coincidencia</h2><p>Cumple: {{evidencia.cumple|join(' · ')}}</p><p>Pendientes: {{evidencia.pendientes|join(' · ')}}</p><p>Preferencias cumplidas: {{evidencia.preferencias_cumplidas|join(' · ')}}</p><p>Preferencias sin datos: {{evidencia.preferencias_pendientes|join(' · ')}}</p><p>Preferencias no cumplidas: {{evidencia.preferencias_no_cumplidas|join(' · ')}}</p></section>{% endif %}<section class="detail-section"><h2>Descripción</h2><p class="description">{{inmueble.descripcion or 'La publicación no incluye una descripción disponible.'}}</p></section>
+<p>ID interno: {{inmueble.id_interno}}</p>{% if error_evidencia %}<p role="alert">{{error_evidencia}}</p>{% endif %}{% if evidencia %}<section><h2>Evidencia de coincidencia</h2><p>Cumple: {{evidencia.cumple|join(' · ')}}</p><p>Pendientes: {{evidencia.pendientes|join(' · ')}}</p><p>Preferencias cumplidas: {{evidencia.preferencias_cumplidas|join(' · ')}}</p><p>Preferencias sin datos: {{evidencia.preferencias_pendientes|join(' · ')}}</p><p>Preferencias no cumplidas: {{evidencia.preferencias_no_cumplidas|join(' · ')}}</p></section>{% endif %}<section class="detail-section"><h2>Descripción</h2><p class="description">{{inmueble.descripcion or ('Información no disponible en esta fuente' if inmueble.origen.fuente=='wasi' and campos_fuente.get('description',{}).get('status')=='absent' else 'La publicación no incluye una descripción disponible.')}}</p></section>
 <details class="detail-section"><summary>Más datos y características</summary>
   <dl class="metadata">
-    {% for valor,etiqueta in [(inmueble.area_construida_m2,'Área construida (m²)'),(inmueble.area_privada_m2,'Área privada (m²)'),(inmueble.area_publicada_m2,'Área no especifica (m²)')] %}<dt>{{etiqueta}}</dt><dd>{{valor|numero if valor is not none else 'No especifica'}}</dd>{% endfor %}
-    <dt>Estrato</dt><dd>{{inmueble.estrato|numero}}</dd>
+    {% for valor,etiqueta in [(inmueble.area_construida_m2,'Área construida (m²)'),(inmueble.area_privada_m2,'Área privada (m²)'),(inmueble.area_publicada_m2,'Área no especifica (m²)')] %}<dt>{{etiqueta}}</dt><dd>{{dato_fuente(valor, ['built_area','private_area','area'][loop.index0])}}</dd>{% endfor %}
+    <dt>Estrato</dt><dd>{{dato_fuente(inmueble.estrato, 'stratum')}}</dd>
     {% if inmueble.geografia %}
     <dt>Ubicación normalizada</dt><dd>{{'Consistente con el catálogo controlado' if inmueble.geografia.estado=='confirmada' else 'Pendiente de verificar'}}. {{inmueble.geografia.motivos|join(' · ')}}</dd>
     <dt>Barrio publicado (original)</dt><dd>{{inmueble.geografia.barrio_original or 'Sin dato'}}</dd>
