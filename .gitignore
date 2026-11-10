@@ -39,3 +39,6 @@ tmp/
 resource_usage.csv
 resource_usage.csv.lock
 samples-*.csv
+
+# Documentos privados del equipo; no forman parte del repositorio
+/.local/

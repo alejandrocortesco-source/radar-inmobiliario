@@ -2,6 +2,8 @@
 
 Política vigente desde el 9 de noviembre de 2026. Un solo desarrollo personal, sin ramas por versión ni automatizaciones adicionales. Las decisiones funcionales siguen en [el documento rector](RADAR_PROYECTO_RECTOR.md).
 
+La ubicación vigente de documentación, datos y archivos privados se consulta en [el mapa de archivos](docs/ESTRUCTURA.md). El diagnóstico privado que la auditoría histórica registra bajo `docs/` se trasladó después a `.local/diagnosticos/`, conservando su contenido y fuera de Git. Este traslado no altera las referencias Git de la auditoría.
+
 ## Política operativa
 
 - Todo nuevo desarrollo y commit se realiza en `develop`. Antes de editar, comprobar rama, HEAD, índice y cambios pendientes. Si se está en una rama histórica, detenerse e informar; esta migración autorizada constituye la excepción.

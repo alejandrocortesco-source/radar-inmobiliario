@@ -33,27 +33,9 @@ Las evaluaciones reales de Gemini requieren `GEMINI_API_KEY` y un `GEMINI_MODEL`
 
 La herramienta es privada para Mónica, con unos 30 clientes activos. Se mantiene la arquitectura existente; Sheets sigue como adaptación futura. Cloud Run Jobs tiene preparación local, sin despliegue ni operación desatendida real validada. El presupuesto objetivo vigente es inferior a 10 USD/mes, sujeto a medición.
 
-```text
-radar-inmobiliario/
-├── .gitignore
-├── README.md
-├── catalogo/
-├── consola/
-├── oportunidades/
-└── scraper/
-    ├── README.md
-    ├── docs/
-    ├── metro/
-    ├── tests/
-    ├── tools/
-    ├── run.py
-    ├── pytest.ini
-    ├── requirements.txt
-    ├── requirements.lock.txt
-    ├── start-interface.ps1
-    ├── Dockerfile
-    └── .dockerignore
-```
+## Archivos y documentación
+
+La distribución vigente de módulos, datos, documentos privados y temporales está en el [mapa de archivos](docs/ESTRUCTURA.md). El [índice documental](docs/README.md) permite distinguir guías vigentes e informes históricos. Se conserva una sola carpeta de trabajo; las versiones se identifican con Git, no duplicando el proyecto.
 
 El repositorio Git y su historial pertenecen a esta raíz. Los entornos virtuales, credenciales, cachés y resultados locales quedan excluidos de Git. El nombre de la carpeta local puede diferir de `radar-inmobiliario`; no hace falta crear otra carpeta contenedora.
 

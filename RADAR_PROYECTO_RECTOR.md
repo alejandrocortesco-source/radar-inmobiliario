@@ -69,6 +69,8 @@ Las decisiones por oportunidad/inmueble son **Pendiente, Preseleccionado y Desca
 
 ## Arquitectura
 
+La distribución de código, documentación, archivos privados, datos y temporales se mantiene según [el mapa de archivos](docs/ESTRUCTURA.md). El [índice documental](docs/README.md) separa guías vigentes e informes históricos sin mover los módulos ni sus rutas operativas.
+
 Playwright propio, FastAPI/Jinja2, JavaScript nativo, SQLite. `consola/v06.py` adapta HTTP; `consola/inicio.py` proyecta resúmenes; `oportunidades/matching.py` contiene reglas puras; `automatizacion.py` coordina; `seguimiento.py` define un contrato y adaptador SQLite; `gemini.py` encapsula el proveedor. La base auxiliar predeterminada es `metro-consola.sqlite` junto al catálogo; `RADAR_CRM_DB` permite elegir otra base, siempre distinta de `METRO_DB`.
 
 Las tablas nuevas `radar_clientes_estado`, `radar_decisiones`, `radar_matching`, `radar_matching_pendiente` y `radar_gemini_cache` se crean de forma aditiva en la primera escritura. No se cambia la migración 1 de clientes/oportunidades ni el user_version ni el catálogo. Los adaptadores permiten una implementación futura en Sheets; esta entrega no migra datos. v0.8 prepara Cloud Run Jobs y snapshots durables; despliegue, operación desatendida real y medición de costos permanecen pendientes.

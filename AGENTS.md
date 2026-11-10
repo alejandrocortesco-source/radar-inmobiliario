@@ -2,6 +2,8 @@
 
 **Primera lectura:** `RADAR_PROYECTO_RECTOR.md` contiene las decisiones vigentes. Los README de los módulos documentan el código real; contrastar diferencias antes de asumir.
 
+**Organización de archivos:** consultar [el mapa y las reglas de ubicación](docs/ESTRUCTURA.md) y [el índice documental](docs/README.md). Conservar rutas operativas; no crear copias del proyecto por versión ni publicar documentos privados de `.local/`.
+
 ## Alcance y conservación
 
 - Herramienta privada para Mónica, unos 30 clientes activos y presupuesto operativo objetivo inferior a 10 USD/mes, sujeto a medición. Priorizar simplicidad, mantenimiento y reutilización.
