@@ -6,7 +6,7 @@
 
 - Herramienta privada para Mónica, unos 30 clientes activos y presupuesto operativo objetivo inferior a 10 USD/mes, sujeto a medición. Priorizar simplicidad, mantenimiento y reutilización.
 
-- La especificación vigente está en `RADAR_PROYECTO_RECTOR.md`. La versión funcional v0.8 se desarrolla en `v0.6`, conservando las rutas existentes; no hacer merge a main ni push sin solicitud.
+- La especificación funcional vigente está en `RADAR_PROYECTO_RECTOR.md`. Seguir la política única de [Git y versionado](GIT_WORKFLOW.md): todo desarrollo y commit nuevo se realiza en `develop`. v0.8 se identifica mediante el tag `v0.8.0`; las rutas existentes se conservan.
 - Reutilizar scraper, catálogo, identidades, historial, clientes, oportunidades y matching determinista. No reconstruirlos para un cambio visual.
 - FastAPI, Jinja2, CSS y JavaScript nativo. Sin React, Carbon instalado, Firestore ni infraestructura adicional.
 - El dashboard tiene **exactamente cuatro secciones**: oportunidades recientes, estado del catálogo, agregar fuente y nuevo cliente. La actividad pertenece a las dos primeras; no existe una quinta sección.
@@ -31,7 +31,7 @@ WhatsApp, comunicaciones automáticas, portales distintos de Metrocuadrado y Was
 
 ## Disciplina Git e informes
 
-- Antes de modificar, verificar `git status`, `git branch --show-current` y `git log -1`; el nombre de una rama no demuestra su estado funcional.
-- `main` es la referencia estable, `release/v0.5` conserva el cierre `291ce82` y `v0.4` y `feat/consola-v0.3` son históricas. No reescribirlas ni publicar en ellas sin autorización explícita.
+- Antes de modificar, verificar `git status`, `git branch --show-current` y `git log -1`. Si la rama es histórica, detenerse e informar; la migración autorizada del 9 de noviembre de 2026 es la excepción. El nombre de una rama no demuestra estabilidad, pruebas aprobadas ni producción.
+- `v0.6` queda histórica: no desarrollar ni publicar nuevos commits en ella. `main` conserva su función prevista de referencia estable y su contenido actual; `master` local no equivale a `main`. Conservar `release/v0.5`, `v0.4`, `feat/consola-v0.3`, tags y respaldos. No reescribir historial ni mover tags publicados. Push, merge y despliegue requieren autorización expresa para su alcance; no usar `push --all` ni `push --tags`.
 - Hacer cambios pequeños y compatibles; no reconstruir módulos que funcionan. No desplegar ni efectuar operaciones destructivas sin autorización.
 - Informar archivos modificados, conflictos, pruebas realmente ejecutadas, commit y pendientes. No presentar resultados de commits anteriores como pruebas nuevas.

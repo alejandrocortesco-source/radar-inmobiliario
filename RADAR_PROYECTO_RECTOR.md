@@ -4,9 +4,11 @@ La especificación funcional del usuario de 3 de noviembre de 2026 gobierna esta
 
 ## Ampliación vigente v0.8 — Wasi (8 de noviembre de 2026)
 
-La entrega funcional v0.8 conserva la rama `v0.6` y las rutas `/v0.6/`, `/v0.4/` y `/consola/`. La solicitud del 9 de noviembre autoriza revisar y crear el commit local, y consultar el remoto para preparar un push posterior; no autoriza ejecutarlo ni desplegar. El cierre de revisión y sus pruebas nuevas constan en `scraper/docs/VALIDACION_WASI.md`.
+La entrega funcional v0.8 corresponde a `4781daeb9adefc310028d40dcec88795657530eb`, identificada mediante el tag anotado `v0.8.0`. El desarrollo y los commits nuevos se realizan en `develop`, según la política única [GIT_WORKFLOW.md](GIT_WORKFLOW.md). La rama remota `v0.6` queda histórica, sin nuevos commits; las rutas `/v0.6/`, `/v0.4/` y `/consola/` permanecen. El commit documental de organización no incrementa la versión funcional ni integra la entrega en `main`.
 
-La solicitud de esta fecha amplía el alcance a la red inmobiliaria de Wasi y al login automático normal con secretos externos. Se desarrolla en el checkout `v0.6`, base funcional comprobada `9db935a` (anunciantes v0.7), conservando cambios locales. Esta solicitud no autoriza merge, push, despliegue ni publicación. Las autorizaciones de sincronización descritas en hitos históricos no se trasladan a esta entrega.
+La revisión funcional y sus pruebas constan en `scraper/docs/VALIDACION_WASI.md`. La autorización inicial del 9 de noviembre limitó esa revisión al commit local; una solicitud posterior autorizó y completó su push a `origin/v0.6`. La solicitud de organización posterior autoriza publicar exclusivamente `develop` y `v0.8.0`, sin merge a main, despliegue ni GitHub Release. Estas acciones y autorizaciones son distintas.
+
+La solicitud de esta fecha amplía el alcance a la red inmobiliaria de Wasi y al login automático normal con secretos externos. Se desarrolló en el checkout entonces llamado `v0.6`, base funcional comprobada `9db935a` (anunciantes v0.7), conservando cambios locales. Aquella solicitud no autorizaba merge, push, despliegue ni publicación. Las autorizaciones de sincronización descritas en hitos históricos no se trasladan a esta entrega.
 
 El catálogo de negocio permanece único, con los campos actuales. Se añade almacenamiento técnico `wasi.sqlite` reutilizando el motor incremental; el adaptador integrado presenta ambas fuentes a las vistas, API, filtros, CSV, anunciantes, contadores y matching existentes. La identidad UUID5 por fuente/código original permanece intacta. No se fusionan anuncios entre portales. Enlaces y decisiones usan UUID; un código compartido necesita fuente explícita en la API.
 
@@ -88,8 +90,8 @@ Cliente es la persona atendida; oportunidad es una necesidad concreta, con vario
 ## Historia, ramas y referencias
 
 - El cierre funcional de v0.5 corresponde a `291ce82b6ee83884d5501630b5da9d5e47dd8c61`, originado en la rama histórica `v0.4` y conservado en `release/v0.5`.
-- `main` es la referencia estable; no desarrollar esta v0.6 ni hacer merge allí sin autorización. `v0.4` y `feat/consola-v0.3` conservan su historia.
-- `v0.6` contiene la implementación y las correcciones descritas en este documento. La integración con el commit remoto `069fc89` conserva su historia de documentación, actualizada según la implementación comprobada, las cuatro secciones aprobadas y el objetivo menor a 10 USD/mes.
+- `main` conserva su función prevista de referencia estable y su contenido actual; esta tarea no integra v0.8 allí. Todo nuevo desarrollo se realiza en `develop`; si se está en una rama histórica, detenerse e informar según [GIT_WORKFLOW.md](GIT_WORKFLOW.md). `master` local no equivale a `main`. `v0.4`, `release/v0.5`, `feat/consola-v0.3` y respaldos conservan su historia.
+- La referencia remota histórica `v0.6` conserva la entrega funcional `4781dae`, sin nuevos commits. El tag local histórico `v0.5.0` apunta a `a52159c`, distinto del cierre funcional `291ce82`; no se mueve ni se publica por esta organización. La integración con el commit remoto `069fc89` conserva su historia de documentación, actualizada según la implementación comprobada, las cuatro secciones aprobadas y el objetivo menor a 10 USD/mes.
 - Los reportes de pruebas o de actualizaciones anteriores describen esas ejecuciones; no son verificaciones nuevas ni valores fijos del dashboard. Antes de cada cambio contrastar instrucciones, código, datos y pruebas pertinentes.
 - El sistema de archivos efímero de Cloud Run no será el almacenamiento definitivo cuando se aborde el despliegue futuro. Sheets sigue siendo el objetivo previsto, sin migración integral en esta entrega.
 

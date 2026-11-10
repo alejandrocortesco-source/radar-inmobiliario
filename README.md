@@ -24,8 +24,10 @@ Las evaluaciones reales de Gemini requieren `GEMINI_API_KEY` y un `GEMINI_MODEL`
 
 ## Estado y ramas
 
-- `v0.6`: rama actual; entrega funcional v0.8 de Wasi y preparación de Cloud Run Jobs, sobre v0.7 de anunciantes (`9db935a`). Se conservan las rutas existentes.
-- `main`: referencia estable; no desarrollar ni integrar v0.6 allí sin autorización.
+- `develop`: rama de todo nuevo desarrollo y commit. Política operativa: [GIT_WORKFLOW.md](GIT_WORKFLOW.md).
+- `v0.8.0`: tag anotado de la entrega funcional v0.8 en `4781daeb9adefc310028d40dcec88795657530eb`; el commit documental posterior no cambia esa versión. Las rutas `/v0.6/`, `/v0.4/` y demás existentes se conservan.
+- `v0.6`: referencia remota histórica de esa entrega; no desarrollar ni publicar nuevos commits en ella.
+- `main`: conserva su función prevista de referencia estable y su contenido en `069fc89`; esta organización no integra v0.8 allí. `master` es exclusivamente local y no equivale automáticamente a `main`.
 - `release/v0.5`: conserva el cierre funcional `291ce82b`.
 - `v0.4` y `feat/consola-v0.3`: ramas históricas. El nombre `v0.4` no cambia que el hito funcional cerrado sea v0.5.
 

@@ -1,5 +1,7 @@
 # Verificación de v0.8 — Wasi y preparación de Cloud Run Jobs
 
+Informe de la implementación y revisión funcional previas. Los estados Git, autorizaciones y pruebas siguientes describen sus momentos; no son verificaciones nuevas de la organización documental. Tras el push autorizado de `4781dae`, la política vigente es [GIT_WORKFLOW.md](../../GIT_WORKFLOW.md): `develop` para desarrollo y `v0.6` histórica.
+
 ## Verificación histórica de implementación — 8 y 9 de noviembre de 2026
 
 Este apartado conserva el informe recibido con los cambios locales. Sus resultados y la captura operativa descrita más abajo corresponden a ejecuciones anteriores; no son pruebas nuevas de la revisión para el commit v0.8. El cierre de esa revisión se registra al final.

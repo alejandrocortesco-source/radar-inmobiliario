@@ -1,5 +1,7 @@
 # Wasi en Radar Inmobiliario — v0.8
 
+Organización Git vigente: [GIT_WORKFLOW.md](../../GIT_WORKFLOW.md). La base y las autorizaciones del párrafo siguiente son históricas; el desarrollo nuevo usa `develop` y el tag `v0.8.0` identifica la entrega funcional original. No acredita despliegue ni operación desatendida en Google Cloud.
+
 Ampliación solicitada el 8 de noviembre de 2026, sobre `v0.6` / `9db935a` (anunciantes v0.7). No incluye push, merge ni despliegue. El catálogo real no se usa para pruebas.
 
 ## Contratos conservados

@@ -1,5 +1,7 @@
 # Consola v0.6 — Radar Inmobiliario
 
+El nombre v0.6 de esta interfaz y sus rutas es un identificador heredado, no la versión funcional ni la rama de desarrollo. La entrega actual es v0.8 (`v0.8.0`); todo desarrollo nuevo usa `develop`. Véase [política Git vigente](../GIT_WORKFLOW.md).
+
 La entrada vigente es [Inicio v0.6](http://127.0.0.1:8000/v0.6/). Tiene exactamente cuatro secciones: oportunidades recientes, estado del catálogo, agregar fuente y nuevo cliente. La actividad se integra en las dos primeras; no existe una quinta sección. La lista Activos/Inactivos y las fichas de clientes son páginas independientes.
 
 Consulta la [guía completa v0.6](docs/V06.md), con configuración de Gemini, límites de consumo, decisiones, fuentes y validación. El [documento rector](../RADAR_PROYECTO_RECTOR.md) prevalece sobre los informes históricos.
