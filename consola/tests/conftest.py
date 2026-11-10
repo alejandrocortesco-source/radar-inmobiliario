@@ -26,6 +26,7 @@ def escenario_consola(tmp_path, monkeypatch):
     ruta = tmp_path / 'consola.sqlite'
     monkeypatch.setenv('METRO_DB', str(ruta))
     monkeypatch.setenv('WASI_DB', str(tmp_path / 'wasi.sqlite'))
+    monkeypatch.setenv('FINCARAIZ_DB', str(tmp_path / 'fincaraiz.sqlite'))
     store = Store(ruta)
     run = store.new_run(A, {'urls': [A, B], 'listing_currency': 'COP'})
     links = [{'id': f'{n}-M{n}', 'url': f'https://www.metrocuadrado.com/inmueble/casa/{n}-M{n}',

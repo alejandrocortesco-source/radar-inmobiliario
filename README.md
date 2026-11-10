@@ -2,7 +2,7 @@
 
 Radar Inmobiliario es un proyecto para recopilar y revisar información pública de inmuebles.
 
-La **Consola v0.8** abre en [http://127.0.0.1:8000/v0.6/](http://127.0.0.1:8000/v0.6/): dashboard de cuatro secciones, clientes Activos/Inactivos y ficha individual para revisar coincidencias. Integra Wasi y Metrocuadrado reutilizando catálogo, clientes, oportunidades y matching determinista; conserva decisiones persistentes y una segunda capa opcional con Gemini Flash. Guardar una fuente no ejecuta scraping.
+La **Consola v0.9 — Fincaraíz (desarrollo local)** abre en [http://127.0.0.1:8000/v0.6/](http://127.0.0.1:8000/v0.6/): dashboard de cuatro secciones, clientes Activos/Inactivos y ficha individual para revisar coincidencias. Integra Fincaraíz, Wasi y Metrocuadrado reutilizando catálogo, clientes, oportunidades y matching determinista; conserva decisiones persistentes y una segunda capa opcional con Gemini Flash. Guardar una fuente no ejecuta scraping.
 
 Todos los precios y presupuestos inmobiliarios son COP. El presupuesto se compara directamente con el precio numérico, con límites inclusivos, sin solicitar ni verificar moneda y sin conversiones. Los campos históricos de moneda se conservan como metadatos.
 
@@ -42,3 +42,7 @@ El repositorio Git y su historial pertenecen a esta raíz. Los entornos virtuale
 ## Ampliación Wasi — v0.8
 
 La consola integra Metrocuadrado y Wasi mediante el catálogo común. Configuración de búsquedas, credenciales externas, captura incremental, recuperación y preparación de Jobs: [guía Wasi](scraper/docs/WASI.md). La operación real desatendida y el coste siguen pendientes; no se desplegó.
+
+## v0.9 — Fincaraíz (desarrollo local)
+
+Tercera fuente integrada en «Agregar fuente» del inicio, catálogo, anunciantes, CSV y matching. Conserva las rutas actuales. [Configuración y ejecución](scraper/docs/FINCARAIZ.md) · [Validación y límites](scraper/docs/VALIDACION_FINCARAIZ.md). Commit local de v0.9 autorizado posteriormente, sin tag, push ni despliegue; `v0.8.0` conserva su referencia.

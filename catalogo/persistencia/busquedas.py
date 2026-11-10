@@ -19,7 +19,11 @@ class BusquedasSQLite:
                 db.row_factory = sqlite3.Row
                 if not db.execute("SELECT 1 FROM sqlite_master WHERE name='consola_busquedas'").fetchone():
                     return ()
-                return tuple(dict(r) for r in db.execute('SELECT * FROM consola_busquedas ORDER BY fuente,nombre,id_busqueda'))
+                filas = [dict(r) for r in db.execute('SELECT * FROM consola_busquedas ORDER BY fuente,nombre,id_busqueda')]
+                estados = {}
+                if db.execute("SELECT 1 FROM sqlite_master WHERE name='radar_busquedas_estado'").fetchone():
+                    estados = {(r['fuente'], r['id_busqueda']): bool(r['activa']) for r in db.execute('SELECT * FROM radar_busquedas_estado')}
+                return tuple({**r, 'activa': estados.get((r['fuente'], r['id_busqueda']), True)} for r in filas)
         except (sqlite3.Error, OSError) as exc:
             raise ErrorLecturaCatalogo('No se pudieron leer los nombres de búsquedas') from exc
 
@@ -104,3 +108,57 @@ class BusquedasSQLite:
                                       (fuente, id_busqueda)).rowcount > 0
         except (sqlite3.Error, OSError) as exc:
             raise ErrorLecturaCatalogo('No se pudo eliminar la búsqueda') from exc
+    def opciones_fincaraiz(self):
+        from ..fuentes.fincaraiz import opciones_iniciales
+        opciones = {c['url_efectiva']: c for c in opciones_iniciales()}
+        if self.ruta.exists():
+            with closing(sqlite3.connect(self.ruta.as_uri() + '?mode=ro', uri=True)) as db:
+                if db.execute("SELECT 1 FROM sqlite_master WHERE name='radar_fincaraiz_busquedas'").fetchone():
+                    for (raw,) in db.execute('SELECT config FROM radar_fincaraiz_busquedas'):
+                        c = json.loads(raw)
+                        if c.get('criterios'):
+                            opciones[c['url_efectiva']] = c
+        return list(opciones.values())
+
+    def configuracion_fincaraiz(self, identificador):
+        if not self.ruta.exists():
+            return None
+        with closing(sqlite3.connect(self.ruta.as_uri() + '?mode=ro', uri=True)) as db:
+            if not db.execute("SELECT 1 FROM sqlite_master WHERE name='radar_fincaraiz_busquedas'").fetchone():
+                return None
+            fila = db.execute('SELECT config FROM radar_fincaraiz_busquedas WHERE id=?', (identificador,)).fetchone()
+            return json.loads(fila[0]) if fila else None
+
+    def guardar_fincaraiz(self, nombre, config, reemplazar=None):
+        from ..fuentes.fincaraiz import identidad
+        key = identidad(config['url_efectiva'])
+        if not isinstance(nombre, str) or not 1 <= len(nombre.strip()) <= 120:
+            raise ValueError('El nombre debe tener entre 1 y 120 caracteres')
+        if not isinstance(config.get('filtros'), dict):
+            raise ValueError('Faltan filtros verificados por el portal')
+        self.ruta.parent.mkdir(parents=True, exist_ok=True)
+        with closing(sqlite3.connect(self.ruta, timeout=10)) as db, db:
+            db.execute('CREATE TABLE IF NOT EXISTS consola_busquedas (fuente TEXT NOT NULL, id_busqueda TEXT NOT NULL, url TEXT NOT NULL, nombre TEXT NOT NULL, PRIMARY KEY(fuente,id_busqueda))')
+            db.execute('CREATE TABLE IF NOT EXISTS radar_fincaraiz_busquedas(id TEXT PRIMARY KEY, config TEXT NOT NULL)')
+            db.execute('CREATE TABLE IF NOT EXISTS radar_fincaraiz_revisiones(id INTEGER PRIMARY KEY, busqueda TEXT NOT NULL, config TEXT NOT NULL, fecha TEXT DEFAULT CURRENT_TIMESTAMP)')
+            db.execute('CREATE TABLE IF NOT EXISTS radar_busquedas_estado(fuente TEXT NOT NULL,id_busqueda TEXT NOT NULL,activa INTEGER NOT NULL DEFAULT 1,PRIMARY KEY(fuente,id_busqueda))')
+            if reemplazar and not db.execute("SELECT 1 FROM consola_busquedas WHERE fuente='fincaraiz' AND id_busqueda=?", (reemplazar,)).fetchone():
+                raise ValueError('La búsqueda a editar ya no existe')
+            raw = json.dumps(config, ensure_ascii=False)
+            db.execute('INSERT INTO radar_fincaraiz_busquedas VALUES (?,?) ON CONFLICT(id) DO UPDATE SET config=excluded.config', (key, raw))
+            db.execute('INSERT INTO radar_fincaraiz_revisiones(busqueda,config) VALUES (?,?)', (key, raw))
+            db.execute("INSERT INTO consola_busquedas VALUES ('fincaraiz',?,?,?) ON CONFLICT(fuente,id_busqueda) DO UPDATE SET url=excluded.url,nombre=excluded.nombre", (key, config['url_efectiva'], nombre.strip()))
+            if reemplazar and reemplazar != key:
+                db.execute("DELETE FROM consola_busquedas WHERE fuente='fincaraiz' AND id_busqueda=?", (reemplazar,))
+                old = db.execute("SELECT activa FROM radar_busquedas_estado WHERE fuente='fincaraiz' AND id_busqueda=?", (reemplazar,)).fetchone()
+                db.execute("INSERT OR REPLACE INTO radar_busquedas_estado VALUES ('fincaraiz',?,?)", (key, old[0] if old else 1))
+        return key
+
+    def cambiar_estado(self, fuente, identificador, activa):
+        if not self.ruta.exists():
+            raise ValueError('Búsqueda inexistente')
+        with closing(sqlite3.connect(self.ruta, timeout=10)) as db, db:
+            if not db.execute('SELECT 1 FROM consola_busquedas WHERE fuente=? AND id_busqueda=?', (fuente, identificador)).fetchone():
+                raise ValueError('Búsqueda inexistente')
+            db.execute('CREATE TABLE IF NOT EXISTS radar_busquedas_estado(fuente TEXT NOT NULL,id_busqueda TEXT NOT NULL,activa INTEGER NOT NULL DEFAULT 1,PRIMARY KEY(fuente,id_busqueda))')
+            db.execute('INSERT OR REPLACE INTO radar_busquedas_estado VALUES (?,?,?)', (fuente, identificador, int(activa)))

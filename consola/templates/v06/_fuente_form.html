@@ -1,9 +1,10 @@
+{% set es_fr = fuente_valores.get('fuente') == 'fincaraiz' %}
 {% set es_wasi = fuente_valores.get('fuente') == 'wasi' %}
 <form action="/v0.6/fuentes" method="post" class="source-form" data-source-form>
-<label>Fuente<select name="fuente" data-source-select><option value="metrocuadrado" {{'selected' if not es_wasi else ''}}>Metrocuadrado</option><option value="wasi" {{'selected' if es_wasi else ''}}>Wasi</option></select></label>
+<label>Fuente<select name="fuente" data-source-select><option value="metrocuadrado" {{'selected' if not es_wasi and not es_fr else ''}}>Metrocuadrado</option><option value="wasi" {{'selected' if es_wasi else ''}}>Wasi</option><option value="fincaraiz" {{'selected' if es_fr else ''}}>Fincaraíz</option></select></label>
 <button class="secondary" type="submit" formaction="/v0.6/fuentes/opciones" formnovalidate>Actualizar formulario</button>
 <label>Nombre descriptivo<input name="nombre" required maxlength="120" value="{{fuente_valores.get('nombre','')}}" placeholder="Ej. Apartamentos en La Carolina"></label>
-<label data-metro-field {% if es_wasi %}hidden{% endif %}>URL de búsqueda de Metrocuadrado<input type="url" name="url" {{'disabled' if es_wasi else 'required'}} maxlength="4096" value="{{fuente_valores.get('url','')}}" placeholder="https://www.metrocuadrado.com/inmuebles/…"></label>
+<label data-metro-field {% if es_wasi or es_fr %}hidden{% endif %}>URL de búsqueda de Metrocuadrado<input type="url" name="url" {{'disabled' if es_wasi or es_fr else 'required'}} maxlength="4096" value="{{fuente_valores.get('url','')}}" placeholder="https://www.metrocuadrado.com/inmuebles/…"></label>
 <div data-wasi-fields {% if not es_wasi %}hidden{% endif %}>
 <p>Elige ciudad y al menos una localidad o zona / barrio. Las opciones corresponden a Wasi. Si falta una opción, actualiza las opciones de la fuente con los filtros anteriores elegidos.</p>
 <button class="secondary" type="submit" formaction="/v0.6/fuentes/wasi/opciones" formnovalidate>Actualizar opciones de Wasi</button>
@@ -11,6 +12,18 @@
 {% for campo in wasi_numeros %}<label>{{wasi_labels[campo]}}<input type="{{'text' if campo=='title' else 'number'}}" name="{{campo}}" {% if campo=='title' %}maxlength="256"{% else %}min="0" step="1"{% endif %} value="{{fuente_valores.get(campo,'')}}" data-wasi-control {{'disabled' if not es_wasi else ''}}></label>{% endfor %}
 <input type="hidden" name="reemplazar" value="{{fuente_valores.get('reemplazar','')}}" data-wasi-control {{'disabled' if not es_wasi else ''}}>
 <p class="caption">Cambiar filtros crea una nueva revisión de búsqueda. Las procedencias y el historial anterior se conservan.</p>
+</div>
+<div data-fr-fields {% if not es_fr %}hidden{% endif %}>
+<label>Modo de búsqueda Fincaraíz<select name="fr_modo" data-fr-control {{'disabled' if not es_fr else ''}}><option value="url">URL filtrada</option><option value="criterios" {{'selected' if fuente_valores.get('fr_modo')=='criterios' else ''}}>Criterios verificados</option></select></label>
+<label data-fr-url>URL de resultados Fincaraíz<input type="url" name="fr_url" maxlength="4096" value="{{fuente_valores.get('fr_url','')}}" placeholder="https://www.fincaraiz.com.co/venta/…" data-fr-control {{'disabled' if not es_fr else ''}}></label>
+<div data-fr-criteria><p>En modo criterios elige una combinación comprobada en el portal. Las opciones se amplían al registrar URLs filtradas. Si tu combinación no está disponible, usa una URL filtrada; no se inventan ubicaciones.</p>
+{% for campo, etiqueta, nombre in [('operacion','Operación','operacion_nombre'),('ciudad','Ciudad','ciudad_nombre'),('ubicacion','Barrio o zona · tipo de ubicación','ubicacion_nombre')] %}
+<label>{{etiqueta}}<select name="fr_{{campo}}" data-fr-control {{'disabled' if not es_fr else ''}}><option value="">Seleccionar</option>{% set vistos = [] %}{% for c in fr_opciones if c.criterios %}{% set v=c.criterios[campo] %}{% if v not in vistos %}{% set _=vistos.append(v) %}<option value="{{v}}" {{'selected' if fuente_valores.get('fr_'+campo)==v else ''}}>{{c.criterios[nombre]}}</option>{% endif %}{% endfor %}</select></label>
+{% endfor %}
+<label>Tipos de inmueble<select name="fr_tipos" data-fr-control {{'disabled' if not es_fr else ''}}><option value="">Seleccionar uno o varios tipos</option>{% set vistos = [] %}{% for c in fr_opciones if c.criterios %}{% set v=c.criterios.tipos|join(',') %}{% if v not in vistos %}{% set _=vistos.append(v) %}<option value="{{v}}" {{'selected' if fuente_valores.get('fr_tipos')==v else ''}}>{% for t in c.criterios.tipos %}{{c.criterios.tipos_nombres[t]}}{{', ' if not loop.last else ''}}{% endfor %}</option>{% endif %}{% endfor %}</select></label>
+</div>
+<input type="hidden" name="reemplazar_fr" value="{{fuente_valores.get('reemplazar_fr','')}}" data-fr-control {{'disabled' if not es_fr else ''}}>
+<p class="caption">Guardar verifica los filtros del portal y conserva URL original y efectiva. No captura anuncios.</p>
 </div>
 <button class="secondary" type="submit">Guardar fuente <span aria-hidden="true">+</span></button></form>
 <script type="application/json" id="wasi-options">{{wasi_registros|tojson}}</script>

@@ -300,3 +300,7 @@ El catálogo `/v0.4/` añade la columna Anunciante. Las fichas y los resultados 
 ## Búsquedas Wasi — v0.8
 
 El inicio conserva cuatro secciones. Agregar fuente selecciona Metrocuadrado (URL) o Wasi (controles dependientes); no inicia captura al guardar o editar. Una acción separada actualiza opciones del portal sin capturar anuncios, usando acceso configurado externamente. El catálogo común incorpora ambas fuentes en filtros, fichas, anunciantes, CSV, indicadores y matching; las decisiones continúan por UUID. Configuración y verificación: [Wasi](../scraper/docs/WASI.md).
+
+## Fincaraíz v0.9
+
+La tercera fuente reutiliza el motor incremental, el catálogo integrado, identidad por fuente y las pantallas existentes. Configuración auxiliar por URL verificada o criterios comprobados, edición y activación desde Inicio → Agregar fuente. Almacenamiento técnico `FINCARAIZ_DB` (por defecto `fincaraiz.sqlite` junto a Metrocuadrado), solo lectura desde consola. [Guía de campos, ejecución y límites](../scraper/docs/FINCARAIZ.md).

@@ -10,6 +10,8 @@ from pathlib import Path
 from metro import paths
 from metro.scraper import Scraper, Config
 from wasi.scraper import WasiScraper
+from fincaraiz.scraper import FincaraizScraper
+from fincaraiz.__main__ import configuracion as configuracion_fincaraiz
 from wasi.__main__ import configuracion
 from wasi.locking import bloqueo
 from wasi.durable import EstadoGCS
@@ -23,15 +25,16 @@ def horario(dias):
     return {'schedule': '0 0 * * ' + ','.join(dias), 'timeZone': 'America/Bogota'}
 
 
-async def ejecutar(carpeta, fuentes, resume_wasi=None, estado=None):
+async def ejecutar(carpeta, fuentes, resume_wasi=None, estado=None, resume_fincaraiz=None):
     metro, wasi, crm = [carpeta / nombre for nombre in ('metro.sqlite', 'wasi.sqlite', 'metro-consola.sqlite')]
-    os.environ.update(METRO_DB=str(metro), WASI_DB=str(wasi), RADAR_CRM_DB=str(crm))
+    fincaraiz = carpeta / 'fincaraiz.sqlite'
+    os.environ.update(FINCARAIZ_DB=str(fincaraiz), METRO_DB=str(metro), WASI_DB=str(wasi), RADAR_CRM_DB=str(crm))
     repo = BusquedasSQLite(crm)
     registradas = repo.listar()
     resultados = {}
     async def capturar():
         with ExitStack() as stack:
-            for base in (metro, wasi):
+            for base in (metro, wasi, fincaraiz):
                 stack.enter_context(bloqueo(base))
             if 'metrocuadrado' in fuentes:
                 urls = [b['id_busqueda'] for b in registradas if b['fuente'] == 'metrocuadrado']
@@ -41,6 +44,10 @@ async def ejecutar(carpeta, fuentes, resume_wasi=None, estado=None):
                 config = configuracion(repo, wasi, resume=resume_wasi, concurrency=1)
                 if config.searches or resume_wasi:
                     resultados['wasi'] = await WasiScraper(config).run()
+            if 'fincaraiz' in fuentes:
+                config = configuracion_fincaraiz(repo, fincaraiz, resume=resume_fincaraiz)
+                if config.searches or resume_fincaraiz:
+                    resultados['fincaraiz'] = await FincaraizScraper(config).run()
     task = asyncio.create_task(capturar())
     # Cloud Run envía SIGTERM antes de terminar. Conserva checkpoints al cancelar.
     anterior = signal.getsignal(signal.SIGTERM)
@@ -68,8 +75,9 @@ async def ejecutar(carpeta, fuentes, resume_wasi=None, estado=None):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--data-dir', default=os.getenv('RADAR_DATA_DIR', str(paths.DEFAULT_DB.parent)))
-    parser.add_argument('--source', choices=('all', 'metrocuadrado', 'wasi'), default='all')
+    parser.add_argument('--source', choices=('all', 'metrocuadrado', 'wasi', 'fincaraiz'), default='all')
     parser.add_argument('--resume-wasi', type=int)
+    parser.add_argument('--resume-fincaraiz', type=int)
     parser.add_argument('--schedule', action='store_true', help='Imprimir horario propuesto; no crea Scheduler')
     parser.add_argument('--initialize-state', action='store_true', help='Subir bases locales al objeto durable si aún no existe')
     args = parser.parse_args()
@@ -79,7 +87,7 @@ def main():
             return
         carpeta = Path(args.data_dir).resolve()
         carpeta.mkdir(parents=True, exist_ok=True)
-        fuentes = ('metrocuadrado', 'wasi') if args.source == 'all' else (args.source,)
+        fuentes = ('metrocuadrado', 'wasi', 'fincaraiz') if args.source == 'all' else (args.source,)
         bucket = os.getenv('RADAR_STATE_BUCKET')
         if os.getenv('CLOUD_RUN_JOB') and not bucket:
             raise ValueError('Cloud Run requiere RADAR_STATE_BUCKET; no se usará disco efímero como persistencia')
@@ -95,7 +103,7 @@ def main():
             if estado:
                 estado.cargar(carpeta)
             try:
-                resultado = asyncio.run(ejecutar(carpeta, fuentes, args.resume_wasi, estado))
+                resultado = asyncio.run(ejecutar(carpeta, fuentes, args.resume_wasi, estado, args.resume_fincaraiz))
             finally:
                 if estado:
                     estado.guardar(carpeta)

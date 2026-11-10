@@ -1,4 +1,5 @@
 """UX v0.6: servicios existentes, páginas independientes y tareas posteriores al guardado."""
+import sqlite3
 from pathlib import Path
 from urllib.parse import parse_qs
 
@@ -21,7 +22,7 @@ from oportunidades.normalizacion import normalizar_ciudad
 from .anunciantes import url_anunciante
 from .presentacion import fecha, numero, enlace_publico
 from .inicio import indicadores, resumen_clientes
-from catalogo.fuentes import wasi
+from catalogo.fuentes import wasi, fincaraiz
 
 RAIZ = Path(__file__).parent
 templates = Jinja2Templates(directory=[str(RAIZ / 'templates' / 'v06'), str(RAIZ / 'templates')])
@@ -47,9 +48,10 @@ def crear_router(proveedor):
         registros = catalogo.busquedas.opciones_wasi() if catalogo.busquedas else wasi.opciones_iniciales()
         valores = {'id_pais': '1', 'id_dpto': '15', **(extras.get('fuente_valores') or {})}
         extras['fuente_valores'] = valores
+        fr_opciones = catalogo.busquedas.opciones_fincaraiz() if catalogo.busquedas else fincaraiz.opciones_iniciales()
         return render(request, 'inicio06.html', status, recientes=[f for f in filas if f['activo']][:6],
             indicadores=indicadores(todos, catalogo.ultima_actualizacion()), fuentes=catalogo.listar_busquedas(),
-            wasi_campos=wasi.SELECTS, wasi_numeros=wasi.INPUTS, wasi_labels=wasi.LABELS,
+            fr_opciones=fr_opciones, wasi_campos=wasi.SELECTS, wasi_numeros=wasi.INPUTS, wasi_labels=wasi.LABELS,
             wasi_registros=registros, wasi_opciones={c: wasi.opciones(c, valores, registros) for c in wasi.SELECTS},
             mensaje=request.query_params.get('mensaje'), **extras)
 
@@ -60,6 +62,13 @@ def crear_router(proveedor):
     @router.get('/')
     def inicio(request: Request, catalogo=Depends(proveedor), s=Depends(proveedor_oportunidades)):
         try:
+            editar_fr = request.query_params.get('editar_fincaraiz')
+            if editar_fr and catalogo.busquedas:
+                c = catalogo.busquedas.configuracion_fincaraiz(editar_fr)
+                b = next((b for b in catalogo.listar_busquedas() if b['fuente'] == 'fincaraiz' and b['id_busqueda'] == editar_fr), None)
+                if not c or not b:
+                    return error(request, 'Búsqueda Fincaraíz no encontrada', 404)
+                return dashboard(request, catalogo, s, fuente_valores={'fuente': 'fincaraiz', 'nombre': b['nombre'], 'fr_url': c['url_original'], 'reemplazar_fr': editar_fr})
             editar = request.query_params.get('editar_wasi')
             if editar and catalogo.busquedas:
                 config = catalogo.busquedas.configuracion_wasi(editar)
@@ -234,6 +243,21 @@ def crear_router(proveedor):
     async def fuente(request: Request, catalogo=Depends(proveedor), s=Depends(proveedor_oportunidades)):
         valores = {k: v[-1] for k, v in parse_qs((await request.body()).decode(), keep_blank_values=True).items()}
         try:
+            if valores.get('fuente') == 'fincaraiz':
+                from fincaraiz.browser import verificar
+                from playwright.async_api import Error as PortalError
+                from metro.extraction import ExtractionError, Restricted
+                if catalogo.busquedas is None:
+                    raise ErrorLecturaCatalogo('Almacenamiento auxiliar no disponible')
+                opciones = catalogo.busquedas.opciones_fincaraiz()
+                url = fincaraiz.resolver(valores, opciones) if valores.get('fr_modo') == 'criterios' else valores.get('fr_url', '')
+                try:
+                    esperado = next((c['filtros'] for c in opciones if c['url_efectiva'] == url), None) if valores.get('fr_modo') == 'criterios' else None
+                    config = await verificar(url, esperado)
+                except (ExtractionError, Restricted, OSError, PortalError) as exc:
+                    raise ValueError('No se pudo verificar la búsqueda en Fincaraíz. Revisa la URL o reintenta cuando el portal esté disponible. No se guardó ni se inició una extracción.') from exc
+                catalogo.busquedas.guardar_fincaraiz(valores.get('nombre', ''), config, valores.get('reemplazar_fr'))
+                return RedirectResponse('/v0.6/?mensaje=fuente_guardada#agregar-fuente', 303)
             if valores.get('fuente') == 'wasi':
                 if catalogo.busquedas is None:
                     raise ErrorLecturaCatalogo('Almacenamiento auxiliar no disponible')
@@ -259,7 +283,7 @@ def crear_router(proveedor):
                 return dashboard(request, catalogo, s, 422, fuente_error=str(exc), fuente_valores=valores)
             except (ErrorPersistencia, ErrorLecturaCatalogo, FileNotFoundError):
                 return error(request, exc, 422)
-        except (ErrorLecturaCatalogo, OSError) as exc:
+        except (ErrorLecturaCatalogo, OSError, sqlite3.Error) as exc:
             return error(request, exc)
 
     @router.post('/fuentes/opciones')
@@ -301,6 +325,17 @@ def crear_router(proveedor):
             return dashboard(request, catalogo, s, 503, fuente_valores=valores,
                              fuente_error='No se pudieron actualizar las opciones de Wasi. Verifica el acceso configurado o reintenta cuando no haya una captura en curso.')
 
+    @router.post('/fuentes/estado')
+    async def estado_fuente(request: Request, catalogo=Depends(proveedor)):
+        valores = {k: v[-1] for k, v in parse_qs((await request.body()).decode(), keep_blank_values=True).items()}
+        try:
+            if valores.get('fuente') != 'fincaraiz' or valores.get('activa') not in ('0', '1'):
+                raise ValueError('Estado o fuente inválidos')
+            catalogo.busquedas.cambiar_estado('fincaraiz', valores.get('id_busqueda'), valores['activa'] == '1')
+            return RedirectResponse('/v0.6/#agregar-fuente', 303)
+        except (ValueError, OSError, ErrorLecturaCatalogo) as exc:
+            return error(request, exc, 422)
+
     @router.post('/fuentes/eliminar')
     async def eliminar_fuente(request: Request, catalogo=Depends(proveedor)):
         valores = {k: v[-1] for k, v in parse_qs((await request.body()).decode(), keep_blank_values=True).items()}
@@ -312,7 +347,7 @@ def crear_router(proveedor):
             return RedirectResponse('/v0.6/?mensaje=fuente_eliminada#agregar-fuente', 303)
         except ConsultaInvalida as exc:
             return error(request, exc, 422)
-        except (ErrorLecturaCatalogo, OSError) as exc:
+        except (ErrorLecturaCatalogo, OSError, sqlite3.Error) as exc:
             return error(request, exc)
 
     return router

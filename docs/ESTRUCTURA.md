@@ -11,6 +11,7 @@ Una sola carpeta de trabajo y un solo repositorio: no crear carpetas como copias
 | `consola/` | FastAPI, Jinja2, CSS, JavaScript, pruebas y herramientas de interfaz | Versionado; conservar imports, plantillas y rutas |
 | `oportunidades/` | Clientes, necesidades, matching, decisiones y proveedor Gemini | Versionado; reglas separadas de presentación |
 | `scraper/metro/` | Captura e interfaz técnica de Metrocuadrado | Versionado |
+| `scraper/fincaraiz/` | Adaptador público de Fincaraíz sobre el motor incremental común | Versionado |
 | `scraper/wasi/` | Acceso y captura de Wasi | Versionado |
 | `scraper/examples/` | Configuraciones de ejemplo sin secretos | Versionado |
 | `scraper/tools/` y `consola/tools/` | Utilidades de cada componente | Versionado; revisar si una utilidad escribe datos antes de usarla |

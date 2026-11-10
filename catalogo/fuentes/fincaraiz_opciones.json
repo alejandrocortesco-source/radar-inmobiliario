@@ -1,0 +1,560 @@
+[
+  {
+    "version": 1,
+    "url_original": "https://www.fincaraiz.com.co/venta/casas-y-apartamentos/la-carolina/zona-norte/bogota",
+    "url_efectiva": "https://www.fincaraiz.com.co/venta/casas-y-apartamentos/la-carolina/zona-norte/bogota",
+    "filtros": {
+      "operation_type_id": {
+        "value": 1,
+        "text": "Venta"
+      },
+      "property_type_id": [
+        {
+          "value": 1,
+          "text": "Casas"
+        },
+        {
+          "value": 2,
+          "text": "Apartamentos"
+        }
+      ],
+      "locations": {
+        "value": [
+          {
+            "city": [
+              {
+                "name": "Bogotá",
+                "id": "65d441f3-a239-4111-bc5b-01c5a268869f",
+                "slug": "city-colombia-11-001"
+              }
+            ],
+            "name": "La carolina",
+            "id": "0f82b8b1-fc61-46a4-a4f8-ec7ab7032280",
+            "type": "NEIGHBOURHOOD",
+            "slug": [
+              "neighbourhood-colombia-11-001-000672"
+            ],
+            "estate": {
+              "name": "Bogotá, d.c.",
+              "id": "2d9f0ad9-8b72-4364-a7dc-e161d7dddb4d",
+              "slug": "state-colombia-11-bogota-dc"
+            }
+          }
+        ],
+        "text": ""
+      },
+      "country_id": 3,
+      "currencyID": {
+        "text": "$",
+        "value": 4
+      },
+      "m2Currency": {
+        "text": "$",
+        "value": 4
+      },
+      "order": {
+        "text": "Popularidad",
+        "value": 2
+      }
+    },
+    "criterios": {
+      "operacion": "1",
+      "operacion_nombre": "Venta",
+      "ciudad": "65d441f3-a239-4111-bc5b-01c5a268869f",
+      "ciudad_nombre": "Bogotá",
+      "ubicacion": "0f82b8b1-fc61-46a4-a4f8-ec7ab7032280",
+      "ubicacion_nombre": "La carolina · NEIGHBOURHOOD · Bogotá",
+      "tipos": [
+        "1",
+        "2"
+      ],
+      "tipos_nombres": {
+        "1": "Casas",
+        "2": "Apartamentos"
+      }
+    }
+  },
+  {
+    "version": 1,
+    "url_original": "https://www.fincaraiz.com.co/arriendo/apartamentos/la-carolina/zona-norte/bogota",
+    "url_efectiva": "https://www.fincaraiz.com.co/arriendo/apartamentos/la-carolina/zona-norte/bogota",
+    "filtros": {
+      "operation_type_id": {
+        "value": 2,
+        "text": "Arriendo"
+      },
+      "property_type_id": [
+        {
+          "value": 2,
+          "text": "Apartamentos"
+        }
+      ],
+      "locations": {
+        "value": [
+          {
+            "city": [
+              {
+                "name": "Bogotá",
+                "id": "65d441f3-a239-4111-bc5b-01c5a268869f",
+                "slug": "city-colombia-11-001"
+              }
+            ],
+            "name": "La carolina",
+            "id": "0f82b8b1-fc61-46a4-a4f8-ec7ab7032280",
+            "type": "NEIGHBOURHOOD",
+            "slug": [
+              "neighbourhood-colombia-11-001-000672"
+            ],
+            "estate": {
+              "name": "Bogotá, d.c.",
+              "id": "2d9f0ad9-8b72-4364-a7dc-e161d7dddb4d",
+              "slug": "state-colombia-11-bogota-dc"
+            }
+          }
+        ],
+        "text": ""
+      },
+      "country_id": 3,
+      "currencyID": {
+        "text": "$",
+        "value": 4
+      },
+      "m2Currency": {
+        "text": "$",
+        "value": 4
+      },
+      "order": {
+        "text": "Popularidad",
+        "value": 2
+      }
+    },
+    "criterios": {
+      "operacion": "2",
+      "operacion_nombre": "Arriendo",
+      "ciudad": "65d441f3-a239-4111-bc5b-01c5a268869f",
+      "ciudad_nombre": "Bogotá",
+      "ubicacion": "0f82b8b1-fc61-46a4-a4f8-ec7ab7032280",
+      "ubicacion_nombre": "La carolina · NEIGHBOURHOOD · Bogotá",
+      "tipos": [
+        "2"
+      ],
+      "tipos_nombres": {
+        "2": "Apartamentos"
+      }
+    }
+  },
+  {
+    "version": 1,
+    "url_original": "https://www.fincaraiz.com.co/arriendo/casas/la-carolina/zona-norte/bogota",
+    "url_efectiva": "https://www.fincaraiz.com.co/arriendo/casas/la-carolina/zona-norte/bogota",
+    "filtros": {
+      "operation_type_id": {
+        "value": 2,
+        "text": "Arriendo"
+      },
+      "property_type_id": [
+        {
+          "value": 1,
+          "text": "Casas"
+        }
+      ],
+      "locations": {
+        "value": [
+          {
+            "city": [
+              {
+                "name": "Bogotá",
+                "id": "65d441f3-a239-4111-bc5b-01c5a268869f",
+                "slug": "city-colombia-11-001"
+              }
+            ],
+            "name": "La carolina",
+            "id": "0f82b8b1-fc61-46a4-a4f8-ec7ab7032280",
+            "type": "NEIGHBOURHOOD",
+            "slug": [
+              "neighbourhood-colombia-11-001-000672"
+            ],
+            "estate": {
+              "name": "Bogotá, d.c.",
+              "id": "2d9f0ad9-8b72-4364-a7dc-e161d7dddb4d",
+              "slug": "state-colombia-11-bogota-dc"
+            }
+          }
+        ],
+        "text": ""
+      },
+      "country_id": 3,
+      "currencyID": {
+        "text": "$",
+        "value": 4
+      },
+      "m2Currency": {
+        "text": "$",
+        "value": 4
+      },
+      "order": {
+        "text": "Popularidad",
+        "value": 2
+      }
+    },
+    "criterios": {
+      "operacion": "2",
+      "operacion_nombre": "Arriendo",
+      "ciudad": "65d441f3-a239-4111-bc5b-01c5a268869f",
+      "ciudad_nombre": "Bogotá",
+      "ubicacion": "0f82b8b1-fc61-46a4-a4f8-ec7ab7032280",
+      "ubicacion_nombre": "La carolina · NEIGHBOURHOOD · Bogotá",
+      "tipos": [
+        "1"
+      ],
+      "tipos_nombres": {
+        "1": "Casas"
+      }
+    }
+  },
+  {
+    "version": 1,
+    "url_original": "https://www.fincaraiz.com.co/venta/apartaestudios/la-carolina/zona-norte/bogota",
+    "url_efectiva": "https://www.fincaraiz.com.co/venta/apartaestudios/la-carolina/zona-norte/bogota",
+    "filtros": {
+      "operation_type_id": {
+        "value": 1,
+        "text": "Venta"
+      },
+      "property_type_id": [
+        {
+          "value": 14,
+          "text": "Apartaestudios"
+        }
+      ],
+      "locations": {
+        "value": [
+          {
+            "city": [
+              {
+                "name": "Bogotá",
+                "id": "65d441f3-a239-4111-bc5b-01c5a268869f",
+                "slug": "city-colombia-11-001"
+              }
+            ],
+            "name": "La carolina",
+            "id": "0f82b8b1-fc61-46a4-a4f8-ec7ab7032280",
+            "type": "NEIGHBOURHOOD",
+            "slug": [
+              "neighbourhood-colombia-11-001-000672"
+            ],
+            "estate": {
+              "name": "Bogotá, d.c.",
+              "id": "2d9f0ad9-8b72-4364-a7dc-e161d7dddb4d",
+              "slug": "state-colombia-11-bogota-dc"
+            }
+          }
+        ],
+        "text": ""
+      },
+      "country_id": 3,
+      "currencyID": {
+        "text": "$",
+        "value": 4
+      },
+      "m2Currency": {
+        "text": "$",
+        "value": 4
+      },
+      "order": {
+        "text": "Popularidad",
+        "value": 2
+      }
+    },
+    "criterios": {
+      "operacion": "1",
+      "operacion_nombre": "Venta",
+      "ciudad": "65d441f3-a239-4111-bc5b-01c5a268869f",
+      "ciudad_nombre": "Bogotá",
+      "ubicacion": "0f82b8b1-fc61-46a4-a4f8-ec7ab7032280",
+      "ubicacion_nombre": "La carolina · NEIGHBOURHOOD · Bogotá",
+      "tipos": [
+        "14"
+      ],
+      "tipos_nombres": {
+        "14": "Apartaestudios"
+      }
+    }
+  },
+  {
+    "version": 1,
+    "url_original": "https://www.fincaraiz.com.co/venta/apartamentos/la-carolina/zona-norte/bogota",
+    "url_efectiva": "https://www.fincaraiz.com.co/venta/apartamentos/la-carolina/zona-norte/bogota",
+    "filtros": {
+      "operation_type_id": {
+        "value": 1,
+        "text": "Venta"
+      },
+      "property_type_id": [
+        {
+          "value": 2,
+          "text": "Apartamentos"
+        }
+      ],
+      "locations": {
+        "value": [
+          {
+            "city": [
+              {
+                "name": "Bogotá",
+                "id": "65d441f3-a239-4111-bc5b-01c5a268869f",
+                "slug": "city-colombia-11-001"
+              }
+            ],
+            "name": "La carolina",
+            "id": "0f82b8b1-fc61-46a4-a4f8-ec7ab7032280",
+            "type": "NEIGHBOURHOOD",
+            "slug": [
+              "neighbourhood-colombia-11-001-000672"
+            ],
+            "estate": {
+              "name": "Bogotá, d.c.",
+              "id": "2d9f0ad9-8b72-4364-a7dc-e161d7dddb4d",
+              "slug": "state-colombia-11-bogota-dc"
+            }
+          }
+        ],
+        "text": ""
+      },
+      "country_id": 3,
+      "currencyID": {
+        "text": "$",
+        "value": 4
+      },
+      "m2Currency": {
+        "text": "$",
+        "value": 4
+      },
+      "order": {
+        "text": "Popularidad",
+        "value": 2
+      }
+    },
+    "criterios": {
+      "operacion": "1",
+      "operacion_nombre": "Venta",
+      "ciudad": "65d441f3-a239-4111-bc5b-01c5a268869f",
+      "ciudad_nombre": "Bogotá",
+      "ubicacion": "0f82b8b1-fc61-46a4-a4f8-ec7ab7032280",
+      "ubicacion_nombre": "La carolina · NEIGHBOURHOOD · Bogotá",
+      "tipos": [
+        "2"
+      ],
+      "tipos_nombres": {
+        "2": "Apartamentos"
+      }
+    }
+  },
+  {
+    "version": 1,
+    "url_original": "https://www.fincaraiz.com.co/venta/casas/la-carolina/bogota",
+    "url_efectiva": "https://www.fincaraiz.com.co/venta/casas/la-carolina/zona-norte/bogota",
+    "filtros": {
+      "operation_type_id": {
+        "value": 1,
+        "text": "Venta"
+      },
+      "property_type_id": [
+        {
+          "value": 1,
+          "text": "Casas"
+        }
+      ],
+      "locations": {
+        "value": [
+          {
+            "city": [
+              {
+                "name": "Bogotá",
+                "id": "65d441f3-a239-4111-bc5b-01c5a268869f",
+                "slug": "city-colombia-11-001"
+              }
+            ],
+            "name": "La carolina",
+            "id": "0f82b8b1-fc61-46a4-a4f8-ec7ab7032280",
+            "type": "NEIGHBOURHOOD",
+            "slug": [
+              "neighbourhood-colombia-11-001-000672"
+            ],
+            "estate": {
+              "name": "Bogotá, d.c.",
+              "id": "2d9f0ad9-8b72-4364-a7dc-e161d7dddb4d",
+              "slug": "state-colombia-11-bogota-dc"
+            }
+          }
+        ],
+        "text": ""
+      },
+      "country_id": 3,
+      "currencyID": {
+        "text": "$",
+        "value": 4
+      },
+      "m2Currency": {
+        "text": "$",
+        "value": 4
+      },
+      "order": {
+        "text": "Popularidad",
+        "value": 2
+      }
+    },
+    "criterios": {
+      "operacion": "1",
+      "operacion_nombre": "Venta",
+      "ciudad": "65d441f3-a239-4111-bc5b-01c5a268869f",
+      "ciudad_nombre": "Bogotá",
+      "ubicacion": "0f82b8b1-fc61-46a4-a4f8-ec7ab7032280",
+      "ubicacion_nombre": "La carolina · NEIGHBOURHOOD · Bogotá",
+      "tipos": [
+        "1"
+      ],
+      "tipos_nombres": {
+        "1": "Casas"
+      }
+    }
+  },
+  {
+    "version": 1,
+    "url_original": "https://www.fincaraiz.com.co/venta/casas/la-carolina/zona-norte/bogota",
+    "url_efectiva": "https://www.fincaraiz.com.co/venta/casas/la-carolina/zona-norte/bogota",
+    "filtros": {
+      "operation_type_id": {
+        "value": 1,
+        "text": "Venta"
+      },
+      "property_type_id": [
+        {
+          "value": 1,
+          "text": "Casas"
+        }
+      ],
+      "locations": {
+        "value": [
+          {
+            "city": [
+              {
+                "name": "Bogotá",
+                "id": "65d441f3-a239-4111-bc5b-01c5a268869f",
+                "slug": "city-colombia-11-001"
+              }
+            ],
+            "name": "La carolina",
+            "id": "0f82b8b1-fc61-46a4-a4f8-ec7ab7032280",
+            "type": "NEIGHBOURHOOD",
+            "slug": [
+              "neighbourhood-colombia-11-001-000672"
+            ],
+            "estate": {
+              "name": "Bogotá, d.c.",
+              "id": "2d9f0ad9-8b72-4364-a7dc-e161d7dddb4d",
+              "slug": "state-colombia-11-bogota-dc"
+            }
+          }
+        ],
+        "text": ""
+      },
+      "country_id": 3,
+      "currencyID": {
+        "text": "$",
+        "value": 4
+      },
+      "m2Currency": {
+        "text": "$",
+        "value": 4
+      },
+      "order": {
+        "text": "Popularidad",
+        "value": 2
+      }
+    },
+    "criterios": {
+      "operacion": "1",
+      "operacion_nombre": "Venta",
+      "ciudad": "65d441f3-a239-4111-bc5b-01c5a268869f",
+      "ciudad_nombre": "Bogotá",
+      "ubicacion": "0f82b8b1-fc61-46a4-a4f8-ec7ab7032280",
+      "ubicacion_nombre": "La carolina · NEIGHBOURHOOD · Bogotá",
+      "tipos": [
+        "1"
+      ],
+      "tipos_nombres": {
+        "1": "Casas"
+      }
+    }
+  },
+  {
+    "version": 1,
+    "url_original": "https://www.fincaraiz.com.co/venta/lotes/la-carolina/zona-norte/bogota",
+    "url_efectiva": "https://www.fincaraiz.com.co/venta/lotes/la-carolina/zona-norte/bogota",
+    "filtros": {
+      "operation_type_id": {
+        "value": 1,
+        "text": "Venta"
+      },
+      "property_type_id": [
+        {
+          "value": 3,
+          "text": "Lotes"
+        }
+      ],
+      "locations": {
+        "value": [
+          {
+            "city": [
+              {
+                "name": "Bogotá",
+                "id": "65d441f3-a239-4111-bc5b-01c5a268869f",
+                "slug": "city-colombia-11-001"
+              }
+            ],
+            "name": "La carolina",
+            "id": "0f82b8b1-fc61-46a4-a4f8-ec7ab7032280",
+            "type": "NEIGHBOURHOOD",
+            "slug": [
+              "neighbourhood-colombia-11-001-000672"
+            ],
+            "estate": {
+              "name": "Bogotá, d.c.",
+              "id": "2d9f0ad9-8b72-4364-a7dc-e161d7dddb4d",
+              "slug": "state-colombia-11-bogota-dc"
+            }
+          }
+        ],
+        "text": ""
+      },
+      "country_id": 3,
+      "currencyID": {
+        "text": "$",
+        "value": 4
+      },
+      "m2Currency": {
+        "text": "$",
+        "value": 4
+      },
+      "order": {
+        "text": "Popularidad",
+        "value": 2
+      }
+    },
+    "criterios": {
+      "operacion": "1",
+      "operacion_nombre": "Venta",
+      "ciudad": "65d441f3-a239-4111-bc5b-01c5a268869f",
+      "ciudad_nombre": "Bogotá",
+      "ubicacion": "0f82b8b1-fc61-46a4-a4f8-ec7ab7032280",
+      "ubicacion_nombre": "La carolina · NEIGHBOURHOOD · Bogotá",
+      "tipos": [
+        "3"
+      ],
+      "tipos_nombres": {
+        "3": "Lotes"
+      }
+    }
+  }
+]

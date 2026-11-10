@@ -171,6 +171,7 @@ def convertir(fila, documento, presencias, config, *, geografia=None, actualizac
 
     return Inmueble(
         anunciante=contacto('advertiser', 'companyName'),
+        anunciante_url=_texto(normal.get('advertiser_url')),
         anunciante_direccion=contacto('advertiser_address', 'companyAddress'),
         telefono=contacto('phone', 'contactPhone'),
         whatsapp=contacto('whatsapp', 'whatsapp'),

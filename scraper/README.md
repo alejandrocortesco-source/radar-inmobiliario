@@ -1,4 +1,4 @@
-# Scrapers de Metrocuadrado y Wasi — Radar Inmobiliario
+# Scrapers de Metrocuadrado, Wasi y Fincaraíz — Radar Inmobiliario
 
 Componente de [Radar Inmobiliario](../README.md) para descubrir anuncios, mantener un catálogo incremental por cambios de precio y revisar los resultados con FastAPI. Recorre todos los listados y abre las fichas nuevas, con precio modificado o que requieren revisión de integridad. Puede ejecutarse por consola sin iniciar la interfaz. No necesita Apify, Sheets, Gemini ni WhatsApp. No contacta anunciantes. Metrocuadrado usa búsquedas públicas; Wasi aplica controles de búsqueda y el login normal con secretos externos. La [guía Wasi](docs/WASI.md) documenta acceso, búsquedas, recuperación y preparación de Cloud Run; los comandos siguientes conservan el uso de Metrocuadrado.
 
@@ -137,3 +137,7 @@ El filesystem de Cloud Run es efímero. v0.8 prepara `Dockerfile.jobs` y un adap
 ## Fuente Wasi y ejecución de ambas fuentes — v0.8
 
 `wasi/` adapta navegación, login normal y normalización al mismo motor `metro.storage.Store` y ciclo de ejecución. Mantiene una base técnica separada, integrada por el catálogo de lectura. `python wasi_run.py scrape` captura búsquedas Wasi registradas; `python job.py --source all` procesa las dos fuentes sin FastAPI. Configuración, secretos, snapshots durables y limitaciones: [Wasi](docs/WASI.md). `Dockerfile.jobs` utiliza el contexto raíz; el Dockerfile histórico se conserva.
+
+## Fincaraíz v0.9
+
+La tercera fuente reutiliza el motor incremental, el catálogo integrado, identidad por fuente y las pantallas existentes. Configuración auxiliar por URL verificada o criterios comprobados, edición y activación desde Inicio → Agregar fuente. Almacenamiento técnico `FINCARAIZ_DB` (por defecto `fincaraiz.sqlite` junto a Metrocuadrado), solo lectura desde consola. [Guía de campos, ejecución y límites](docs/FINCARAIZ.md).

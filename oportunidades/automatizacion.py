@@ -104,6 +104,7 @@ def despues_scraper(ruta):
     ruta = Path(ruta).resolve()
     crm = Path(os.getenv('RADAR_CRM_DB', str(ruta.with_name(ruta.stem + '-consola.sqlite')))).resolve()
     wasi = Path(os.getenv('WASI_DB', str(ruta.with_name('wasi.sqlite')))).resolve()
-    if crm in (ruta, wasi):
+    fincaraiz = Path(os.getenv('FINCARAIZ_DB', str(ruta.with_name('fincaraiz.sqlite')))).resolve()
+    if crm in (ruta, wasi, fincaraiz):
         raise ValueError('La base auxiliar debe ser distinta al catálogo')
     recalcular_abiertas(ServicioOportunidades(SQLite(crm)), ServicioCatalogo(catalogo_configurado(ruta)))

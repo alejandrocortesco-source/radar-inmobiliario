@@ -29,7 +29,7 @@
 
 ## Fuera de alcance
 
-WhatsApp, comunicaciones automáticas, portales distintos de Metrocuadrado y Wasi, CRM empresarial, migración integral a Sheets y despliegue a producción. La ampliación Wasi y preparación de Cloud Run están autorizadas por la solicitud del 8 de noviembre de 2026; el despliegue y la validación real desatendida siguen siendo posteriores. Sheets permanece como objetivo futuro.
+WhatsApp, comunicaciones automáticas, portales distintos de Metrocuadrado, Wasi y Fincaraíz, CRM empresarial, migración integral a Sheets y despliegue a producción. La ampliación Wasi y preparación de Cloud Run están autorizadas por la solicitud del 8 de noviembre de 2026; el despliegue y la validación real desatendida siguen siendo posteriores. Fincaraíz y su validación real acotada en `.tmp/` están autorizados por la solicitud del 9 de noviembre de 2026; la solicitud posterior autoriza su captura operativa completa en el catálogo de la app. Las pruebas de regresión siguen usando exclusivamente bases sintéticas. Sheets permanece como objetivo futuro.
 
 ## Disciplina Git e informes
 

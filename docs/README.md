@@ -1,6 +1,6 @@
 # Documentación de Radar Inmobiliario
 
-Punto de entrada a las guías y a la evidencia del proyecto. La versión funcional vigente es v0.8; las rutas heredadas no identifican la versión ni la rama de trabajo.
+Punto de entrada a las guías y a la evidencia del proyecto. La ampliación local vigente es v0.9 — Fincaraíz (commit local autorizado, sin tag); `v0.8.0` conserva la entrega publicada anterior; las rutas heredadas no identifican la versión ni la rama de trabajo.
 
 ## Referencias vigentes
 
@@ -18,6 +18,8 @@ Punto de entrada a las guías y a la evidencia del proyecto. La versión funcion
 | Instalación y ejecución de capturas | [Guía del scraper](../scraper/README.md) |
 | Actualización incremental | [Captura incremental](../scraper/docs/INCREMENTAL.md) |
 | Wasi y preparación de Cloud Run Jobs | [Guía Wasi](../scraper/docs/WASI.md) |
+| Fincaraíz v0.9 | [Guía Fincaraíz](../scraper/docs/FINCARAIZ.md) |
+| Validación local de Fincaraíz | [Resultados y límites](../scraper/docs/VALIDACION_FINCARAIZ.md) |
 | Medición de recursos | [Recursos](../scraper/docs/RECURSOS.md) |
 
 Las guías técnicas explican la implementación. El documento rector gobierna las decisiones funcionales. Los resultados de pruebas corresponden al momento de cada ejecución; este índice no acredita pruebas nuevas.

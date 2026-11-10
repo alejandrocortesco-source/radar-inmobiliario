@@ -147,7 +147,7 @@ def tarjeta(inmueble, filtros, volver):
         'area_comparacion': area_principal(inmueble, filtros.tipo_area),
         'mapa': enlace_mapa(inmueble),
         'fotos': tuple(f for f in inmueble.fotos if enlace_publico(f)),
-        'fuente': 'Metrocuadrado' if inmueble.origen.fuente == 'metrocuadrado' else inmueble.origen.fuente.title(),
+        'fuente': {'metrocuadrado': 'Metrocuadrado', 'fincaraiz': 'Fincaraíz'}.get(inmueble.origen.fuente, inmueble.origen.fuente.title()),
         'url': '/consola/inmuebles/' + inmueble.id_interno + '?' + urlencode({'volver': volver}),
     }
 

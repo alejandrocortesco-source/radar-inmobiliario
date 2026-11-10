@@ -180,3 +180,7 @@ escribir en la base auxiliar: no debe usarse como una consulta de solo lectura.
 Las pruebas usan bases sintéticas y las validaciones reales crean CRM aislados.
 Se verifican las huellas de las bases originales para detectar modificaciones.
 Las bases SQLite y las evidencias locales están excluidas de Git.
+
+## Fincaraíz v0.9
+
+El catálogo integrado incorpora también Fincaraíz sin cambiar reglas estrictas, decisiones ni Gemini. El adaptador usa solo ubicación principal explícita; barrios asociados quedan como evidencia. Las áreas conservan sus tipos y no se sustituyen. Una ejecución completa exitosa invoca el mismo recálculo de oportunidades activas; los límites de validación no lo disparan. [Guía y límites](../scraper/docs/FINCARAIZ.md).

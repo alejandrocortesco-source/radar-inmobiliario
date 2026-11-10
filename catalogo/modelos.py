@@ -128,6 +128,7 @@ class Inmueble:
     origen: Origen
     anunciante: str | None = None
     anunciante_direccion: str | None = None
+    anunciante_url: str | None = None
     telefono: str | None = None
     whatsapp: str | None = None
     telefono_fijo: str | None = None
@@ -164,7 +165,7 @@ class Inmueble:
         if self.geografia is not None and not isinstance(self.geografia, Geografia):
             raise TypeError('geografia debe ser Geografia o None')
         for nombre in ('titulo', 'descripcion', 'ciudad', 'zona', 'barrio', 'edificio', 'direccion',
-                       'portal_map_url', 'map_url', 'anunciante', 'anunciante_direccion',
+                       'portal_map_url', 'map_url', 'anunciante', 'anunciante_direccion', 'anunciante_url',
                        'telefono', 'whatsapp', 'telefono_fijo'):
             validar.texto(getattr(self, nombre), nombre)
         for nombre, limite in (('latitud', 90), ('longitud', 180)):

@@ -1,9 +1,9 @@
 <!doctype html>
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="referrer" content="no-referrer">
-<title>{% block title %}Radar Inmobiliario{% endblock %} · v0.8</title>
+<title>{% block title %}Radar Inmobiliario{% endblock %} · v0.9</title>
 <link rel="stylesheet" href="/consola/static/v06.css"><script src="/consola/static/v06.js" defer></script><link rel="stylesheet" href="/consola/static/anunciantes.css"><script src="/consola/static/anunciantes.js" defer></script></head>
 <body><a href="#contenido" class="skip">Ir al contenido</a>
-<header class="app-header"><a href="/v0.6/" class="brand"><span class="brand-symbol" aria-hidden="true">◈</span> Radar <span class="brand-sub">Inmobiliario</span></a><span class="edition">Consola / 0.8</span><nav aria-label="Principal"><a href="/v0.6/" {% if request.url.path == '/v0.6/' %}aria-current="page"{% endif %}>Inicio</a><a href="/v0.6/clientes" {% if '/clientes' in request.url.path %}aria-current="page"{% endif %}>Clientes</a><a href="/v0.4/" data-catalog-link>Catálogo</a></nav></header>
+<header class="app-header"><a href="/v0.6/" class="brand"><span class="brand-symbol" aria-hidden="true">◈</span> Radar <span class="brand-sub">Inmobiliario</span></a><span class="edition">Consola / 0.9</span><nav aria-label="Principal"><a href="/v0.6/" {% if request.url.path == '/v0.6/' %}aria-current="page"{% endif %}>Inicio</a><a href="/v0.6/clientes" {% if '/clientes' in request.url.path %}aria-current="page"{% endif %}>Clientes</a><a href="/v0.4/" data-catalog-link>Catálogo</a></nav></header>
 <main id="contenido">{% block content %}{% endblock %}</main>
 <footer class="app-footer">Radar Inmobiliario <span>Un lugar para cada necesidad.</span></footer>
 </body></html>

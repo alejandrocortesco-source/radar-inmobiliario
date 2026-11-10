@@ -69,6 +69,8 @@ class ServicioCatalogo:
         if not all(isinstance(v, str) for v in (fuente, url, nombre)):
             raise ConsultaInvalida('Fuente, URL y nombre deben ser texto')
         fuente, url, nombre = normalizar_fuente(fuente), url.strip(), nombre.strip()
+        if fuente == 'fincaraiz':
+            raise ConsultaInvalida('Configura Fincaraíz en Agregar fuente del inicio para verificar sus filtros.')
         if fuente == 'wasi':
             raise ConsultaInvalida('Configura o edita los filtros Wasi en Agregar fuente del inicio.')
         if not nombre or len(nombre) > 120:
@@ -107,13 +109,15 @@ class ServicioCatalogo:
     def catalogo_compatible(self, *, state=None, search_url=None, limit=100, offset=0,
                             filtros: FiltrosCatalogo | None = None):
         """Filtra el modelo común y conserva el formato y parámetros HTTP anteriores."""
-        busqueda = (search_url if search_url.startswith('wasi:') else self.normalizar_busqueda(search_url)) if search_url else None
+        es_fincaraiz = bool(search_url and urlsplit(search_url).hostname in ('www.fincaraiz.com.co', 'fincaraiz.com.co'))
+        from .fuentes.fincaraiz import identidad as identidad_fincaraiz
+        busqueda = (identidad_fincaraiz(search_url) if es_fincaraiz else search_url if search_url.startswith('wasi:') else self.normalizar_busqueda(search_url)) if search_url else None
         filtros = filtros if filtros is not None else FiltrosCatalogo()
         if busqueda:
             if filtros.id_busqueda is not None and filtros.id_busqueda != busqueda:
                 raise ConsultaInvalida('search_url e id_busqueda deben identificar la misma búsqueda')
             filtros = replace(filtros, id_busqueda=busqueda,
-                              fuente=filtros.fuente or ('wasi' if busqueda.startswith('wasi:') else 'metrocuadrado'))
+                              fuente=filtros.fuente or ('fincaraiz' if es_fincaraiz else 'wasi' if busqueda.startswith('wasi:') else 'metrocuadrado'))
         elif filtros.id_busqueda is not None:
             busqueda = filtros.id_busqueda
         items = {}

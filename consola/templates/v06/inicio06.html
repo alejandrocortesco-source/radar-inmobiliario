@@ -12,7 +12,7 @@
 <p class="caption">Nuevos y actualizados: última ejecución exitosa por búsqueda. Actualizados incluye cambios de precio. Ausentes cuenta inmuebles que faltan en al menos una búsqueda; pueden seguir activos en otra. La ausencia no confirma retiro ni venta.</p>
 </section>
 <section class="tile source" aria-labelledby="fuente-titulo" id="agregar-fuente" data-dashboard-section="fuente">
-<p class="eyebrow">03 / Ampliar la búsqueda</p><h2 id="fuente-titulo">Agregar fuente</h2><p class="muted">Registra una búsqueda de Metrocuadrado o Wasi para futuras actualizaciones.</p>
+<p class="eyebrow">03 / Ampliar la búsqueda</p><h2 id="fuente-titulo">Agregar fuente</h2><p class="muted">Registra una búsqueda de Metrocuadrado, Wasi o Fincaraíz para futuras actualizaciones.</p>
 {% if mensaje == 'fuente_eliminada' %}<p class="notice success" role="status">Búsqueda eliminada. Se conservaron los inmuebles y su historial.</p>{% endif %}
 {% if mensaje == 'fuente_guardada' %}<p class="notice success" role="status">Fuente guardada. No se inició una extracción.</p>{% elif mensaje == 'fuente_duplicada' %}<p class="notice" role="status">Esta búsqueda ya está registrada. Se conservó su nombre.</p>{% endif %}
 {% if fuente_error %}<p class="notice" id="fuente-error" role="alert">{{fuente_error}}</p>{% endif %}
@@ -23,7 +23,7 @@
 <summary>Búsquedas registradas ({{fuentes|length}})</summary>
 {% if fuentes %}<ul class="source-list">
 {% for fuente in fuentes %}<li data-registered-source>
-<strong>{{fuente.nombre}}</strong> <small>{{fuente.fuente|capitalize}}</small>{% if fuente.fuente == 'wasi' %}<a href="/v0.6/?editar_wasi={{fuente.id_busqueda|urlencode}}#agregar-fuente">Editar filtros</a>{% endif %}<a href="{{fuente.url}}" target="_blank" rel="noopener noreferrer">{{fuente.url}}</a>
+<strong>{{fuente.nombre}}</strong> <small>{{'Fincaraíz' if fuente.fuente == 'fincaraiz' else fuente.fuente|capitalize}}</small>{% if fuente.fuente == 'fincaraiz' %}<span>{{'Activa' if fuente.activa else 'Inactiva'}}</span><a href="/v0.6/?editar_fincaraiz={{fuente.id_busqueda|urlencode}}#agregar-fuente">Editar búsqueda</a><form action="/v0.6/fuentes/estado" method="post"><input type="hidden" name="fuente" value="fincaraiz"><input type="hidden" name="id_busqueda" value="{{fuente.id_busqueda}}"><button class="secondary" name="activa" value="{{'0' if fuente.activa else '1'}}">{{'Desactivar' if fuente.activa else 'Activar'}}</button></form>{% endif %}{% if fuente.fuente == 'wasi' %}<a href="/v0.6/?editar_wasi={{fuente.id_busqueda|urlencode}}#agregar-fuente">Editar filtros</a>{% endif %}<a href="{{fuente.url}}" target="_blank" rel="noopener noreferrer">{{fuente.url}}</a>
 <details class="source-delete"><summary>Eliminar búsqueda: {{fuente.nombre}}</summary>
 <p>Se quitará de las fuentes registradas para futuras ejecuciones. Los inmuebles y su historial se conservan. Una ejecución en curso o reanudada mantiene sus fuentes.</p>
 <form action="/v0.6/fuentes/eliminar" method="post">

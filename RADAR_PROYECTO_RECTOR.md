@@ -1,8 +1,24 @@
-# Radar Inmobiliario — documento rector v0.8
+# Radar Inmobiliario — documento rector v0.9 (desarrollo local)
 
 La especificación funcional del usuario de 3 de noviembre de 2026 gobierna esta entrega. El producto acompaña el trabajo de Mónica con unos 30 clientes activos. Debe permanecer sencillo y de bajo mantenimiento; el objetivo de operación inferior a US$10/mes está **pendiente de validación de consumo y alojamiento**, no es una garantía.
 
-## Ampliación vigente v0.8 — Wasi (8 de noviembre de 2026)
+## Ampliación vigente v0.9 — Fincaraíz (9 de noviembre de 2026)
+
+La solicitud actual autoriza Fincaraíz como tercera fuente, compatible con Metrocuadrado y Wasi, y una validación real acotada en almacenamiento aislado. Es una ampliación MINOR compatible en `develop`. La solicitud inicial excluía commit, tag, push, publicación y despliegue; la solicitud posterior autoriza el commit local de v0.9, sin push ni tag. El tag `v0.8.0` sigue identificando la entrega publicada anterior; las rutas operativas no cambian.
+
+El catálogo de negocio continúa único: el adaptador integrado lee también `fincaraiz.sqlite`, almacenamiento técnico del mismo motor incremental, con identidad UUID5 por fuente/ID numérico. La configuración, revisiones, nombre y activación viven en la base auxiliar. No se fusionan anuncios entre portales. Búsquedas distintas comparten el anuncio y conservan todas sus procedencias. El dashboard conserva exactamente cuatro secciones.
+
+«Agregar fuente» incorpora Fincaraíz por URL filtrada o por criterios comprobados. Guardar verifica una página de resultados, sus filtros efectivos y su URL; no registra anuncios ni inicia extracción. El modo criterios resuelve únicamente combinaciones con una URL verificada y vuelve a comprobar sus filtros en el portal. Inicialmente hay opciones inspeccionadas de La Carolina / Bogotá; nuevas URLs verificadas amplían la selección. No se inventan slugs ni se ofrece un directorio universal de ubicaciones. Una combinación no comprobada explica cómo usar URL filtrada. Editar mantiene revisiones; desactivar excluye de nuevas ejecuciones sin alterar snapshots reanudados ni historial.
+
+Fincaraíz entrega `__NEXT_DATA__` con `fetchResult.searchFast`, filtros y paginador. Solo se siguen enlaces reales del portal que conservan la URL de alcance y los parámetros. El campo `page` observado se comprueba contra la página activa y se separa de los filtros de negocio. Totales, avance, huellas y fin se verifican en cada ejecución. La ficha se abre cuando el listado no contiene los datos completos. Se reutilizan decisiones incrementales, historial, checkpoints y la confirmación de ausencias tras dos ejecuciones exitosas; un límite de prueba, bloqueo o fallo parcial no confirma bajas. Una captura que pierde un dato previamente conocido queda parcial y conserva la ficha fiable anterior.
+
+Solo la ubicación principal explícita alimenta barrio/zona del matching. Las ubicaciones asociadas se conservan y muestran como evidencia, sin confirmar coincidencias. Las áreas publicada, construida y privada se mantienen separadas: filtro y matching usan exactamente el tipo de área elegido, sin fallback entre ellas; las discrepancias se registran. Antigüedad usa la etiqueta técnica publicada y conserva el código como evidencia, nunca como años. El motor actual mantiene la preferencia de antigüedad pendiente cuando no dispone de un valor comparable.
+
+Anunciantes siguen agrupándose por igualdad literal de nombre. Se conserva el perfil publicado y solo teléfonos/WhatsApp completos de datos públicos propios del anuncio; nunca contactos generales del portal, números enmascarados, formularios o mensajes. COP continúa siendo la única moneda; Gemini no cambia ni es un requisito. Jobs y snapshots incluyen la tercera fuente, sin activar horarios ni desplegar.
+
+Configuración, comandos, límites y evidencia: [guía Fincaraíz](scraper/docs/FINCARAIZ.md) e [informe de validación v0.9](scraper/docs/VALIDACION_FINCARAIZ.md). Después de la prueba acotada, el usuario autorizó una captura operativa completa: ejecución local 1, 13 páginas y 267 anuncios correctos, sin errores ni duplicados, comprobados también en la API local. Esta captura no valida la operación desatendida en Cloud Run.
+
+## Ampliación v0.8 — Wasi (8 de noviembre de 2026)
 
 La entrega funcional v0.8 corresponde a `4781daeb9adefc310028d40dcec88795657530eb`, identificada mediante el tag anotado `v0.8.0`. El desarrollo y los commits nuevos se realizan en `develop`, según la política única [GIT_WORKFLOW.md](GIT_WORKFLOW.md). La rama remota `v0.6` queda histórica, sin nuevos commits; las rutas `/v0.6/`, `/v0.4/` y `/consola/` permanecen. El commit documental de organización no incrementa la versión funcional ni integra la entrega en `main`.
 
@@ -36,7 +52,7 @@ La entrada de la consola es `/v0.6/`. Tiene exactamente cuatro secciones:
 
 1. **Oportunidades recientes**: resumen por cliente, necesidad, pendientes y última actividad. Prioriza clientes con pendientes, luego actividad más reciente; muestra hasta seis clientes activos. La actividad se integra aquí.
 2. **Estado del catálogo**: total, última actualización exitosa global en hora de Colombia, nuevos, actualizados (clasificación de cambios de precio existente) y ausentes de al menos una búsqueda. Nuevos y actualizados usan la última ejecución completada por búsqueda de v0.5. La actividad de actualización se integra aquí. Una ausencia no confirma retiro ni venta; el inmueble puede seguir activo en otra búsqueda.
-3. **Agregar fuente**: URL de búsqueda de Metrocuadrado o controles dependientes de Wasi y nombre, con identidad canónica, validación y deduplicación. Permite revisar las búsquedas registradas, editar filtros Wasi y eliminarlas con confirmación. Eliminar quita únicamente su selección auxiliar para futuras ejecuciones; conserva inmuebles, procedencias e historial y no cambia las fuentes de ejecuciones en curso o reanudadas. No extrae al guardar ni al eliminar. Metrocuadrado las incorpora con `scrape --fuentes-registradas`; Wasi usa `wasi_run.py scrape` y el Job puede procesar ambas fuentes.
+3. **Agregar fuente**: URL de búsqueda de Metrocuadrado, controles dependientes de Wasi o búsqueda Fincaraíz y nombre, con identidad canónica, validación y deduplicación. Permite revisar las búsquedas registradas, editar filtros Wasi y eliminarlas con confirmación. Eliminar quita únicamente su selección auxiliar para futuras ejecuciones; conserva inmuebles, procedencias e historial y no cambia las fuentes de ejecuciones en curso o reanudadas. No extrae al guardar ni al eliminar. Metrocuadrado las incorpora con `scrape --fuentes-registradas`; Wasi usa `wasi_run.py scrape` y el Job puede procesar ambas fuentes.
 4. **Nuevo cliente**: acceso al formulario independiente de cliente y necesidades; permite seleccionar uno existente. Confirmar guarda una oportunidad y abre la ficha del cliente mientras se evalúan candidatos.
 
 **No hay quinta sección.** Las referencias históricas a interfaces anteriores no añaden secciones al dashboard.

@@ -215,10 +215,11 @@ def crear_router(proveedor_servicio, plantillas=None):
         try:
             revision = servicio.ficha_compatible(id_interno)
             historial = historial_visible(revision['price_history'])
-            campos_fuente = (revision.get('catalog_data') or {}).get('fields') or {}
+            datos_fuente = revision.get('catalog_data') or {}
+            campos_fuente = datos_fuente.get('fields') or {}
             error_historial = False
         except (FileNotFoundError, ErrorLecturaCatalogo, InmuebleNoEncontrado):
-            historial, error_historial, campos_fuente = (), True, {}
+            historial, error_historial, campos_fuente, datos_fuente = (), True, {}, {}
         busquedas = [{
             'nombre': nombre_busqueda(p, n), 'url': enlace_publico(p.url),
             'estado': ESTADOS[p.disponibilidad][0], 'clase': ESTADOS[p.disponibilidad][1],
@@ -226,7 +227,7 @@ def crear_router(proveedor_servicio, plantillas=None):
         } for n, p in enumerate(inmueble.origen.busquedas, 1)]
         return render(request, 'ficha.html', inmueble=inmueble, datos=datos,
                       ofertas=ofertas_visibles(inmueble), busquedas=busquedas, volver=regreso,
-                      historial=historial, error_historial=error_historial, campos_fuente=campos_fuente)
+                      historial=historial, error_historial=error_historial, campos_fuente=campos_fuente, datos_fuente=datos_fuente)
 
     return router
 

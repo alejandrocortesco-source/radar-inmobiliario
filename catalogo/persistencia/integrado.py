@@ -36,11 +36,12 @@ class CatalogoIntegrado:
 
 def catalogo_configurado(metro=None):
     metro = Path(metro or os.getenv('METRO_DB', str(BASE_PREDETERMINADA))).resolve()
-    wasi = Path(os.getenv('WASI_DB', str(metro.with_name('wasi.sqlite')))).resolve()
-    if metro == wasi:
-        raise ErrorLecturaCatalogo('METRO_DB y WASI_DB deben ser distintas')
-    # Metro sigue siendo requerido salvo una instalación inicialmente solo Wasi.
-    repos = [CatalogoSQLite(metro)] if metro.exists() or not wasi.exists() else []
-    if wasi.exists():
-        repos.append(CatalogoSQLite(wasi, fuente='wasi'))
+    rutas = [('metrocuadrado', metro),
+             ('wasi', Path(os.getenv('WASI_DB', str(metro.with_name('wasi.sqlite')))).resolve()),
+             ('fincaraiz', Path(os.getenv('FINCARAIZ_DB', str(metro.with_name('fincaraiz.sqlite')))).resolve())]
+    if len({ruta for _, ruta in rutas}) != 3:
+        raise ErrorLecturaCatalogo('METRO_DB, WASI_DB y FINCARAIZ_DB deben ser distintas')
+    repos = [CatalogoSQLite(ruta, fuente=fuente) for fuente, ruta in rutas if ruta.exists()]
+    if not repos:
+        repos = [CatalogoSQLite(metro)]
     return CatalogoIntegrado(repos)

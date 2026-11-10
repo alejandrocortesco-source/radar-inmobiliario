@@ -1,0 +1,14 @@
+{% set n = datos_fuente.get('normalized', {}) %}{% set extra = datos_fuente.get('extra', {}) %}
+<details class="detail-section"><summary>Datos publicados en Fincaraíz</summary>
+<dl class="metadata">
+<dt>Administración (COP, separada del precio)</dt><dd>{{dato_fuente(n.get('administration'), 'administration')}}</dd>
+<dt>Piso</dt><dd>{{dato_fuente(n.get('floor'), 'floor')}}</dd>
+<dt>Antigüedad publicada</dt><dd>{{n.get('age') or 'Sin etiqueta disponible; código interno sin interpretar'}}</dd>
+<dt>Fecha de publicación del portal</dt><dd>{{n.get('publication_date') or 'Sin dato'}}</dd>
+<dt>Fecha de actualización del portal</dt><dd>{{n.get('update_date') or 'Sin dato'}} (sin hora informada)</dd>
+<dt>Ubicación principal explícita</dt><dd>{{extra.get('location_main',{}).get('name') or 'Pendiente de verificar'}}</dd>
+<dt>Ubicaciones asociadas</dt><dd>{% for loc in extra.get('associated_locations',{}).get('neighbourhood',[]) %}{{loc.name}}{{' · ' if not loop.last else ''}}{% else %}Sin dato{% endfor %}. No confirman el barrio del inmueble para matching.</dd>
+</dl>
+{% if extra.get('area_discrepancy') %}<p>El portal publica áreas diferentes. Se conserva cada valor: publicada, construida y privada; el filtro usa el tipo de área seleccionado, sin sustituirlo.</p>{% endif %}
+{% if not n.get('phone') and not n.get('whatsapp') %}<p>No hay teléfono ni WhatsApp completos disponibles en los datos públicos capturados. Puedes consultar el anunciante y la publicación original. No se envían formularios para habilitar contactos.</p>{% endif %}
+</details>

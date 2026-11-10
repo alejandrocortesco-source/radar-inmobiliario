@@ -4,6 +4,7 @@ COPY scraper/requirements.txt scraper/requirements-cloud.txt ./
 RUN pip install --no-cache-dir -r requirements.txt -r requirements-cloud.txt
 COPY scraper/metro ./scraper/metro
 COPY scraper/wasi ./scraper/wasi
+COPY scraper/fincaraiz ./scraper/fincaraiz
 COPY scraper/job.py ./scraper/job.py
 COPY catalogo ./catalogo
 COPY oportunidades ./oportunidades

@@ -12,7 +12,7 @@ import uuid
 from pathlib import Path
 from contextlib import closing
 
-ARCHIVOS = ('metro.sqlite', 'wasi.sqlite', 'metro-consola.sqlite', 'metro-geografia.sqlite', 'wasi-geografia.sqlite')
+ARCHIVOS = ('metro.sqlite', 'wasi.sqlite', 'fincaraiz.sqlite', 'fincaraiz-geografia.sqlite', 'metro-consola.sqlite', 'metro-geografia.sqlite', 'wasi-geografia.sqlite')
 
 
 def empaquetar(carpeta):

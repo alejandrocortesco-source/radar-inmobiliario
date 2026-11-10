@@ -307,3 +307,7 @@ SQLite y el formulario se detallan en
 ## Catálogo integrado Metrocuadrado y Wasi
 
 `persistencia/integrado.py` compone repositorios `CatalogoSQLite` con fuente explícita, sin modificar las identidades ni los campos de `Inmueble`. `WASI_DB` selecciona la base técnica de Wasi; ambas son de solo lectura desde este componente. UUID o `fuente:ID` resuelven códigos compartidos; un ID simple ambiguo devuelve 422. La API agrega la procedencia técnica `fuente`. La configuración versionada y las opciones dependientes viven en tablas auxiliares, separadas del catálogo. Detalles y límites: [guía Wasi](../scraper/docs/WASI.md).
+
+## Fincaraíz v0.9
+
+La tercera fuente reutiliza el motor incremental, el catálogo integrado, identidad por fuente y las pantallas existentes. Configuración auxiliar por URL verificada o criterios comprobados, edición y activación desde Inicio → Agregar fuente. Almacenamiento técnico `FINCARAIZ_DB` (por defecto `fincaraiz.sqlite` junto a Metrocuadrado), solo lectura desde consola. [Guía de campos, ejecución y límites](../scraper/docs/FINCARAIZ.md).
