@@ -16,6 +16,7 @@ from catalogo.persistencia.busquedas import BusquedasSQLite
 from oportunidades.servicio import servicio_oportunidades
 from oportunidades.persistencia import ErrorPersistencia
 from catalogo.servicio import ServicioCatalogo
+from catalogo.persistencia.asociaciones import AsociacionesSQLite
 from consola.rutas import crear_router as crear_router_consola, ESTATICOS
 from consola.v04 import crear_router as crear_router_v04, ESTATICOS as ESTATICOS_V04
 from consola.v06 import crear_router as crear_router_v06
@@ -36,7 +37,7 @@ def servicio():
         busquedas = None
     return ServicioCatalogo(
         repositorio, revision=repositorio, normalizar_busqueda=search_identity,
-        busquedas=busquedas)
+        busquedas=busquedas, asociaciones=AsociacionesSQLite(busquedas.ruta) if busquedas else None)
 
 
 app.include_router(crear_router(servicio))

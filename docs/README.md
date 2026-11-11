@@ -1,6 +1,6 @@
 # Documentación de Radar Inmobiliario
 
-Punto de entrada a las guías y a la evidencia del proyecto. La ampliación local vigente es v0.9 — Fincaraíz (commit local autorizado, sin tag); `v0.8.0` conserva la entrega publicada anterior; las rutas heredadas no identifican la versión ni la rama de trabajo.
+Punto de entrada a las guías y a la evidencia del proyecto. La entrega vigente es v0.10.0 — identificación supervisada (versionado y sincronización autorizados el 11 de noviembre de 2026); `v0.8.0` conserva la entrega publicada anterior; las rutas heredadas no identifican la versión ni la rama de trabajo.
 
 ## Referencias vigentes
 
@@ -13,6 +13,8 @@ Punto de entrada a las guías y a la evidencia del proyecto. La ampliación loca
 | Carpetas y conservación de archivos | [Mapa de archivos](ESTRUCTURA.md) |
 | Consola y navegación | [Guía de consola](../consola/README.md) |
 | Configuración y pruebas de la consola | [V06](../consola/docs/V06.md) |
+| Entrega local de identificación y pruebas | [Informe del 10 de noviembre](ENTREGA_IDENTIFICACION.md) |
+| Identificación física y revisión humana | [Reglas, migración y operación](IDENTIFICACION.md) |
 | Catálogo y persistencia | [Guía de catálogo](../catalogo/README.md) |
 | Clientes, oportunidades y matching | [Guía de oportunidades](../oportunidades/README.md) |
 | Instalación y ejecución de capturas | [Guía del scraper](../scraper/README.md) |

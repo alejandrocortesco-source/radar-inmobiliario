@@ -1,12 +1,20 @@
-# Radar Inmobiliario — documento rector v0.9 (desarrollo local)
+# Radar Inmobiliario — documento rector v0.10.0
 
 La especificación funcional del usuario de 3 de noviembre de 2026 gobierna esta entrega. El producto acompaña el trabajo de Mónica con unos 30 clientes activos. Debe permanecer sencillo y de bajo mantenimiento; el objetivo de operación inferior a US$10/mes está **pendiente de validación de consumo y alojamiento**, no es una garantía.
 
-## Ampliación vigente v0.9 — Fincaraíz (9 de noviembre de 2026)
+## v0.10.0 — identificación supervisada (implementación del 10 de noviembre de 2026)
+
+Implementada localmente una capa común de similitud entre publicaciones de las tres fuentes, con revisión humana, evidencias versionadas y persistencia aditiva en la base auxiliar. Publicación mantiene UUID5, ficha e historial; inmueble físico tiene un UUID de agrupación independiente. Solo confirmaciones humanas agrupan catálogo y matching. La ampliación de un grupo exige revisar explícitamente todas sus relaciones; deshacer separa todo el grupo conservando decisiones comerciales. La implementación inicial no ejecutó capturas externas, commits, push ni despliegues. La solicitud del 11 de noviembre autoriza versionar y sincronizar esta entrega en `develop`, con etiqueta anotada `v0.10.0`, sin despliegue.
+
+La revisión vive en `/v0.6/identificacion`, fuera de las cuatro secciones del dashboard. El catálogo filtra publicaciones coherentes antes de agrupar, contar y paginar; el representante es el menor UUID elegible. Matching selecciona una publicación elegible y conserva alternativas y decisiones por publicación. No se mezclan precios y atributos. El CSV conserva filas por publicación/oferta.
+
+Reglas, pesos, tolerancias, auditoría local sin autenticación, reversión, migración, limitaciones e integración incremental: [Identificación supervisada](docs/IDENTIFICACION.md). La política sustituye la ausencia de agrupación cruzada de las entregas históricas, conservando sus identidades. No añade Gemini ni infraestructura. Cloud Run, Sheets, horario automático y costos reales siguen pendientes de verificación operativa; código preparado no acredita despliegue.
+
+## Ampliación v0.9 — Fincaraíz (9 de noviembre de 2026)
 
 La solicitud actual autoriza Fincaraíz como tercera fuente, compatible con Metrocuadrado y Wasi, y una validación real acotada en almacenamiento aislado. Es una ampliación MINOR compatible en `develop`. La solicitud inicial excluía commit, tag, push, publicación y despliegue; la solicitud posterior autoriza el commit local de v0.9, sin push ni tag. El tag `v0.8.0` sigue identificando la entrega publicada anterior; las rutas operativas no cambian.
 
-El catálogo de negocio continúa único: el adaptador integrado lee también `fincaraiz.sqlite`, almacenamiento técnico del mismo motor incremental, con identidad UUID5 por fuente/ID numérico. La configuración, revisiones, nombre y activación viven en la base auxiliar. No se fusionan anuncios entre portales. Búsquedas distintas comparten el anuncio y conservan todas sus procedencias. El dashboard conserva exactamente cuatro secciones.
+El catálogo de negocio continúa único: el adaptador integrado lee también `fincaraiz.sqlite`, almacenamiento técnico del mismo motor incremental, con identidad UUID5 por fuente/ID numérico. La configuración, revisiones, nombre y activación viven en la base auxiliar. Las publicaciones originales permanecen separadas; la agrupación física actual exige confirmación humana. Búsquedas distintas comparten el anuncio y conservan todas sus procedencias. El dashboard conserva exactamente cuatro secciones.
 
 «Agregar fuente» incorpora Fincaraíz por URL filtrada o por criterios comprobados. Guardar verifica una página de resultados, sus filtros efectivos y su URL; no registra anuncios ni inicia extracción. El modo criterios resuelve únicamente combinaciones con una URL verificada y vuelve a comprobar sus filtros en el portal. Inicialmente hay opciones inspeccionadas de La Carolina / Bogotá; nuevas URLs verificadas amplían la selección. No se inventan slugs ni se ofrece un directorio universal de ubicaciones. Una combinación no comprobada explica cómo usar URL filtrada. Editar mantiene revisiones; desactivar excluye de nuevas ejecuciones sin alterar snapshots reanudados ni historial.
 
@@ -26,7 +34,7 @@ La revisión funcional y sus pruebas constan en `scraper/docs/VALIDACION_WASI.md
 
 La solicitud de esta fecha amplía el alcance a la red inmobiliaria de Wasi y al login automático normal con secretos externos. Se desarrolló en el checkout entonces llamado `v0.6`, base funcional comprobada `9db935a` (anunciantes v0.7), conservando cambios locales. Aquella solicitud no autorizaba merge, push, despliegue ni publicación. Las autorizaciones de sincronización descritas en hitos históricos no se trasladan a esta entrega.
 
-El catálogo de negocio permanece único, con los campos actuales. Se añade almacenamiento técnico `wasi.sqlite` reutilizando el motor incremental; el adaptador integrado presenta ambas fuentes a las vistas, API, filtros, CSV, anunciantes, contadores y matching existentes. La identidad UUID5 por fuente/código original permanece intacta. No se fusionan anuncios entre portales. Enlaces y decisiones usan UUID; un código compartido necesita fuente explícita en la API.
+El catálogo de negocio permanece único, con los campos actuales. Se añade almacenamiento técnico `wasi.sqlite` reutilizando el motor incremental; el adaptador integrado presenta ambas fuentes a las vistas, API, filtros, CSV, anunciantes, contadores y matching existentes. La identidad UUID5 por fuente/código original permanece intacta. Las publicaciones originales permanecen separadas; la agrupación física actual exige confirmación humana. Enlaces y decisiones usan UUID; un código compartido necesita fuente explícita en la API.
 
 «Agregar fuente» conserva la URL filtrada de Metrocuadrado y añade configuración de controles Wasi dependientes. Se exige ciudad y localidad o zona/barrio, con IDs/etiquetas reales del portal. La URL general no identifica la búsqueda. Cada conjunto de filtros tiene una identidad canónica y configuración versionada en la base auxiliar; editar conserva revisiones y procedencias anteriores y no provoca ausencias masivas. Guardar/editar no captura; el dashboard conserva exactamente cuatro secciones.
 
@@ -52,7 +60,7 @@ La entrada de la consola es `/v0.6/`. Tiene exactamente cuatro secciones:
 
 1. **Oportunidades recientes**: resumen por cliente, necesidad, pendientes y última actividad. Prioriza clientes con pendientes, luego actividad más reciente; muestra hasta seis clientes activos. La actividad se integra aquí.
 2. **Estado del catálogo**: total, última actualización exitosa global en hora de Colombia, nuevos, actualizados (clasificación de cambios de precio existente) y ausentes de al menos una búsqueda. Nuevos y actualizados usan la última ejecución completada por búsqueda de v0.5. La actividad de actualización se integra aquí. Una ausencia no confirma retiro ni venta; el inmueble puede seguir activo en otra búsqueda.
-3. **Agregar fuente**: URL de búsqueda de Metrocuadrado, controles dependientes de Wasi o búsqueda Fincaraíz y nombre, con identidad canónica, validación y deduplicación. Permite revisar las búsquedas registradas, editar filtros Wasi y eliminarlas con confirmación. Eliminar quita únicamente su selección auxiliar para futuras ejecuciones; conserva inmuebles, procedencias e historial y no cambia las fuentes de ejecuciones en curso o reanudadas. No extrae al guardar ni al eliminar. Metrocuadrado las incorpora con `scrape --fuentes-registradas`; Wasi usa `wasi_run.py scrape` y el Job puede procesar ambas fuentes.
+3. **Agregar fuente**: URL de búsqueda de Metrocuadrado, controles dependientes de Wasi o búsqueda Fincaraíz y nombre, con identidad canónica, validación y deduplicación. Permite revisar las búsquedas registradas, editar filtros Wasi y eliminarlas con confirmación. Eliminar quita únicamente su selección auxiliar para futuras ejecuciones; conserva inmuebles, procedencias e historial y no cambia las fuentes de ejecuciones en curso o reanudadas. No extrae al guardar ni al eliminar. Metrocuadrado las incorpora con `scrape --fuentes-registradas`; Wasi usa `wasi_run.py scrape` y el Job puede procesar las tres fuentes.
 4. **Nuevo cliente**: acceso al formulario independiente de cliente y necesidades; permite seleccionar uno existente. Confirmar guarda una oportunidad y abre la ficha del cliente mientras se evalúan candidatos.
 
 **No hay quinta sección.** Las referencias históricas a interfaces anteriores no añaden secciones al dashboard.
@@ -81,7 +89,7 @@ Cada evaluación se reutiliza por hash de necesidades, datos relevantes del cand
 
 Disparadores: guardar/modificar oportunidad mediante los formularios y API; terminar una ejecución exitosa del scraper; recálculo manual desde la ficha. Las tareas HTTP se ejecutan después de enviar la respuesta mediante BackgroundTasks. Un lease en SQLite evita duplicados concurrentes; los cambios recibidos durante una evaluación dejan una solicitud pendiente para procesar al terminar. El progreso se consulta desde la ficha. No hay cola externa ni servicio adicional.
 
-Las decisiones por oportunidad/inmueble son **Pendiente, Preseleccionado y Descartado**. Se almacenan aparte del matching y se conservan al recalcular o desaparecer un candidato. La ficha permite cambiar también las decisiones históricas. Preseleccionar no comunica ni envía nada.
+Las decisiones por oportunidad/publicación son **Pendiente, Preseleccionado y Descartado**. Se almacenan aparte del matching y se conservan al recalcular o desaparecer un candidato. La ficha permite cambiar también las decisiones históricas. Preseleccionar no comunica ni envía nada.
 
 ## Arquitectura
 
@@ -103,7 +111,7 @@ Las tareas BackgroundTasks viven en el proceso web. Si se interrumpe, pueden no 
 
 La herramienta es privada y acompaña principalmente a personas que buscan vivienda para sí mismas. Mónica necesita ahorrar tiempo al registrar necesidades, actualizar el catálogo, comparar inmuebles y revisar opciones para compartir personalmente. La escala prevista es de cientos o algunos miles de anuncios; prevalecen simplicidad y mantenimiento frente a una escalabilidad hipotética. No convertirla en marketplace, portal público ni CRM corporativo.
 
-Cliente es la persona atendida; oportunidad es una necesidad concreta, con varios barrios como alternativas. Búsqueda de origen es la URL del portal que amplía la cobertura del catálogo y no equivale a los filtros de una oportunidad. Inmueble es un anuncio con identidad, procedencia y trazabilidad. Coincidencia es su evaluación para una oportunidad; la decisión comercial de Mónica se almacena de forma independiente. El catálogo completo es secundario a la revisión de clientes y sus coincidencias.
+Cliente es la persona atendida; oportunidad es una necesidad concreta, con varios barrios como alternativas. Búsqueda de origen es la URL del portal que amplía la cobertura del catálogo y no equivale a los filtros de una oportunidad. Publicación es un anuncio con identidad, procedencia y trazabilidad; inmueble físico es una agrupación confirmada de publicaciones, reversible y con identidad propia. Coincidencia es su evaluación para una oportunidad; la decisión comercial de Mónica se almacena de forma independiente. El catálogo completo es secundario a la revisión de clientes y sus coincidencias.
 
 ## Historia, ramas y referencias
 

@@ -1,5 +1,8 @@
 # Validación Fincaraíz — v0.9 local
 
+> Alcance temporal: los resultados y límites de este informe corresponden al hito descrito. El estado actual integra tres fuentes e [identificación supervisada](../../docs/IDENTIFICACION.md); no acredita despliegue, autenticación de personas, Scheduler activo ni consumo mensual verificado. Gemini sigue opcional y no participa en identidad física.
+
+
 Fecha: **9 de noviembre de 2026, America/Bogota**. Base comprobada `66083ed` en `develop`; índice y árbol inicialmente limpios. La versión v0.9 identifica esta nueva función compatible; no se creó commit ni tag. No hubo push, merge, publicación o despliegue. Las referencias históricas no se modificaron.
 
 ## Implementación revisada

@@ -158,7 +158,7 @@ def crear_router(proveedor_servicio, plantillas=None):
     def exportar(request: Request, servicio=Depends(proveedor_servicio)):
         try:
             filtros = leer_filtros(request.query_params)
-            items = seleccionar(servicio.listar(), filtros)
+            items = seleccionar(servicio.listar(), filtros, agrupar_confirmados=False)
         except ValidationError as exc:
             return render(request, 'estado.html', 422, titulo='Revisa los filtros de exportación',
                           mensaje=mensaje_filtros(exc), reintentar=url_catalogo(request.query_params))

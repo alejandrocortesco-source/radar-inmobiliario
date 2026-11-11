@@ -1,5 +1,8 @@
 # Corrección de Consola v0.3 — 26 de octubre de 2026
 
+> Alcance temporal: los resultados y límites de este informe corresponden al hito descrito. El estado actual integra tres fuentes e [identificación supervisada](../../docs/IDENTIFICACION.md); no acredita despliegue, autenticación de personas, Scheduler activo ni consumo mensual verificado. Gemini sigue opcional y no participa en identidad física.
+
+
 Este informe conserva el diagnóstico inicial. Los selectores y la presentación
 actual en tabla con paginación se describen en [Usabilidad v0.3](USABILIDAD_V03.md).
 

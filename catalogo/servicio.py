@@ -32,16 +32,18 @@ def _geografia(inmueble):
 class ServicioCatalogo:
     def __init__(self, repositorio: RepositorioCatalogo, *,
                  revision: RepositorioRevision | None = None,
-                 busquedas=None,
+                 busquedas=None, asociaciones=None,
                  normalizar_busqueda: Callable[[str], str] = lambda valor: valor):
         self.repositorio = repositorio
         self.revision = revision
         self.busquedas = busquedas
+        self.asociaciones = asociaciones
         self.normalizar_busqueda = normalizar_busqueda
 
     def listar(self) -> tuple[Inmueble, ...]:
         nombres = {(b['fuente'], b['id_busqueda']): b['nombre'] for b in self.listar_busquedas()}
-        return tuple(self._nombrar(i, nombres) for i in self.repositorio.listar())
+        items = tuple(self._nombrar(i, nombres) for i in self.repositorio.listar())
+        return self.asociaciones.proyectar(items) if self.asociaciones else items
 
     @staticmethod
     def _nombrar(inmueble, nombres):
@@ -99,6 +101,8 @@ class ServicioCatalogo:
 
     def obtener(self, id_interno: str) -> Inmueble | None:
         nombres = {(b['fuente'], b['id_busqueda']): b['nombre'] for b in self.listar_busquedas()}
+        if self.asociaciones:
+            return next((i for i in self.listar() if i.id_interno == id_interno), None)
         return self._nombrar(self.repositorio.obtener(id_interno), nombres)
 
     def _revision(self):
@@ -122,7 +126,8 @@ class ServicioCatalogo:
             busqueda = filtros.id_busqueda
         items = {}
         modelos = []
-        for registro in self._revision().listar_registros():
+        registros = self._revision().listar_registros()
+        for registro in registros:
             presencias = [p for p in registro.presencias
                           if busqueda is None or p['search_url'] == busqueda]
             # El endpoint original excluye anuncios sin pertenencia a búsquedas.
@@ -146,10 +151,16 @@ class ServicioCatalogo:
                 'building': registro.inmueble.edificio,
                 'geografia': _geografia(registro.inmueble),
             }
+        if self.asociaciones:
+            proyectados = {i.id_interno: i for i in self.asociaciones.proyectar(tuple(r.inmueble for r in registros))}
+            modelos = [proyectados[i.id_interno] for i in modelos]
         seleccionados = seleccionar(modelos, filtros, id_original_primero=True)
         resultado = []
         for inmueble in seleccionados:
             item = items[inmueble.id_interno]
+            if inmueble.inmueble_id:
+                item['inmueble_id'] = inmueble.inmueble_id
+                item['publicaciones'] = [{'id_interno': p.id_interno, 'fuente': p.origen.fuente, 'url': p.origen.url, 'anunciante': p.anunciante, 'ofertas': [asdict(o) for o in p.ofertas], 'disponibilidad': p.disponibilidad.value} for p in inmueble.publicaciones]
             if filtros.operacion is not None:
                 ofertas = ofertas_compatibles(inmueble, filtros)
                 item['ofertas'] = [

@@ -18,7 +18,7 @@
       <th scope="col" class="numeric">Habitaciones</th><th scope="col">Links</th>
     </tr></thead>
     <tbody>{% for card in tarjetas %}{% set i=card.inmueble %}<tr>
-      <td><a class="property-link" href="{{card.url}}" aria-label="Ver ficha de {{i.titulo or i.origen.id_original}}" title="{{card.ubicacion}} · {{i.titulo or i.origen.id_original}}">{{i.barrio or i.zona or i.ciudad or 'Sin ubicación'}}</a></td>
+      <td><a class="property-link" href="{{card.url}}" aria-label="Ver ficha de {{i.titulo or i.origen.id_original}}" title="{{card.ubicacion}} · {{i.titulo or i.origen.id_original}}">{{i.barrio or i.zona or i.ciudad or 'Sin ubicación'}}</a>{% include '_publicaciones.html' %}</td>
       <td>{% include '_busquedas_origen.html' %}</td>
       <td>{{i.tipo.value|capitalize if i.tipo else 'Sin dato'}}</td>
       <td class="numeric prices">{% set o=card.oferta_principal %}{% if o %}<span>{{o.precio}} <small>· {{o.operacion}}</small></span>{% else %}Sin dato{% endif %}</td>

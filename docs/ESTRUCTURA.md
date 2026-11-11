@@ -28,7 +28,7 @@ Las carpetas de caché y los temporales preexistentes de cada componente se cons
 
 ## Datos y archivos privados
 
-- Metrocuadrado utiliza por defecto `scraper/data/metro.sqlite`; el CRM usa una base auxiliar independiente y Wasi su almacenamiento técnico. Las rutas exactas y sus variables están en las guías de cada módulo.
+- Metrocuadrado utiliza por defecto `scraper/data/metro.sqlite`; el CRM usa una base auxiliar independiente y Wasi/Fincaraíz sus almacenamientos técnicos. Identificación y agrupación confirmada usan únicamente la base auxiliar, junto con clientes y decisiones. Las rutas exactas y sus variables están en las guías de cada módulo.
 - Mover una base exige un cambio operativo específico y la revisión de procesos activos, configuración y respaldos. Esta organización no migra bases ni cambia rutas predeterminadas.
 - Los secretos permanecen en sus ubicaciones externas protegidas. No trasladarlos a documentación ni confundir una carpeta ignorada por Git con un almacén seguro de secretos.
 - Git no respalda archivos ignorados. Conservar los respaldos de datos existentes; cualquier copia externa debe protegerse y definirse por separado. No subir datos operativos para limpiar el estado Git.

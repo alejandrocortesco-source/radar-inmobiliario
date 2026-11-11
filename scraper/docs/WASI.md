@@ -6,7 +6,7 @@ Ampliación solicitada el 8 de noviembre de 2026, sobre `v0.6` / `9db935a` (anun
 
 ## Contratos conservados
 
-Un inmueble sigue siendo un anuncio. UUID5 conserva exactamente el contrato `[fuente,id_original]`; Wasi usa `wasi` y códigos de texto, incluidos ceros iniciales. El mismo código de Metrocuadrado produce otra identidad. No se buscan ni fusionan inmuebles físicos. Enlaces de fichas, comentarios, decisiones y matching utilizan UUID. La API también acepta `wasi:CODIGO` y `metrocuadrado:CODIGO`; un código simple compartido devuelve 422 y exige calificarlo.
+El modelo histórico `Inmueble` representa una publicación; la entidad física confirmada tiene identidad de grupo independiente. UUID5 conserva exactamente el contrato `[fuente,id_original]`; Wasi usa `wasi` y códigos de texto, incluidos ceros iniciales. El mismo código de Metrocuadrado produce otra identidad. La identificación física común propone similitudes entre las tres fuentes; solo confirmaciones humanas agrupan, sin fusionar ni borrar publicaciones originales. [Reglas y revisión](../../docs/IDENTIFICACION.md). Enlaces de fichas, comentarios, decisiones y matching utilizan UUID. La API también acepta `wasi:CODIGO` y `metrocuadrado:CODIGO`; un código simple compartido devuelve 422 y exige calificarlo.
 
 `wasi.sqlite` reutiliza el esquema técnico y `Store` incremental de Metrocuadrado. No hay otro esquema de negocio. `CatalogoIntegrado` compone repositorios de solo lectura: las vistas, filtros, CSV, anunciantes, indicadores y matching reciben el mismo `Inmueble`. Los contratos `RepositorioCatalogo`, `RepositorioRevision` y los adaptadores de configuración permiten sustituir almacenamiento posteriormente; no se implementa Sheets. La interfaz técnica histórica del scraper en `/` continúa siendo la herramienta específica de Metrocuadrado; la consola de Mónica y `/api/catalog` son integradas.
 
@@ -16,13 +16,14 @@ Variables opcionales, rutas predeterminadas junto a `METRO_DB`:
 | --- | --- |
 | `METRO_DB` | Catálogo técnico Metrocuadrado, predeterminado `scraper/data/metro.sqlite` |
 | `WASI_DB` | Catálogo técnico Wasi, predeterminado `wasi.sqlite` en el mismo directorio |
+| `FINCARAIZ_DB` | Catálogo técnico Fincaraíz, predeterminado `fincaraiz.sqlite` en el mismo directorio |
 | `RADAR_CRM_DB` | Configuración auxiliar existente, predeterminado `<nombre-metro>-consola.sqlite` |
 
-Las tres rutas deben ser distintas. La consola nunca escribe capturas. Puede iniciar con solo la base Wasi; si existe una base ilegible, no la omite silenciosamente.
+Las cuatro rutas deben ser distintas. La consola nunca escribe capturas. Puede iniciar con solo la base Wasi; si existe una base ilegible, no la omite silenciosamente.
 
 ## Configurar búsquedas sin capturar
 
-En el inicio `/v0.6/`, «Agregar fuente» permite seleccionar Metrocuadrado (URL filtrada) o Wasi (controles). Permanecen exactamente cuatro secciones. Con JavaScript los controles geográficos dependen de los padres. Sin JavaScript, «Actualizar formulario» prepara las opciones tras elegir fuente o cambiar cada padre. Guardar y editar solo escriben la base auxiliar.
+En el inicio `/v0.6/`, «Agregar fuente» permite seleccionar Metrocuadrado (URL filtrada), Wasi (controles) o Fincaraíz (URL/criterios verificados). Permanecen exactamente cuatro secciones. Con JavaScript los controles geográficos dependen de los padres. Sin JavaScript, «Actualizar formulario» prepara las opciones tras elegir fuente o cambiar cada padre. Guardar y editar solo escriben la base auxiliar.
 
 Wasi requiere ciudad y al menos localidad o zona/barrio. Los IDs y etiquetas corresponden a opciones observadas, no a barrios del catálogo ni equivalencias inventadas. Incluye un snapshot de opciones inspeccionadas el 8 de noviembre: departamentos colombianos, Bogotá, sus localidades y zonas de Usaquén, además de criterios compatibles. No es un directorio geográfico completo. Las opciones de otra ciudad o localidad deben sincronizarse con la cuenta del portal antes de configurarlas, mediante «Actualizar opciones de Wasi» en el formulario o el comando de opciones. Esa acción separada requiere acceso configurado y no guarda búsquedas ni capturas. El scraper vuelve a verificar opciones, valores, resumen activo y renovación del listado cada vez que aplica una búsqueda; un cambio del portal falla de forma conservadora.
 
@@ -170,3 +171,7 @@ Los archivos externos de acceso admiten UTF-8 con o sin BOM, un valor literal o 
 El portal puede mostrar «Tu usuario está siendo usado en otros dispositivos» y el enlace «Usar aquí». Sin autorización operativa, el scraper se detiene con `auth_session_in_use`. `WASI_USE_HERE=1` habilita pulsar ese enlace normal, únicamente cuando se ha autorizado trasladar la sesión y se han detenido los accesos simultáneos incompatibles. No se oculta el modal por JavaScript, no se extraen tokens y no se habilita por defecto. Puede desconectar otra sesión. No utilizarlo en un Job sin decidir previamente cómo se coordina con el acceso de Mónica.
 
 La inspección real también encontró IDs duplicados en modales ocultos (por ejemplo, `bathrooms`). Los filtros se buscan exclusivamente dentro de `.advanced-search`; las opciones y sus comprobaciones siguen el mismo ámbito. Las esperas aceptan el reemplazo del nodo de control por el portal y el contacto móvil se toma del enlace de teléfono publicado, evitando incluir el texto del botón de WhatsApp.
+
+## Normalización e identificación supervisada vigente
+
+La localidad explícita de Wasi se trata como calificador del barrio cuando coincide con el catálogo controlado; se conserva la evidencia y no se infieren barrios de la búsqueda. Una captura exitosa alimenta la capa común de identificación y después matching. Candidatos, decisiones y asociaciones están en la base auxiliar, no en `wasi.sqlite`. [Operación y límites](../../docs/IDENTIFICACION.md).

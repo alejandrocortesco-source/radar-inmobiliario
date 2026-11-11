@@ -1,5 +1,8 @@
 # Filtros rápidos de actualización — entrega v0.5
 
+> Alcance temporal: los resultados y límites de este informe corresponden al hito descrito. El estado actual integra tres fuentes e [identificación supervisada](../../docs/IDENTIFICACION.md); no acredita despliegue, autenticación de personas, Scheduler activo ni consumo mensual verificado. Gemini sigue opcional y no participa en identidad física.
+
+
 Implementación del 3 de noviembre de 2026 sobre el checkout `v0.4` existente.
 No había una implementación ni ruta v0.5 en este checkout: se conserva `/v0.4/`
 como acceso principal y `/consola/` como interfaz anterior. No se renombraron

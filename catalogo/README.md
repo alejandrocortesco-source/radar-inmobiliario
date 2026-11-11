@@ -1,9 +1,13 @@
 # Catálogo — modelo común, persistencia y servicio
 
-El modelo, el servicio y el adaptador usan la biblioteca estándar de Python 3.12.
-El router reutiliza FastAPI y las pruebas aprovechan pytest, ambos ya existentes.
+El núcleo del modelo y los adaptadores SQLite usan la biblioteca estándar de Python 3.12.
+Filtros y API reutilizan Pydantic/FastAPI; las pruebas aprovechan pytest, ya existentes.
 El modelo no depende de extracción ni persistencia; el adaptador abre una base
 existente en modo de solo lectura y no importa ni ejecuta el scraper.
+
+## Identificación física supervisada vigente
+
+El catálogo integra Metrocuadrado, Wasi y Fincaraíz. `Inmueble` conserva el nombre histórico del modelo de publicación; `inmueble_id` y `publicaciones` proyectan la entidad física confirmada desde la base auxiliar. `identificacion.py` contiene reglas comunes y `persistencia/asociaciones.py` el contrato/adaptador, con migración aditiva, auditoría y reversión. Solo decisiones humanas agrupan. Filtros completos por publicación preceden a agrupación, conteos y paginación; no se combinan fichas. La API añade metadatos de grupo solo a publicaciones confirmadas, preservando la forma previa de independientes. [Reglas y operación](../docs/IDENTIFICACION.md).
 
 ## Identidad y procedencia
 
@@ -20,7 +24,7 @@ almacenamiento debe conservarse exactamente el mismo valor.
 
 `Origen` conserva ID, URL, tipo/operación originales y presencias por búsqueda.
 Los IDs de búsqueda son opacos y únicos dentro de una fuente. Su generación y la
-normalización de URLs pertenecen a futuros adaptadores específicos de cada fuente.
+normalización de URLs pertenecen a los adaptadores específicos de cada fuente.
 
 ## Datos desconocidos y ofertas
 
@@ -203,7 +207,7 @@ Parámetros nuevos de `GET /api/catalog`:
 |---|---|
 | Texto y ubicación | `texto`, `ciudad`, `zonas`, `barrios` |
 | Tipo | `tipos`: apartamento, casa, oficina, consultorio, local, bodega, lote, finca, otro |
-| Oferta | `operacion`: venta/arriendo; `moneda`: COP, USD u otro código de tres letras mayúsculas |
+| Oferta | `operacion`: venta/arriendo; `moneda`: parámetro histórico aceptado e ignorado; todos los importes son COP |
 | Precio | `precio_min`, `precio_max` |
 | Área en m² | `area_min_m2`, `area_max_m2`, `tipo_area`: publicada/construida/privada |
 | Distribución | `habitaciones_min`, `habitaciones_max`, `banos_min`, `parqueaderos_min` |
@@ -277,8 +281,7 @@ Desde la raíz, con el entorno existente:
 .\.venv\Scripts\python.exe -m pytest -c scraper/pytest.ini scraper/tests
 ```
 
-Quedan fuera de esta entrega: interfaz de Mónica, adaptador Sheets, migraciones,
-historial general de cambios, nuevas fuentes, oportunidades, matching y despliegue.
+El alcance inicial de los pasos anteriores era el adaptador y las consultas. Hoy están implementados la consola, tres fuentes, clientes, oportunidades, matching e identificación supervisada. Sheets y despliegue siguen pendientes.
 
 ## Categorías de la última actualización
 
@@ -304,9 +307,9 @@ SQLite y el formulario se detallan en
 
 `consultas.inmuebles_anunciante` selecciona por igualdad literal y excluye nombres vacíos. No usa el filtrado geográfico/textual ni las normalizaciones del matching. La consulta HTTP del panel parte de una lectura global y excluye el inmueble de origen solo de la lista de otros anuncios, conservándolo como procedencia de sus contactos. Ver [v0.7](../consola/docs/V07.md).
 
-## Catálogo integrado Metrocuadrado y Wasi
+## Catálogo integrado de tres fuentes
 
-`persistencia/integrado.py` compone repositorios `CatalogoSQLite` con fuente explícita, sin modificar las identidades ni los campos de `Inmueble`. `WASI_DB` selecciona la base técnica de Wasi; ambas son de solo lectura desde este componente. UUID o `fuente:ID` resuelven códigos compartidos; un ID simple ambiguo devuelve 422. La API agrega la procedencia técnica `fuente`. La configuración versionada y las opciones dependientes viven en tablas auxiliares, separadas del catálogo. Detalles y límites: [guía Wasi](../scraper/docs/WASI.md).
+`persistencia/integrado.py` compone repositorios `CatalogoSQLite` con fuente explícita, sin modificar las identidades de publicación. `WASI_DB` y `FINCARAIZ_DB` seleccionan sus bases técnicas; las tres son de solo lectura desde este componente. Los metadatos de grupo se añaden mediante el servicio y la base auxiliar. UUID o `fuente:ID` resuelven códigos compartidos; un ID simple ambiguo devuelve 422. La API agrega la procedencia técnica `fuente`. La configuración versionada y las opciones dependientes viven en tablas auxiliares, separadas del catálogo. Detalles y límites: [guía Wasi](../scraper/docs/WASI.md).
 
 ## Fincaraíz v0.9
 

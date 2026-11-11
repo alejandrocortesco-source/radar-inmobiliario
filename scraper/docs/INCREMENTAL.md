@@ -1,6 +1,6 @@
 # Actualización incremental por precio
 
-El scraper existente sigue recorriendo **todas las páginas de cada búsqueda** en cada invocación diaria. Lo incremental es la apertura de fichas: se evita repetirla cuando el precio es comparable e idéntico al de la última ficha fiable. Se mantiene la extracción completa, el mapa, SQLite, la interfaz y el monitor de recursos.
+El scraper existente sigue recorriendo **todas las páginas de cada búsqueda** en cada invocación explícita. Lo incremental es la apertura de fichas: se evita repetirla cuando el precio es comparable e idéntico al de la última ficha fiable. Se mantiene la extracción completa, el mapa, SQLite, la interfaz y el monitor de recursos.
 
 ## Ejecutar
 
@@ -15,14 +15,11 @@ Desde la raíz, usando el entorno existente:
   --url 'https://www.metrocuadrado.com/inmuebles/venta/bogota/la-carolina?search=form' `
   --url 'https://www.metrocuadrado.com/inmuebles/venta/bogota/usaquen'
 
-# Si no se puede confirmar la moneda de los importes publicados sin código
-.\.venv\Scripts\python.exe scraper/run.py scrape --listing-currency unknown
-
 # Recuperar una ejecución interrumpida
 .\.venv\Scripts\python.exe scraper/run.py scrape --resume 2
 ```
 
-No se instaló una tarea programada: se invoca el mismo comando cada día. Al reanudar se conservan las URLs y la política de moneda de esa ejecución. Para un nuevo día hay que iniciar **una nueva ejecución**, no reanudar una ya terminada. Reanudar el mismo ID no cuenta como una segunda confirmación de ausencia.
+No se acredita una tarea programada activa: cada ejecución se inicia explícitamente; Scheduler está preparado como propuesta y no activado. Al reanudar se conservan las URLs y la política de moneda de esa ejecución. Para un nuevo día hay que iniciar **una nueva ejecución**, no reanudar una ya terminada. Reanudar el mismo ID no cuenta como una segunda confirmación de ausencia.
 
 `--url` puede repetirse. Las variantes que sólo difieran en `search`, `src_url`, parámetros `utm_*`, orden de parámetros o barra final se reconocen como la misma búsqueda; el resto de filtros se conserva. Los checkpoints y procedencias incluyen URL de búsqueda y número de página. Una misma ficha descubierta en varias búsquedas tiene un solo trabajo de detalle por ejecución.
 
@@ -33,7 +30,7 @@ No se instaló una tarea programada: se invoca el mismo comando cada día. Al re
 | `new` | ID sin ficha en el catálogo: se abre y extrae toda la información |
 | `modified` | Precio comparable diferente: se abre la ficha y se actualiza completa si es fiable |
 | `unchanged` | Precio comparable idéntico y catálogo completo: no se abre la ficha; se conserva todo su documento y se actualiza la última verificación del listado |
-| `review` | Precio/moneda/operación no comparable, contradicción, ficha previa parcial o fallo pendiente: se abre la ficha de manera conservadora |
+| `review` | Precio/operación no comparable (el scraper histórico también conserva metadatos de moneda), contradicción, ficha previa parcial o fallo pendiente: se abre la ficha de manera conservadora |
 
 `unchanged` es un estado nuevo de trabajo, con cero intentos de detalle. El título, descripción, fotografías, características y mapa anteriores se conservan. Cambios que no afecten al precio del listado no se detectan automáticamente: esa es la limitación deliberada de la política pedida.
 
@@ -80,3 +77,5 @@ Los respaldos, CSV de recursos, bases y demás salidas siguen excluidos de Git. 
 ## Aplicación a Wasi
 
 La ampliación del 8 de noviembre de 2026 reutiliza esta cola y persistencia mediante `WasiStore`, inyectando la identidad de búsqueda por filtros. La base separada aísla ausencias por fuente; el servicio ofrece un catálogo integrado. Se recorren todas las páginas sin límites, se planifica una sola cola global y se reabren listados únicamente cuando quedan fichas pendientes. No hay refresco por fecha. La normalización Wasi siempre compara COP; la CLI histórica de moneda de Metrocuadrado no añade otra moneda al negocio. Los párrafos anteriores sobre etiquetas USD/EUR documentan compatibilidad técnica del capturador histórico, no soporte multimoneda del catálogo ni matching. Ver [configuración, autenticación, recuperación y límites Wasi](WASI.md).
+
+La identificación cruzada ocurre después de la captura exitosa en una capa común, sin cambiar decisiones técnicas del scraper ni confirmar identidad automáticamente. Ver [agrupación supervisada](../../docs/IDENTIFICACION.md).

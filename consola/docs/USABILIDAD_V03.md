@@ -1,5 +1,8 @@
 # Correcciones funcionales y visuales de Consola v0.3
 
+> Alcance temporal: los resultados y límites de este informe corresponden al hito descrito. El estado actual integra tres fuentes e [identificación supervisada](../../docs/IDENTIFICACION.md); no acredita despliegue, autenticación de personas, Scheduler activo ni consumo mensual verificado. Gemini sigue opcional y no participa en identidad física.
+
+
 26 de octubre de 2026. Rama `feat/consola-v0.3`; sin commits ni push.
 
 ## Ciudad: causa y corrección

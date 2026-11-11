@@ -1,12 +1,12 @@
 # Consola v0.6 — Radar Inmobiliario
 
-El nombre v0.6 de esta interfaz y sus rutas es un identificador heredado, no la versión funcional ni la rama de desarrollo. La entrega actual es v0.8 (`v0.8.0`); todo desarrollo nuevo usa `develop`. Véase [política Git vigente](../GIT_WORKFLOW.md).
+El nombre v0.6 de esta interfaz y sus rutas es un identificador heredado, no la versión funcional ni la rama de desarrollo. La entrega v0.10.0 integra las tres fuentes y la identificación supervisada; `v0.8.0` identifica la entrega publicada anterior; todo desarrollo nuevo usa `develop`. Véase [política Git vigente](../GIT_WORKFLOW.md).
 
 La entrada vigente es [Inicio v0.6](http://127.0.0.1:8000/v0.6/). Tiene exactamente cuatro secciones: oportunidades recientes, estado del catálogo, agregar fuente y nuevo cliente. La actividad se integra en las dos primeras; no existe una quinta sección. La lista Activos/Inactivos y las fichas de clientes son páginas independientes.
 
 Consulta la [guía completa v0.6](docs/V06.md), con configuración de Gemini, límites de consumo, decisiones, fuentes y validación. El [documento rector](../RADAR_PROYECTO_RECTOR.md) prevalece sobre los informes históricos.
 
-En «Agregar fuente» se pueden registrar URLs de Metrocuadrado, consultar «Búsquedas registradas» y eliminar una con confirmación. Eliminar quita su configuración para futuras ejecuciones y conserva el catálogo y su historial. Guardar o eliminar no ejecuta scraping.
+En «Agregar fuente» se pueden registrar URLs de Metrocuadrado, controles Wasi y búsquedas Fincaraíz verificadas, consultar «Búsquedas registradas» y eliminar una con confirmación. Eliminar quita su configuración para futuras ejecuciones y conserva el catálogo y su historial. Guardar o eliminar no ejecuta scraping.
 
 Las interfaces anteriores `/consola/` y `/v0.4/` siguen disponibles dentro del mismo FastAPI. El catálogo detallado de v0.5 conserva filtros, fichas, historial y exportaciones.
 La versión v0.1 se conserva en el commit `fb49534` y la etiqueta `consola-v0.1`.
@@ -100,7 +100,7 @@ causa raíz, el caso real y la validación.
 El orden por coincidencia coloca primero los requisitos confirmados por datos,
 luego menos requisitos pendientes y más preferencias cumplidas. Los empates usan
 el identificador. También se permite ordenar por precio COP, con precios
-desconocidos al final. No hay porcentajes ni puntuaciones de IA.
+desconocidos al final. El motor determinista no da probabilidades. Gemini ofrece evaluación opcional si está configurado; la identificación física usa una puntuación de similitud independiente.
 
 Un incumplimiento indispensable conocido excluye el anuncio. Un requisito sin
 datos deja el resultado **pendiente de verificar**, nunca confirmado. Compra
@@ -209,9 +209,8 @@ no confirma venta ni disponibilidad comercial.
 Se conservan FastAPI, `ServicioCatalogo`, `FiltrosCatalogo`, las consultas comunes
 y `CatalogoSQLite`, que abre SQLite con `mode=ro` y `query_only`.
 El catálogo hace una sola lectura por solicitud para obtener filtros y resultados.
-La exportación usa esa misma selección y transmite el CSV por filas.
-No hay SQL en los adaptadores de la Consola, solicitudes HTTP internas, caché persistente ni
-un segundo servidor. Los formularios GET, paneles, enlaces y paginación funcionan
+La exportación aplica los mismos filtros a cada publicación y transmite el CSV por filas de publicación/oferta, sin colapsar las asociaciones físicas.
+Las reglas y el SQL de identificación permanecen fuera de la presentación, en catálogo y repositorios. No hay solicitudes HTTP internas ni un segundo servidor; la caché de Gemini y las decisiones sí persisten en la base auxiliar. Los formularios GET, paneles, enlaces y paginación funcionan
 sin JavaScript; la restauración de posición y cambio automático de tamaño lo usan.
 
 El filtrado sigue siendo en memoria y requiere leer el catálogo completo.
@@ -304,3 +303,7 @@ El inicio conserva cuatro secciones. Agregar fuente selecciona Metrocuadrado (UR
 ## Fincaraíz v0.9
 
 La tercera fuente reutiliza el motor incremental, el catálogo integrado, identidad por fuente y las pantallas existentes. Configuración auxiliar por URL verificada o criterios comprobados, edición y activación desde Inicio → Agregar fuente. Almacenamiento técnico `FINCARAIZ_DB` (por defecto `fincaraiz.sqlite` junto a Metrocuadrado), solo lectura desde consola. [Guía de campos, ejecución y límites](../scraper/docs/FINCARAIZ.md).
+
+## Revisar publicaciones del mismo inmueble
+
+La navegación abre `/v0.6/identificacion`: pendientes, confirmadas, descartadas y aplazadas, doce pares por página. Confirmar requiere revisar todos los miembros/relaciones; deshacer disuelve todo el grupo. El dashboard mantiene cuatro secciones. Catálogo y matching muestran un representante coherente con acceso a publicaciones, precios, anunciantes y actualización. El CSV conserva publicaciones. [Guía completa](../docs/IDENTIFICACION.md).

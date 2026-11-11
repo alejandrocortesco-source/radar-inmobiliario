@@ -75,3 +75,7 @@ Una captura fallida/parcial, precio contradictorio o pérdida de un valor conoci
 ## Comprobaciones
 
 [Informe de validación de esta tarea](VALIDACION_FINCARAIZ.md). Las regresiones usan portales interceptados y bases sintéticas; las consultas reales autorizadas usan exclusivamente `.tmp/fincaraiz-v09/`, sin bases operativas. La prueba inicial fue acotada. Posteriormente, por instrucción explícita del usuario, la ejecución operativa local 1 terminó con 13 páginas y 267 anuncios correctos, sin errores ni duplicados; se comprobaron en la API de la app. Cloud Run sigue pendiente.
+
+## Identidad física supervisada vigente
+
+La publicación Fincaraíz conserva su UUID y ficha íntegra. La capa compartida posterior a la captura propone coincidencias con Metrocuadrado y Wasi; solo la revisión humana agrupa catálogo y recomendaciones. Un fallo queda reintentable sin perder la captura. [Reglas, reversión y operación](../../docs/IDENTIFICACION.md).

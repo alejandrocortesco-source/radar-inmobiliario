@@ -1,5 +1,5 @@
 """Comparaciones determinísticas sobre Inmueble, sin acceso a captura o SQLite."""
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from collections import Counter
 
 from catalogo.modelos import Inmueble, Oferta, Operacion
@@ -25,6 +25,8 @@ class Coincidencia:
     preferencias_cumplidas: tuple[str, ...]
     preferencias_pendientes: tuple[str, ...]
     preferencias_no_cumplidas: tuple[str, ...]
+
+    alternativas: tuple["Coincidencia", ...] = ()
 
     @property
     def confirmada(self):
@@ -106,7 +108,7 @@ def comparar(n: Necesidades, i: Inmueble) -> Coincidencia | None:
 
 def buscar(necesidades: Necesidades, catalogo, orden='coincidencia'):
     resultados = [r for i in catalogo if (r := comparar(necesidades, i)) is not None]
-    return ordenar(resultados, orden)
+    return ordenar(agrupar_resultados(resultados), orden)
 
 
 def ordenar(resultados, orden):
@@ -126,7 +128,7 @@ def diagnosticar(necesidades: Necesidades, catalogo, orden='coincidencia'):
     el catálogo, y pueden solaparse: no se deben sumar como descartes únicos.
     """
     evaluaciones = [(i, *evaluar(necesidades, i)) for i in catalogo]
-    resultados = ordenar([r for _, r, _ in evaluaciones if r is not None], orden)
+    resultados = ordenar(agrupar_resultados([r for _, r, _ in evaluaciones if r is not None]), orden)
     codigos = ['operacion', 'tipo', 'ciudad', 'ubicacion', 'presupuesto', *CRITERIOS]
     etiquetas = dict(operacion='Operación', tipo='Tipo de inmueble', ciudad='Ciudad',
                      ubicacion='Barrio o zona', presupuesto='Presupuesto en COP', **CRITERIOS)
@@ -161,10 +163,20 @@ def diagnosticar(necesidades: Necesidades, catalogo, orden='coincidencia'):
                        'sin_dato': sum(obligatorias[k].cumple is None for k in vivos if k in obligatorias)})
     confirmadas = sum(r.confirmada for r in resultados)
     return {
-        'total_catalogo': len(evaluaciones), 'compatibles': confirmadas,
+        'total_catalogo': len({i.inmueble_id or i.id_interno for i, _, _ in evaluaciones}),
+        'total_publicaciones': len(evaluaciones), 'compatibles': confirmadas,
         'pendientes': len(resultados) - confirmadas, 'total_resultados': len(resultados),
-        'incompatibles': len(evaluaciones) - len(resultados), 'etapas': etapas,
+        'incompatibles': len({i.inmueble_id or i.id_interno for i, _, _ in evaluaciones}) - len(resultados),
+        'incompatibles_publicaciones': sum(r is None for _, r, _ in evaluaciones), 'etapas': etapas,
         'motivos': [{'codigo': c, 'criterio': etiquetas[c], 'cantidad': motivos[c]} for c in codigos if motivos[c]],
         'datos_faltantes': [{'codigo': c, 'criterio': etiquetas[c], 'cantidad': faltantes[c]} for c in codigos if faltantes[c]],
         'descartes': descartes, 'resultados': resultados,
     }
+
+
+def agrupar_resultados(resultados):
+    grupos = {}
+    # Primero cumple requisitos conocidos, luego UUID: representante estable elegible.
+    for r in sorted(resultados, key=lambda r: (not r.confirmada, r.inmueble.id_interno)):
+        grupos.setdefault(r.inmueble.inmueble_id or r.inmueble.id_interno, []).append(r)
+    return [replace(rs[0], alternativas=tuple(rs[1:])) for rs in grupos.values()]

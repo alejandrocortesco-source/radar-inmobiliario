@@ -91,5 +91,5 @@ def test_flujo_guardar_buscar_y_sin_resultados_explica_criterios(escenario_conso
     pagina = BeautifulSoup(sin.text, 'html.parser')
     assert pagina.select_one('[data-match-confirmed]').text == '0'
     assert not pagina.select('.matching-table tbody tr')
-    assert 'Habitaciones mínimas: 26 inmuebles no cumplen' in pagina.select_one('.match-empty').text
+    assert 'Habitaciones mínimas: 26 publicaciones no cumplen' in pagina.select_one('.match-empty').text
     assert 'Diagnóstico' in pagina.select_one('.matching-diagnostics').text

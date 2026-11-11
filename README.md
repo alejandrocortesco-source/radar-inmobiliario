@@ -2,7 +2,7 @@
 
 Radar Inmobiliario es un proyecto para recopilar y revisar información pública de inmuebles.
 
-La **Consola v0.9 — Fincaraíz (desarrollo local)** abre en [http://127.0.0.1:8000/v0.6/](http://127.0.0.1:8000/v0.6/): dashboard de cuatro secciones, clientes Activos/Inactivos y ficha individual para revisar coincidencias. Integra Fincaraíz, Wasi y Metrocuadrado reutilizando catálogo, clientes, oportunidades y matching determinista; conserva decisiones persistentes y una segunda capa opcional con Gemini Flash. Guardar una fuente no ejecuta scraping.
+La **Consola v0.10.0 — identificación supervisada** abre en [http://127.0.0.1:8000/v0.6/](http://127.0.0.1:8000/v0.6/): dashboard de cuatro secciones, clientes Activos/Inactivos y ficha individual para revisar coincidencias. Integra Fincaraíz, Wasi y Metrocuadrado reutilizando catálogo, clientes, oportunidades y matching determinista; conserva decisiones persistentes y una segunda capa opcional con Gemini Flash. Guardar una fuente no ejecuta scraping.
 
 Todos los precios y presupuestos inmobiliarios son COP. El presupuesto se compara directamente con el precio numérico, con límites inclusivos, sin solicitar ni verificar moneda y sin conversiones. Los campos históricos de moneda se conservan como metadatos.
 
@@ -22,7 +22,13 @@ Inicio local desde la raíz:
 
 Las evaluaciones reales de Gemini requieren `GEMINI_API_KEY` y un `GEMINI_MODEL` Flash disponible para la cuenta. Sin configuración, o ante error, el motor determinista permanece disponible y se informa la limitación. El objetivo de operación inferior a US$10/mes queda sujeto a medir consumo y alojamiento. No hay despliegue de producción ni migración a Sheets en esta entrega.
 
+## Identificación supervisada
+
+[Revisar publicaciones](http://127.0.0.1:8000/v0.6/identificacion) propone pares de las tres fuentes y permite confirmar, descartar, aplazar o deshacer grupos. Solo confirmaciones humanas agrupan catálogo y recomendaciones; se conservan fichas, alternativas e históricos. El botón de análisis procesa el catálogo existente sin scraping. [Reglas, migración y operación](docs/IDENTIFICACION.md).
+
 ## Estado y ramas
+
+Entrega v0.10.0: identificación supervisada compatible; etiqueta anotada `v0.10.0` según la política Git. Véase [changelog](CHANGELOG.md). Publicación en GitHub no acredita despliegue.
 
 - `develop`: rama de todo nuevo desarrollo y commit. Política operativa: [GIT_WORKFLOW.md](GIT_WORKFLOW.md).
 - `v0.8.0`: tag anotado de la entrega funcional v0.8 en `4781daeb9adefc310028d40dcec88795657530eb`; el commit documental posterior no cambia esa versión. Las rutas `/v0.6/`, `/v0.4/` y demás existentes se conservan.

@@ -14,7 +14,7 @@
       <th scope="col" class="numeric">Habitaciones</th><th scope="col">Comentario</th><th scope="col">Links</th>
     </tr></thead>
     <tbody>{% for card in tarjetas %}{% set i=card.inmueble %}<tr>
-      <td><a class="property-link" href="{{card.url}}" aria-label="Ver ficha de {{i.titulo or i.origen.id_original}}" title="{{card.ubicacion}} · {{i.titulo or i.origen.id_original}}">{{i.barrio or i.zona or i.ciudad or 'Sin ubicación'}}</a></td>
+      <td><a class="property-link" href="{{card.url}}" aria-label="Ver ficha de {{i.titulo or i.origen.id_original}}" title="{{card.ubicacion}} · {{i.titulo or i.origen.id_original}}">{{i.barrio or i.zona or i.ciudad or 'Sin ubicación'}}</a>{% include '_publicaciones.html' %}</td>
       <td>{% include '_anunciante_link.html' %}</td><td>{% include '_busquedas_origen.html' %}</td>
       <td>{{i.tipo.value|capitalize if i.tipo else '—'}}</td>
       <td class="numeric prices">{% set o=card.oferta_principal %}{% if o %}<span>{{o.precio}} <small>· {{o.operacion}}</small></span>{% else %}Sin dato{% endif %}</td>
@@ -25,7 +25,7 @@
   </table>
 </div>
 <nav class="pagination" aria-label="Paginación del catálogo">
-  <span>{{primero}}–{{ultimo}} de {{total}}</span>
+  <span>{{primero}}–{{ultimo}} de {{total}} inmuebles</span>
   <div>{% if anterior %}<a href="{{anterior}}" rel="prev">← Anterior</a>{% else %}<span aria-disabled="true">← Anterior</span>{% endif %}
     <span>Página {{pagina}} de {{paginas}}</span>
     {% if siguiente %}<a href="{{siguiente}}" rel="next">Siguiente →</a>{% else %}<span aria-disabled="true">Siguiente →</span>{% endif %}</div>

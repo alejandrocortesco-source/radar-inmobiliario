@@ -32,6 +32,9 @@ templates.env.globals.update(enlace_publico=enlace_publico, url_anunciante=url_a
 
 def crear_router(proveedor):
     router = APIRouter(prefix='/v0.6', include_in_schema=False)
+    from .identificacion import crear_router as router_identificacion
+    # El router de revisión ya contiene el prefijo /v0.6.
+    router_identidad = router_identificacion(proveedor, templates)
 
     def render(request, name, status=200, **context):
         return templates.TemplateResponse(request=request, name=name, context=context, status_code=status)
@@ -159,7 +162,9 @@ def crear_router(proveedor):
                 # Nunca reutilizar explicaciones de criterios o inmuebles que cambiaron.
                 vigente = (o and datos.get('necesidades_huella') == huella(o.necesidades.model_dump(mode='json')) and datos.get('entradas', {}).get(iid) == huella(candidato(r)))
                 filas.append({'r': r, 'decision': decisiones.get(iid, {}).get('estado', 'pendiente'),
-                    'ia': datos.get('evaluaciones', {}).get(iid) if vigente else None})
+                    'ia': datos.get('evaluaciones', {}).get(iid) if vigente else None,
+                    'alternativas': [{'r': x, 'decision': decisiones.get(x.inmueble.id_interno, {}).get('estado', 'pendiente')} for x in r.alternativas],
+                    'estados_publicaciones': {p.id_interno: decisiones.get(p.id_interno, {}).get('estado', 'pendiente') for p in (r.inmueble.publicaciones or (r.inmueble,))}})
             if orden in ('precio', 'precio_desc'):
                 filas.sort(key=lambda f: (f['r'].oferta is None or f['r'].oferta.precio is None, (f['r'].oferta.precio or 0) * (-1 if orden == 'precio_desc' else 1) if f['r'].oferta else 0))
             elif orden in ('area', 'habitaciones'):
@@ -228,7 +233,7 @@ def crear_router(proveedor):
             iid = valores.get('inmueble', '')
             repo = seguimiento(s)
             # Permite modificar decisiones históricas incluso si la ficha ya no existe.
-            if iid not in repo.decisiones(o.id) and not any(r.inmueble.id_interno == iid for r in buscar(o.necesidades, catalogo.listar())):
+            if iid not in repo.decisiones(o.id) and not any(iid in {p.id_interno for p in (r.inmueble.publicaciones or (r.inmueble,))} for r in buscar(o.necesidades, catalogo.listar())):
                 raise NoEncontrado('Coincidencia no encontrada para esta oportunidad')
             repo.decision(o.id, iid, valores.get('estado'))
             return RedirectResponse(f'/v0.6/clientes/{o.cliente_id}?oportunidad={o.id}&guardado=1#candidatos', 303)
@@ -350,4 +355,5 @@ def crear_router(proveedor):
         except (ErrorLecturaCatalogo, OSError, sqlite3.Error) as exc:
             return error(request, exc)
 
+    router.routes.extend(router_identidad.routes)
     return router

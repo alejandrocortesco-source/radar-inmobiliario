@@ -1,5 +1,8 @@
 # Verificación de v0.8 — Wasi y preparación de Cloud Run Jobs
 
+> Alcance temporal: los resultados y límites de este informe corresponden al hito descrito. El estado actual integra tres fuentes e [identificación supervisada](../../docs/IDENTIFICACION.md); no acredita despliegue, autenticación de personas, Scheduler activo ni consumo mensual verificado. Gemini sigue opcional y no participa en identidad física.
+
+
 Informe de la implementación y revisión funcional previas. Los estados Git, autorizaciones y pruebas siguientes describen sus momentos; no son verificaciones nuevas de la organización documental. Tras el push autorizado de `4781dae`, la política vigente es [GIT_WORKFLOW.md](../../GIT_WORKFLOW.md): `develop` para desarrollo y `v0.6` histórica.
 
 ## Verificación histórica de implementación — 8 y 9 de noviembre de 2026

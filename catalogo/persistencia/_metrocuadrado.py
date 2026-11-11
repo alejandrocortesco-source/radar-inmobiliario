@@ -4,7 +4,8 @@ No importa ni ejecuta el scraper. Los datos ambiguos permanecen desconocidos.
 """
 
 import unicodedata
-from ..geografia import normalizar_geografia
+from ..geografia import normalizar_geografia, resolver_barrio, clave
+from dataclasses import replace
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
 
@@ -157,6 +158,13 @@ def convertir(fila, documento, presencias, config, *, geografia=None, actualizac
     evidencia = campo_mapa.get('raw') if isinstance(campo_mapa, dict) else None
     evidencia = evidencia if isinstance(evidencia, dict) else {}
     aproximada = original.get('ubicacionaproximada', evidencia.get('ubicacionaproximada'))
+    if fuente == 'wasi':
+        entrada, _, _ = resolver_barrio(normal.get('city'), normal.get('neighborhood'))
+        localidad = normal.get('zone')
+        if entrada and localidad and clave(localidad) == clave(entrada['localidad']):
+            geografia = normalizar_geografia(ciudad=normal.get('city'), barrio=normal.get('neighborhood'), zona=entrada['zona'])
+            geografia = replace(geografia, zona_original=localidad,
+                                evidencias=geografia.evidencias + ('wasi.detail.Localidad: calificador explícito del barrio',))
     geografia = geografia or normalizar_geografia(
         ciudad=_texto(normal.get('city')) or _texto(fila['city']),
         barrio=normal.get('neighborhood'), barrio_comun=normal.get('common_neighborhood'),

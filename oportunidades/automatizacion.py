@@ -107,4 +107,11 @@ def despues_scraper(ruta):
     fincaraiz = Path(os.getenv('FINCARAIZ_DB', str(ruta.with_name('fincaraiz.sqlite')))).resolve()
     if crm in (ruta, wasi, fincaraiz):
         raise ValueError('La base auxiliar debe ser distinta al catálogo')
-    recalcular_abiertas(ServicioOportunidades(SQLite(crm)), ServicioCatalogo(catalogo_configurado(ruta)))
+    from catalogo.persistencia.asociaciones import AsociacionesSQLite
+    asociaciones = AsociacionesSQLite(crm)
+    catalogo = ServicioCatalogo(catalogo_configurado(ruta), asociaciones=asociaciones)
+    try:
+        asociaciones.analizar(catalogo.listar())
+    except Exception:
+        logging.getLogger(__name__).exception('Identificación pendiente de reintento; captura conservada')
+    recalcular_abiertas(ServicioOportunidades(SQLite(crm)), catalogo)

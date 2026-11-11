@@ -40,7 +40,7 @@ def contexto_captura(request, todos, valores=None, errores=None, servicio=None, 
                 oportunidades_crm=oportunidades, nombres_clientes=nombres,
                 **ubicaciones,
                 criterios_crm=CRITERIOS, tipos_crm=tuple(TipoInmueble), seleccionada_crm=seleccionado,
-                guardada=request.query_params.get('guardada') == '1', match_total=len(todos), informe=None,
+                guardada=request.query_params.get('guardada') == '1', match_total=len({i.inmueble_id or i.id_interno for i in todos}), informe=None,
                 aviso_ubicaciones=valores.get('aviso_ubicaciones', ''))
     if seleccionado and calcular:
         contexto.update(contexto_matching(seleccionado, todos, query=request.query_params))
@@ -51,7 +51,7 @@ def contexto_captura(request, todos, valores=None, errores=None, servicio=None, 
 
 def contexto_matching(oportunidad, todos, orden=None, query=None, independiente=False):
     informe = diagnosticar(oportunidad.necesidades, todos)
-    return dict(informe=informe, oportunidad=oportunidad, match_total=len(todos),
+    return dict(informe=informe, oportunidad=oportunidad, match_total=len({i.inmueble_id or i.id_interno for i in todos}),
                 **presentar_resultados(oportunidad, informe, query, independiente, orden))
 
 

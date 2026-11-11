@@ -19,3 +19,11 @@
 [data-wasi-fields]>button{grid-column:1/-1}
 .source-form select{max-width:100%;min-width:0;width:100%}
 @media(max-width:1055px){[data-wasi-fields]{grid-template-columns:1fr}}
+
+/* Revisión de identidad: las tablas desplazan dentro de su región. */
+.identity-review{margin:24px 0}.identity-review>p,.identity-review details,.identity-review form{margin-top:16px}
+.identity-review small{overflow-wrap:anywhere}.identity-review input[type=checkbox]{width:auto;min-height:0}
+.identity-review label{display:flex;flex-direction:row;align-items:flex-start;gap:8px;margin:16px 0}
+.identity-review th,.identity-review td{min-width:160px;max-width:360px;overflow-wrap:anywhere;white-space:normal}
+.linked-publications{max-width:440px;white-space:normal;overflow-wrap:anywhere}
+@media(max-width:767px){.app-header nav{flex-wrap:wrap;gap:12px}.identity-review .actions{flex-wrap:wrap}.identity-review button{white-space:normal;max-width:100%}}

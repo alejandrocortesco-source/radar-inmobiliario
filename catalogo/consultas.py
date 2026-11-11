@@ -4,6 +4,7 @@ import unicodedata
 from dataclasses import replace
 from .geografia import normalizar_ciudad, resolver_barrio
 
+from .identificacion import agrupar
 from .filtros import FiltrosCatalogo, OrdenCatalogo
 from .modelos import CategoriaActualizacion, TipoArea
 
@@ -99,12 +100,14 @@ def _valor_orden(inmueble, filtros):
     return inmueble.origen.ultima_extraccion
 
 
-def seleccionar(inmuebles, filtros: FiltrosCatalogo, *, id_original_primero=False):
+def seleccionar(inmuebles, filtros: FiltrosCatalogo, *, id_original_primero=False, agrupar_confirmados=True):
     """Una fila por UUID; empates por UUID ascendente y desconocidos al final."""
     unicos = {}
     for inmueble in inmuebles:
         unicos.setdefault(inmueble.id_interno, inmueble)
     coincidentes = [i for i in unicos.values() if _coincide(i, filtros)]
+    if agrupar_confirmados:
+        coincidentes = agrupar(coincidentes)
     coincidentes.sort(key=lambda i: i.id_interno)
     if filtros.orden == OrdenCatalogo.ID:
         if id_original_primero:
@@ -133,10 +136,9 @@ def paginar(items, limite, desplazamiento):
 
 def contar_categorias(inmuebles, filtros):
     """Cuenta UUID únicos después de filtros generales y antes de paginar."""
-    base = seleccionar(inmuebles, replace(filtros, categoria=CategoriaActualizacion.TODOS))
-    return {categoria.value: len(base) if categoria == CategoriaActualizacion.TODOS else
-            sum(_coincide(i, replace(filtros, categoria=categoria)) for i in base)
-            for categoria in CategoriaActualizacion}
+    inmuebles = tuple(inmuebles)
+    return {c.value: len(seleccionar(inmuebles, replace(filtros, categoria=c)))
+            for c in CategoriaActualizacion}
 
 
 def inmuebles_anunciante(inmuebles, nombre):

@@ -319,7 +319,7 @@ def test_correccion_guardar_buscar_metricas_y_explica_cero(chromium, servidor, t
         page.get_by_role('button', name='Guardar y buscar coincidencias', exact=True).click()
         expect(page.locator('[data-match-confirmed]')).to_have_text('0')
         expect(page.locator('.matching-table tbody tr')).to_have_count(0)
-        expect(page.locator('.match-empty')).to_contain_text('Habitaciones mínimas: 26 inmuebles no cumplen')
+        expect(page.locator('.match-empty')).to_contain_text('Habitaciones mínimas: 26 publicaciones no cumplen')
         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
         assert not errores
         page.screenshot(path=str(tmp_path / f'sin-coincidencias-{ancho}.png'))

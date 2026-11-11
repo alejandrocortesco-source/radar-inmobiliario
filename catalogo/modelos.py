@@ -126,6 +126,8 @@ class Inmueble:
     """
 
     origen: Origen
+    inmueble_id: str | None = None
+    publicaciones: tuple["Inmueble", ...] = ()
     anunciante: str | None = None
     anunciante_direccion: str | None = None
     anunciante_url: str | None = None

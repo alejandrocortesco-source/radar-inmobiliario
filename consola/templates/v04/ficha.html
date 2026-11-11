@@ -1,6 +1,6 @@
 {% extends 'base.html' %}{% from '_dato_fuente.html' import dato_fuente with context %}
 {% block title %}{{inmueble.titulo or 'Detalle del inmueble'}} · Radar Inmobiliario{% endblock %}
-{% block content %}
+{% block content %}{% set i=inmueble %}{% include '_publicaciones.html' %}
 <article class="detail">
 <a class="back-link" href="{{volver}}">← Volver al catálogo</a>
 <div class="detail-heading"><h1>{{inmueble.titulo or 'Detalle del inmueble'}}</h1><span>{{inmueble.origen.id_original}}</span></div>

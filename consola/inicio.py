@@ -4,10 +4,12 @@ from oportunidades.matching import buscar
 
 
 def indicadores(todos, ultima):
-    return {'total': len(todos), 'ultima': ultima,
-        'nuevos': sum(any(CategoriaActualizacion.NUEVOS in p.categorias_actualizacion for p in i.origen.busquedas) for i in todos),
-        'actualizados': sum(any(CategoriaActualizacion.CAMBIO_PRECIO in p.categorias_actualizacion for p in i.origen.busquedas) for i in todos),
-        'ausentes': sum(any(p.disponibilidad in (Disponibilidad.POSIBLEMENTE_RETIRADO, Disponibilidad.RETIRADO) for p in i.origen.busquedas) for i in todos)}
+    def contar(condicion):
+        return len({i.inmueble_id or i.id_interno for i in todos if condicion(i)})
+    return {'total': contar(lambda i: True), 'publicaciones': len(todos), 'ultima': ultima,
+        'nuevos': contar(lambda i: any(CategoriaActualizacion.NUEVOS in p.categorias_actualizacion for p in i.origen.busquedas)),
+        'actualizados': contar(lambda i: any(CategoriaActualizacion.CAMBIO_PRECIO in p.categorias_actualizacion for p in i.origen.busquedas)),
+        'ausentes': contar(lambda i: any(p.disponibilidad in (Disponibilidad.POSIBLEMENTE_RETIRADO, Disponibilidad.RETIRADO) for p in i.origen.busquedas))}
 
 
 def resumen_clientes(s, seguimiento, todos):

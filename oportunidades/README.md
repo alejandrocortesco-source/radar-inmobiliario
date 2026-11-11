@@ -184,3 +184,7 @@ Las bases SQLite y las evidencias locales están excluidas de Git.
 ## Fincaraíz v0.9
 
 El catálogo integrado incorpora también Fincaraíz sin cambiar reglas estrictas, decisiones ni Gemini. El adaptador usa solo ubicación principal explícita; barrios asociados quedan como evidencia. Las áreas conservan sus tipos y no se sustituyen. Una ejecución completa exitosa invoca el mismo recálculo de oportunidades activas; los límites de validación no lo disparan. [Guía y límites](../scraper/docs/FINCARAIZ.md).
+
+## Matching por inmueble confirmado
+
+El filtro determinista se aplica a publicaciones individuales; `agrupar_resultados` reúne después los elegibles por `inmueble_id`, con `Coincidencia.alternativas`. El representante cumple individualmente las reglas, priorizando requisitos conocidos y luego UUID. Las decisiones y la caché conservan UUID de publicación, sin borrado al agrupar/deshacer. La ficha actual muestra conflictos comerciales y permite revisar cada publicación. La identificación física no usa Gemini. [Reglas, persistencia y límites](../docs/IDENTIFICACION.md).

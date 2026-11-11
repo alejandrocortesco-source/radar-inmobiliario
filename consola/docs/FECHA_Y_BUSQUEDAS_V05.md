@@ -1,5 +1,8 @@
 # Fecha del catálogo y búsquedas de origen
 
+> Alcance temporal: los resultados y límites de este informe corresponden al hito descrito. El estado actual integra tres fuentes e [identificación supervisada](../../docs/IDENTIFICACION.md); no acredita despliegue, autenticación de personas, Scheduler activo ni consumo mensual verificado. Gemini sigue opcional y no participa en identidad física.
+
+
 Entrega del 3 de noviembre de 2026, en las rutas existentes `/v0.4/` y `/consola/`.
 
 ## Lo que verá Mónica
