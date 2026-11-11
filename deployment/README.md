@@ -61,7 +61,7 @@ Cualquier restauración posterior necesita autorización por su pérdida potenci
 Desde el clon limpio, deployment/build.ps1 -Target web (y -Target jobs). El build
 usa Cloud Build con cuenta radar-build, fuentes solo en builds/ y registro radar;
 no se conecta a GitHub. Registrar commit, ID de build y digest devuelto.
-Desplegar con deployment/deploy-web.ps1 -WebDigest IMAGEN@sha256:DIGEST.
+Desplegar con deployment/deploy-web.ps1 -WebDigest IMAGEN@sha256:DIGEST -SourceSha SHA_DEL_BUILD.
 Comprobar IAP habilitado, IAM del agente y del usuario, OAuth External para Gmail,
 URL/origen exactos, logs, acceso real y persistencia antes de declarar éxito.
 No usar --allow-unauthenticated ni otorgar allUsers/allAuthenticatedUsers.
@@ -118,6 +118,44 @@ PowerShell; deployment/deploy-web.ps1 conserva la corrección reproducible.
 
 Jobs creados: radar-metro, radar-wasi, radar-fincaraiz y radar-state-check.
 Solo se ejecutó radar-state-check: integridad de las cinco bases y Chromium OK,
-con scraping=false y gemini=false. Wasi espera credenciales de login; el secreto
-wasi-token existente no sustituye WASI_USER/WASI_PASSWORD del scraper actual.
+con scraping=false y gemini=false. Wasi ya tiene wasi-user:1 y wasi-password:1 montados por separado; el secreto
+wasi-token preexistente se conserva sin cambios. No se ejecutó login ni captura.
 No se activa Scheduler. La API Scheduler no estaba habilitada inicialmente.
+
+## Validación final completada
+
+URL privada https://radar-56106530298.us-central1.run.app/v0.6/ con acceso real
+verificado para alejandro.cortes.co@gmail.com. OAuth externo permanece en Prueba,
+un solo usuario de prueba, con cliente creado automáticamente en Google/IAP.
+El secreto OAuth permanece allí y no se exportó al repo, imagen ni informes.
+IAP tiene únicamente esa cuenta; Run Invoker únicamente el agente de IAP.
+Las dos URLs run.app devolvieron 302 a Google en 16 comprobaciones sin sesión,
+incluyendo health, páginas, API, estáticos y las dos rutas CSV.
+
+Revisión actual: radar-verify-20261111, 100% tráfico; conserva radar-00001-69p.
+Mismo digest web del commit runtime 1e193e653ed8e50563e5ddc80782e6251aaa5540.
+El reemplazo cambió solo RADAR_VALIDATION_REV, conservando imagen y datos.
+Cliente creado por web, matching manual 469, recuperado desde nueva revisión,
+API y Job radar-state-check-fbl5d. La limpieza radar-state-check-h96b6 eliminó
+exclusivamente su UUID/marcador y relaciones. Se eliminó también la búsqueda
+sintética después de registrar y editar su nombre en el control existente.
+La auditoría final comprobó iguales todas las tablas originales (45 en total)
+y ninguna solicitud Gemini ni ejecución de scraper nueva. No quedan registros
+sintéticos de esta validación. Los nuevos esquemas auxiliares son aditivos.
+
+Wasi: Secret Manager wasi-user:1 y wasi-password:1, Secret Accessor solo radar-jobs,
+montados en /secrets/wasi-user/value y /secrets/wasi-password/value. No se ejecutó
+scraping, login real ni programación; esa validación operativa sigue pendiente.
+Se conservan los archivos privados fuente fuera del clon y del repo original.
+
+CSV autenticado: Cloud Run confirmó HTTP 200, 240901 bytes, 8.735 s. La espera de
+archivo de la herramienta de navegador se bloqueó; no se usó ese evento como
+prueba de éxito. Evidencia independiente: logs HTTP y acceso sin sesión rechazado.
+El archivo descargado no se inspeccionó localmente en esta validación.
+
+Al actualizar Jobs existentes usar run jobs update NOMBRE --image=DIGEST con
+--project=radar-inmobiliario-co --region=us-central1; conservar identidad, entorno,
+montajes, tareas y paralelismo. deploy-jobs.ps1 es creación inicial y falla ante
+nombres existentes. configure-wasi.ps1 también evita reemplazar secretos existentes.
+El script web exige SourceSha explícito del build para no atribuir a una imagen
+anterior los commits posteriores de scripts/documentación.
