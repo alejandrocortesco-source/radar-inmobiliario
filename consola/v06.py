@@ -2,6 +2,7 @@
 import sqlite3
 from pathlib import Path
 from urllib.parse import parse_qs
+from uuid import uuid4
 
 from fastapi import APIRouter, BackgroundTasks, Depends, Request, HTTPException
 from fastapi.responses import RedirectResponse
@@ -14,7 +15,7 @@ from oportunidades.api import proveedor_oportunidades
 from oportunidades.modelos import ClienteDatos, Necesidades
 from oportunidades.persistencia import ErrorPersistencia, NoEncontrado
 from oportunidades.seguimiento import SeguimientoSQLite
-from oportunidades.automatizacion import recalcular_seguro, candidato, huella
+from oportunidades.automatizacion import recalcular_seguro, plan_gemini, solicitar_gemini, clave_novedad
 from oportunidades.matching import buscar
 from .oportunidades import contexto_captura, leer_formulario, mensajes_validacion
 from .ubicaciones import actualizar_ciudad
@@ -155,14 +156,17 @@ def crear_router(proveedor):
             decisiones = repo.decisiones(o.id) if o else {}
             ejecucion = repo.leer(o.id) if o else None
             resultados = buscar(o.necesidades, catalogo.listar()) if o else []
-            datos = ejecucion['datos'] if ejecucion else {}
+            if o and o.estado == 'abierta' and repo.activo(c.id):
+                repo.registrar_resultados(o.id, resultados)
+            novedades = repo.novedades(o.id) if o else {}
+            plan = plan_gemini(o, resultados, repo) if o else None
+            evaluacion = repo.ultima_gemini(o.id) if o else None
+            desactualizada = evaluacion and evaluacion['datos'].get('huella') != plan['firma']
             filas = []
             for r in resultados:
                 iid = r.inmueble.id_interno
-                # Nunca reutilizar explicaciones de criterios o inmuebles que cambiaron.
-                vigente = (o and datos.get('necesidades_huella') == huella(o.necesidades.model_dump(mode='json')) and datos.get('entradas', {}).get(iid) == huella(candidato(r)))
                 filas.append({'r': r, 'decision': decisiones.get(iid, {}).get('estado', 'pendiente'),
-                    'ia': datos.get('evaluaciones', {}).get(iid) if vigente else None,
+                    'ia': plan['evaluaciones'].get(iid), 'novedad': novedades.get(clave_novedad(r)),
                     'alternativas': [{'r': x, 'decision': decisiones.get(x.inmueble.id_interno, {}).get('estado', 'pendiente')} for x in r.alternativas],
                     'estados_publicaciones': {p.id_interno: decisiones.get(p.id_interno, {}).get('estado', 'pendiente') for p in (r.inmueble.publicaciones or (r.inmueble,))}})
             if orden in ('precio', 'precio_desc'):
@@ -178,6 +182,8 @@ def crear_router(proveedor):
             historicas = [d for iid, d in decisiones.items() if iid not in actuales]
             return render(request, 'cliente06.html', cliente=c, propias=propias, oportunidad=o,
                 activo=repo.activo(c.id), filas=filas, historicas=historicas, orden=orden, ejecucion=ejecucion,
+                plan=plan, evaluacion=evaluacion, desactualizada=desactualizada, solicitud=str(uuid4()),
+                nuevas=sum(bool(f['novedad'] and f['novedad']['nueva']) for f in filas),
                 conteos={estado: sum(f['decision'] == estado for f in filas) for estado in ('pendiente', 'preseleccionado', 'descartado')})
         except NoEncontrado as exc:
             return error(request, exc, 404)
@@ -208,7 +214,7 @@ def crear_router(proveedor):
             o = s.oportunidad(identificador)
             if o.estado != 'abierta' or not seguimiento(s).activo(o.cliente_id):
                 return error(request, 'Activa el cliente y abre la oportunidad antes de recalcular.', 422)
-            tareas.add_task(recalcular_seguro, s, catalogo, o.id, True)
+            recalcular_seguro(s, catalogo, o.id, True)
             return RedirectResponse(f'/v0.6/clientes/{o.cliente_id}?oportunidad={o.id}&recalculando=1', 303)
         except NoEncontrado as exc:
             return error(request, exc, 404)
@@ -219,11 +225,49 @@ def crear_router(proveedor):
     def estado(identificador: str, s=Depends(proveedor_oportunidades)):
         try:
             s.oportunidad(identificador)
-            return seguimiento(s).leer(identificador) or {'estado': 'sin_calcular'}
+            repo = seguimiento(s)
+            return repo.ultima_gemini(identificador) or repo.leer(identificador) or {'estado': 'sin_calcular'}
         except NoEncontrado as exc:
             raise HTTPException(404, str(exc)) from exc
         except ErrorPersistencia as exc:
             raise HTTPException(503, str(exc)) from exc
+
+    @router.post('/oportunidades/{identificador}/gemini')
+    async def evaluar_manual(request: Request, identificador: str, tareas: BackgroundTasks,
+                             catalogo=Depends(proveedor), s=Depends(proveedor_oportunidades)):
+        valores = {k: v[-1] for k, v in parse_qs((await request.body()).decode(), keep_blank_values=True).items()}
+        try:
+            o = s.oportunidad(identificador)
+            if not valores.get('huella'):
+                raise ValueError('Revisa la vista previa antes de evaluar con Gemini.')
+            tarea = solicitar_gemini(s, catalogo, identificador, valores.get('solicitud', ''), esperada=valores['huella'])
+            if tarea:
+                tareas.add_task(tarea)
+            return RedirectResponse(f'/v0.6/clientes/{o.cliente_id}?oportunidad={o.id}&evaluando=1#candidatos', 303)
+        except NoEncontrado as exc:
+            return error(request, exc, 404)
+        except ValueError as exc:
+            return error(request, exc, 409)
+        except (ErrorPersistencia, ErrorLecturaCatalogo, FileNotFoundError) as exc:
+            return error(request, exc)
+
+    @router.post('/oportunidades/{identificador}/novedades/vistas')
+    async def marcar_novedades(request: Request, identificador: str, s=Depends(proveedor_oportunidades)):
+        valores = parse_qs((await request.body()).decode(), keep_blank_values=True)
+        try:
+            o = s.oportunidad(identificador)
+            tokens = set(valores.get('novedad', []))
+            repo = seguimiento(s)
+            # Solo tokens de esa oportunidad y de la aparición mostrada. Una
+            # reaparición concurrente no se borra con un formulario anterior.
+            mostradas = {(n['relacion'], n['ultima_deteccion']) for n in repo.novedades(o.id).values()
+                         if n['presente'] and n['nueva'] and n['relacion'] + '|' + n['ultima_deteccion'] in tokens}
+            repo.marcar_vistas(o.id, mostradas)
+            return RedirectResponse(f'/v0.6/clientes/{o.cliente_id}?oportunidad={o.id}#candidatos', 303)
+        except NoEncontrado as exc:
+            return error(request, exc, 404)
+        except ErrorPersistencia as exc:
+            return error(request, exc)
 
     @router.post('/oportunidades/{identificador}/decision')
     async def decision(request: Request, identificador: str, catalogo=Depends(proveedor), s=Depends(proveedor_oportunidades)):

@@ -34,7 +34,7 @@
 
       <p class="capture-help">Antigüedad: el catálogo actual no tiene este dato estructurado. Se mostrará pendiente de verificar. Las áreas se comparan solo con el tipo elegido, sin sustituirlo.</p>
       <label for="crm_observaciones">Observaciones y preferencias adicionales<textarea id="crm_observaciones" name="observaciones" rows="2" maxlength="5000">{{captura.get('observaciones', '')}}</textarea></label>
-      <p class="capture-help">Las observaciones se conservan como preferencias. Gemini puede analizarlas sin convertirlas en requisitos estrictos.</p>
+      <p class="capture-help">Las observaciones se conservan para la revisión de Mónica. Los textos libres no se envían a Gemini por privacidad.</p>
     </details>
 <div class="actions capture-actions"><button class="primary" type="submit">Confirmar y guardar oportunidad →</button><a href="/v0.6/clientes">Cancelar</a></div>
     {% if captura.get('cliente_id') %}<p class="capture-help">Cliente existente: guardar actualiza su nombre y teléfono para todas sus oportunidades. <a href="/v0.6/clientes/{{captura.cliente_id}}">Editar solo cliente</a></p>{% endif %}

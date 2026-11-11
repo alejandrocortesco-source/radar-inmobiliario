@@ -2,13 +2,14 @@
 
 Radar Inmobiliario es un proyecto para recopilar y revisar información pública de inmuebles.
 
-La **Consola v0.10.0 — identificación supervisada** abre en [http://127.0.0.1:8000/v0.6/](http://127.0.0.1:8000/v0.6/): dashboard de cuatro secciones, clientes Activos/Inactivos y ficha individual para revisar coincidencias. Integra Fincaraíz, Wasi y Metrocuadrado reutilizando catálogo, clientes, oportunidades y matching determinista; conserva decisiones persistentes y una segunda capa opcional con Gemini Flash. Guardar una fuente no ejecuta scraping.
+La **Consola v0.10.0 — identificación supervisada** abre en [http://127.0.0.1:8000/v0.6/](http://127.0.0.1:8000/v0.6/): dashboard de cuatro secciones, clientes Activos/Inactivos y ficha individual para revisar coincidencias. Integra Fincaraíz, Wasi y Metrocuadrado reutilizando catálogo, clientes, oportunidades y matching determinista; conserva decisiones persistentes y una segunda capa opcional con Gemini Flash. Guardar una fuente no ejecuta scraping. «Buscar coincidencias» actualiza resultados sin IA; únicamente «Evaluar con Gemini» autoriza consumo. Las novedades por oportunidad persisten hasta marcarlas como vistas.
 
 Todos los precios y presupuestos inmobiliarios son COP. El presupuesto se compara directamente con el precio numérico, con límites inclusivos, sin solicitar ni verificar moneda y sin conversiones. Los campos históricos de moneda se conservan como metadatos.
 
 El catálogo detallado de v0.5 se conserva en `/v0.4/`, con filtros, fichas, comentarios, historial y exportaciones. `/consola/` y la interfaz técnica `/` mantienen compatibilidad. No se añadieron frameworks ni infraestructura.
 
 - [Anunciantes v0.7, contactos y límites de datos](consola/docs/V07.md).
+- [Matching manual, novedades y VALIDACIÓN REAL CON GEMINI](consola/docs/GEMINI_MANUAL.md).
 - [Guía v0.6, Gemini, fuentes, pruebas y limitaciones](consola/docs/V06.md).
 - [Documento rector vigente](RADAR_PROYECTO_RECTOR.md) e [instrucciones de trabajo](AGENTS.md).
 - [Instalación y ejecución del scraper propio](scraper/README.md).

@@ -16,8 +16,9 @@ from oportunidades.servicio import servicio_oportunidades
 from oportunidades.modelos import ClienteDatos, Necesidades, OportunidadDatos
 from oportunidades.matching import comparar
 from oportunidades.seguimiento import SeguimientoSQLite
-from oportunidades.automatizacion import recalcular, despues_scraper, candidato
-from oportunidades.gemini import Gemini
+from oportunidades.automatizacion import recalcular, despues_scraper, candidato, solicitar_gemini
+from uuid import uuid4
+from oportunidades.gemini import Gemini, Respuesta, esquema_proveedor
 from catalogo.modelos import Oferta, Operacion, Disponibilidad, PresenciaBusqueda
 from consola.inicio import indicadores
 from test_v03 import necesidades, inmueble
@@ -174,20 +175,28 @@ class GeminiFalso:
                           'evidencias':[{'campo':'ciudad','valor':c['hechos']['ciudad']}]} for c in candidatos}, ''
 
 
+def evaluar_manual(s, catalogo, oid, ia):
+    tarea = solicitar_gemini(s, catalogo, oid, str(uuid4()), gemini=ia)
+    if tarea:
+        tarea()
+    return tarea is not None
+
+
 def test_matching_cache_no_duplicados_cambios_y_manual(escenario06):
     c, s, o, repo = escenario06
     ia = GeminiFalso()
-    assert recalcular(s, servicio(), o.id, gemini=ia)
+    assert recalcular(s, servicio(), o.id)
+    assert not ia.llamadas
+    assert evaluar_manual(s, servicio(), o.id, ia)
     assert len(ia.llamadas) == 1
-    assert not recalcular(s, servicio(), o.id, gemini=ia)
-    assert recalcular(s, servicio(), o.id, True, ia)
-    assert len(ia.llamadas) == 1  # manual tampoco repite evaluaciones intactas
-    assert len(repo.leer(o.id)['datos']['evaluaciones']) == 10
+    assert evaluar_manual(s, servicio(), o.id, ia)
+    assert len(ia.llamadas) == 1
+    assert len(repo.ultima_gemini(o.id)['datos']['evaluaciones']) == 10
     s.guardar_oportunidad(OportunidadDatos(cliente_id=o.cliente_id, necesidades=necesidades(observaciones='Prefiere terraza')), o.id)
-    assert recalcular(s, servicio(), o.id, gemini=ia)
+    assert recalcular(s, servicio(), o.id)
+    assert len(ia.llamadas) == 1
+    assert evaluar_manual(s, servicio(), o.id, ia)
     assert len(ia.llamadas) == 2
-    assert repo.iniciar(o.id, 'nueva', True)
-    assert not repo.iniciar(o.id, 'otra', True)
 
 
 def test_despues_scraper_actualiza_solo_abiertas_y_no_escribe_catalogo(escenario06, escenario_consola):
@@ -199,31 +208,33 @@ def test_despues_scraper_actualiza_solo_abiertas_y_no_escribe_catalogo(escenario
     assert escenario_consola['ruta'].read_bytes() == antes
 
 
-def test_cambios_durante_evaluacion_se_recalculan_despues(escenario06):
+def test_cambios_durante_evaluacion_requieren_otro_clic(escenario06):
     _, s, o, repo = escenario06
     class CambiaDuranteGemini(GeminiFalso):
         def evaluar(self, n, candidatos):
             if not self.llamadas:
                 nuevos = Necesidades.model_validate(o.necesidades.model_dump() | {'habitaciones_min': 2})
                 s.guardar_oportunidad(OportunidadDatos(cliente_id=o.cliente_id, necesidades=nuevos), o.id)
-                assert not recalcular(s, servicio(), o.id, gemini=self)
+                recalcular(s, servicio(), o.id)
+                assert not evaluar_manual(s, servicio(), o.id, self)
             return super().evaluar(n, candidatos)
     ia = CambiaDuranteGemini()
-    assert recalcular(s, servicio(), o.id, gemini=ia)
+    assert evaluar_manual(s, servicio(), o.id, ia)
+    assert len(ia.llamadas) == 1
+    assert evaluar_manual(s, servicio(), o.id, ia)
     assert len(ia.llamadas) == 2
-    assert repo.leer(o.id)['datos']['necesidades_huella'] != ''
-    assert not recalcular(s, servicio(), o.id, gemini=ia)
 
 
-def test_no_mostrar_ia_obsoleta_y_orden_manual(escenario06):
+def test_no_mostrar_ia_obsoleta_y_orden_manual(escenario06, monkeypatch):
     c, s, o, repo = escenario06
-    recalcular(s, servicio(), o.id, gemini=GeminiFalso())
+    monkeypatch.setattr("oportunidades.automatizacion.Gemini", GeminiFalso)
+    evaluar_manual(s, servicio(), o.id, GeminiFalso())
     url = f'/v0.6/clientes/{o.cliente_id}'
     assert 'Coincide con los hechos' in c.get(url + '?orden=ia').text
     s.guardar_oportunidad(OportunidadDatos(cliente_id=o.cliente_id, necesidades=necesidades(observaciones='Otra preferencia')), o.id)
     assert 'Coincide con los hechos' not in c.get(url).text
     assert c.post(f'/v0.6/oportunidades/{o.id}/recalcular', follow_redirects=False).status_code == 303
-    assert 'Gemini no está configurado' in c.get(url).text
+    assert 'Los datos cambiaron' in c.get(url).text
     soup = BeautifulSoup(c.get(url + '?orden=precio').text, 'html.parser')
     primero = soup.select_one('[data-candidate]')['data-candidate']
     assert servicio().obtener(primero).origen.id_original == '1-M1'
@@ -299,7 +310,8 @@ def test_gemini_rest_estructurado_y_validacion(monkeypatch):
     assert evaluaciones[r.inmueble.id_interno]['puntuacion'] == 85 and not aviso
     cuerpo = cliente.post.call_args.kwargs['json']
     assert cuerpo['generationConfig']['responseMimeType'] == 'application/json'
-    assert 'responseJsonSchema' in cuerpo['generationConfig']
+    assert cuerpo['generationConfig']['responseJsonSchema'] == esquema_proveedor()
+    assert 'responseFormat' not in cuerpo['generationConfig']
     assert cuerpo['generationConfig']['thinkingConfig']['thinkingLevel'] == 'LOW'
     assert 'temperature' not in cuerpo['generationConfig']
     assert 'gemini-3.8-flash:generateContent' in cliente.post.call_args.args[0]
@@ -332,7 +344,8 @@ def test_navegacion_responsive_creacion_revision_y_catalogo(servidor, pagina, wi
     seleccionar_barrio(page, True)
     page.get_by_role('button', name='Confirmar y guardar oportunidad').click()
     expect(page.locator('h1')).to_have_text('Cliente v06')
-    expect(page.locator('[data-match-status]')).to_contain_text('Gemini no está configurado')
+    expect(page.locator('[data-gemini-preview]')).to_contain_text('Gemini no está configurado')
+    expect(page.locator('[data-match-status]')).to_contain_text('Gemini solo se ejecuta al hacer clic')
     assert page.locator('[data-candidate]').count() == 10
     page.screenshot(path=str(Path('.tmp') / f'v06-cliente-{width}.png'), full_page=True)
     page.locator('.decision-form select').first.select_option('preseleccionado')

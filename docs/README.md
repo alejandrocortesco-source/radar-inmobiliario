@@ -16,6 +16,7 @@ Punto de entrada a las guías y a la evidencia del proyecto. La entrega vigente 
 | Entrega local de identificación y pruebas | [Informe del 10 de noviembre](ENTREGA_IDENTIFICACION.md) |
 | Identificación física y revisión humana | [Reglas, migración y operación](IDENTIFICACION.md) |
 | Catálogo y persistencia | [Guía de catálogo](../catalogo/README.md) |
+| Matching manual, novedades y Gemini bajo solicitud | [Guía y validación real optativa](../consola/docs/GEMINI_MANUAL.md) |
 | Clientes, oportunidades y matching | [Guía de oportunidades](../oportunidades/README.md) |
 | Instalación y ejecución de capturas | [Guía del scraper](../scraper/README.md) |
 | Actualización incremental | [Captura incremental](../scraper/docs/INCREMENTAL.md) |

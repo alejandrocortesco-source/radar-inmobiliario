@@ -4,6 +4,8 @@ El nombre v0.6 de esta interfaz y sus rutas es un identificador heredado, no la 
 
 La entrada vigente es [Inicio v0.6](http://127.0.0.1:8000/v0.6/). Tiene exactamente cuatro secciones: oportunidades recientes, estado del catálogo, agregar fuente y nuevo cliente. La actividad se integra en las dos primeras; no existe una quinta sección. La lista Activos/Inactivos y las fichas de clientes son páginas independientes.
 
+La ficha incorpora «Buscar coincidencias», novedades persistentes y «Evaluar con Gemini» exclusivamente bajo solicitud; [funcionamiento y validación real](docs/GEMINI_MANUAL.md). Guardar y recalcular nunca llaman al proveedor.
+
 Consulta la [guía completa v0.6](docs/V06.md), con configuración de Gemini, límites de consumo, decisiones, fuentes y validación. El [documento rector](../RADAR_PROYECTO_RECTOR.md) prevalece sobre los informes históricos.
 
 En «Agregar fuente» se pueden registrar URLs de Metrocuadrado, controles Wasi y búsquedas Fincaraíz verificadas, consultar «Búsquedas registradas» y eliminar una con confirmación. Eliminar quita su configuración para futuras ejecuciones y conserva el catálogo y su historial. Guardar o eliminar no ejecuta scraping.

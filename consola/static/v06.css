@@ -27,3 +27,6 @@
 .identity-review th,.identity-review td{min-width:160px;max-width:360px;overflow-wrap:anywhere;white-space:normal}
 .linked-publications{max-width:440px;white-space:normal;overflow-wrap:anywhere}
 @media(max-width:767px){.app-header nav{flex-wrap:wrap;gap:12px}.identity-review .actions{flex-wrap:wrap}.identity-review button{white-space:normal;max-width:100%}}
+
+.gemini-actions { margin: 1rem 0; padding: 1rem; border: 1px solid #c6c6c6; }
+.novelty { border: 1px solid currentColor; font-weight: 600; }

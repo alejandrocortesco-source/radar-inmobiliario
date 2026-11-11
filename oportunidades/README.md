@@ -1,7 +1,7 @@
 # Clientes, oportunidades y matching v0.6
 
 Este módulo reutiliza `catalogo.modelos.Inmueble` y `ServicioCatalogo.listar()`.
-El motor determinista no importa `metro` ni ejecuta scraping. El adaptador `gemini.py` añade evaluación opcional por REST; `automatizacion.py` coordina tareas y caché. Ver [reglas vigentes v0.6](../RADAR_PROYECTO_RECTOR.md) y [configuración y límites](../consola/docs/V06.md).
+El motor determinista no importa `metro` ni ejecuta scraping. El adaptador `gemini.py` añade evaluación manual por REST; `automatizacion.py` separa matching determinista de solicitudes explícitas al proveedor, con caché y reserva transaccional. Guardados, scrapers y recálculos no llaman a Gemini. [Novedades, concurrencia, API y validación real optativa](../consola/docs/GEMINI_MANUAL.md). Ver [reglas vigentes v0.6](../RADAR_PROYECTO_RECTOR.md) y [configuración y límites](../consola/docs/V06.md).
 
 - `modelos.py`: contratos Pydantic de entrada y registros con UUID y fechas UTC.
   `Cliente` y `Oportunidad` se guardan separados, con relación uno a muchos.
@@ -25,7 +25,7 @@ Los límites especificados de presupuesto y habitaciones son estrictos, junto a 
 
 `seguimiento.py` define un protocolo independiente y SQLite aditivo para actividad de clientes, decisiones por oportunidad/inmueble, estado del matching y caché de Gemini. Los repositorios actuales de clientes y oportunidades conservan sus tablas y migración. Las decisiones no se borran al recalcular ni al desaparecer candidatos. Clientes inactivos y oportunidades cerradas no se recalculan automáticamente.
 
-Gemini solo recibe candidatos filtrados por código. El adaptador valida JSON Schema, IDs y evidencias; limita lote, tokens y timeout. La caché depende del modelo, instrucciones, necesidades y hechos del candidato. No se envían nombre ni teléfono del cliente. Sin clave o ante error se informa la limitación, sin simular IA. La prueba contra el proveedor real requiere credenciales y está pendiente.
+Gemini solo recibe candidatos filtrados por código. El adaptador valida JSON Schema, IDs y evidencias; limita lote, tokens y timeout. La caché depende del modelo, instrucciones, necesidades y hechos del candidato. No se envían nombre ni teléfono del cliente, contactos ni textos libres (observaciones, descripciones y características). Sin clave o ante error se informa la limitación, sin simular IA. La prueba contra el proveedor real requiere credenciales y está pendiente.
 
 ## API local
 
