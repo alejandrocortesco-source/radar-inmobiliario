@@ -100,3 +100,24 @@ Precios oficiales consultados el 11 de noviembre de 2026:
 
 Resultados reales, recursos finales, digest, revisión, pruebas manuales y
 pendientes se documentan en el informe externo ../evidence/ENTREGA.md.
+
+## Estado operativo del 11 de noviembre
+
+La cuenta de facturación usa COP. Se creó una única alerta de COP 30.000, con
+umbrales 50%, 80%, 100% y previsión 100%, limitada al proyecto 56106530298.
+Es una alerta conservadora (aprox. USD 9,10 con TRM Banrep 3.297,07 del 11/11),
+no un límite automático ni conversión monetaria dentro de Radar.
+Fuente TRM: https://www.banrep.gov.co/es . Retención _Default: 30 días.
+
+Los builds iniciales del commit 1e193e653ed8e50563e5ddc80782e6251aaa5540
+terminaron SUCCESS. Web: sha256:891c3d3b6c926ea36cd49c8a06bb9a1da713d420237032369586dfb7109c7bfa.
+Jobs: sha256:cfd53b5faaff8ea0a1311b4ded15757d89a23d7e42dca780a20436960363a373.
+Los ajustes posteriores de scripts operativos no alteran esos contenedores.
+El health check exige entrecomillar la lista de campos al llamar gcloud desde
+PowerShell; deployment/deploy-web.ps1 conserva la corrección reproducible.
+
+Jobs creados: radar-metro, radar-wasi, radar-fincaraiz y radar-state-check.
+Solo se ejecutó radar-state-check: integridad de las cinco bases y Chromium OK,
+con scraping=false y gemini=false. Wasi espera credenciales de login; el secreto
+wasi-token existente no sustituye WASI_USER/WASI_PASSWORD del scraper actual.
+No se activa Scheduler. La API Scheduler no estaba habilitada inicialmente.
