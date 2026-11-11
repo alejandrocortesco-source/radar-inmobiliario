@@ -140,14 +140,20 @@ def test_limites_estrictos_y_preferencias_sin_descarte():
     assert not comparar(necesidades(), inmueble(habitaciones=None)).confirmada
 
 
-def test_fuentes_normalizadas_duplicados_y_sin_extraccion(escenario06, escenario_consola):
+@pytest.mark.parametrize('entrada,canonica', [
+    ('http://metrocuadrado.com/inmuebles/venta/bogota/la-carolina/?utm_source=a#hola',
+     'https://www.metrocuadrado.com/inmuebles/venta/bogota/la-carolina'),
+    ('https://www.metrocuadrado.com/apartamento-casa/arriendo/bogota/la-carolina?search=form&preciomax=3000000',
+     'https://www.metrocuadrado.com/apartamento-casa/arriendo/bogota/la-carolina?preciomax=3000000'),
+])
+def test_fuentes_normalizadas_duplicados_y_sin_extraccion(escenario06, escenario_consola, entrada, canonica):
     c, _, _, _ = escenario06
     antes = escenario_consola['ruta'].read_bytes()
-    datos = {'nombre':'En la Carolina', 'url':'http://metrocuadrado.com/inmuebles/venta/bogota/la-carolina/?utm_source=a#hola'}
+    datos = {'nombre':'En la Carolina', 'url':entrada}
     r = c.post('/v0.6/fuentes', data=datos)
     assert r.status_code == 200 and 'Fuente guardada' in r.text
     datos['nombre'] = 'Otro nombre'
-    datos['url'] = 'https://www.metrocuadrado.com/inmuebles/venta/bogota/la-carolina'
+    datos['url'] = canonica
     r = c.post('/v0.6/fuentes', data=datos)
     assert 'ya está registrada' in r.text
     guardadas = servicio().listar_busquedas()
@@ -163,6 +169,25 @@ def test_fuentes_invalidas(escenario06, url):
     c, *_ = escenario06
     assert c.post('/v0.6/fuentes', data={'nombre':'Fuente','url':url}).status_code == 422
     assert not servicio().listar_busquedas()
+
+
+def test_url_por_tipos_desde_formulario_chromium(servidor, pagina, escenario_consola, tmp_path):
+    url = 'https://www.metrocuadrado.com/apartamento-casa/arriendo/bogota/la-carolina?search=form'
+    antes = escenario_consola['ruta'].read_bytes()
+    for ancho, alto in [(1440, 900), (768, 1024)]:
+        pagina.set_viewport_size({'width':ancho, 'height':alto})
+        pagina.goto(servidor+'/v0.6/')
+        pagina.locator('.source-form [name=nombre]').fill('Arriendo casas y apartamentos')
+        pagina.locator('.source-form [name=url]').fill(url)
+        pagina.get_by_role('button', name='Guardar fuente').click()
+        expect(pagina.get_by_text('Fuente guardada. No se inició una extracción.', exact=True)
+               if ancho == 1440 else pagina.get_by_text('Esta búsqueda ya está registrada. Se conservó su nombre.', exact=True)).to_be_visible()
+        assert pagina.evaluate('document.documentElement.scrollWidth <= innerWidth')
+        pagina.screenshot(path=str(tmp_path/f'url-metro-{ancho}.png'), full_page=True)
+    guardadas = servicio().listar_busquedas()
+    assert len(guardadas) == 1
+    assert guardadas[0]['url'] == url.split('?')[0]
+    assert escenario_consola['ruta'].read_bytes() == antes
 
 
 class GeminiFalso:
@@ -241,10 +266,14 @@ def test_no_mostrar_ia_obsoleta_y_orden_manual(escenario06, monkeypatch):
     assert c.get(url + '?orden=inventado').status_code == 422
 
 
-def test_fuentes_registradas_disponibles_en_cli(escenario06, escenario_consola, monkeypatch):
+@pytest.mark.parametrize('url', [
+    'https://metrocuadrado.com/inmuebles/venta/bogota/la-carolina',
+    'https://www.metrocuadrado.com/apartamento-casa/arriendo/bogota/la-carolina?search=form',
+])
+def test_fuentes_registradas_disponibles_en_cli(escenario06, escenario_consola, monkeypatch, url):
     import metro.__main__ as cli
     c, _, _, _ = escenario06
-    c.post('/v0.6/fuentes', data={'nombre':'Fuente CLI','url':'https://metrocuadrado.com/inmuebles/venta/bogota/la-carolina'})
+    assert c.post('/v0.6/fuentes', data={'nombre':'Fuente CLI','url':url}).status_code == 200
     capturada = []
     class ScraperPrueba:
         def __init__(self, config):
@@ -257,7 +286,8 @@ def test_fuentes_registradas_disponibles_en_cli(escenario06, escenario_consola, 
     import concurrent.futures
     with concurrent.futures.ThreadPoolExecutor() as executor:
         executor.submit(cli.main).result()
-    assert capturada[0].urls == ['https://www.metrocuadrado.com/inmuebles/venta/bogota/la-carolina']
+    from metro.prices import search_identity
+    assert capturada[0].urls == [search_identity(url)]
 
 
 def test_hook_scraper_no_oculta_exito_ante_fallo_crm(escenario_consola, monkeypatch):

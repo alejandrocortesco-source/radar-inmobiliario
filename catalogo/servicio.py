@@ -75,6 +75,12 @@ class ServicioCatalogo:
             raise ConsultaInvalida('Configura Fincaraíz en Agregar fuente del inicio para verificar sus filtros.')
         if fuente == 'wasi':
             raise ConsultaInvalida('Configura o edita los filtros Wasi en Agregar fuente del inicio.')
+        if fuente == 'metrocuadrado':
+            from .fuentes.metrocuadrado import validar_url
+            try:
+                url = validar_url(url)
+            except ValueError as exc:
+                raise ConsultaInvalida(str(exc)) from exc
         if not nombre or len(nombre) > 120:
             raise ConsultaInvalida('El nombre debe tener entre 1 y 120 caracteres')
         try:

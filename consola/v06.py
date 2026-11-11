@@ -23,7 +23,7 @@ from oportunidades.normalizacion import normalizar_ciudad
 from .anunciantes import url_anunciante
 from .presentacion import fecha, numero, enlace_publico
 from .inicio import indicadores, resumen_clientes
-from catalogo.fuentes import wasi, fincaraiz
+from catalogo.fuentes import wasi, fincaraiz, metrocuadrado
 
 RAIZ = Path(__file__).parent
 templates = Jinja2Templates(directory=[str(RAIZ / 'templates' / 'v06'), str(RAIZ / 'templates')])
@@ -315,14 +315,8 @@ def crear_router(proveedor):
                 return RedirectResponse('/v0.6/?mensaje=fuente_guardada#agregar-fuente', 303)
             if valores.get('fuente', 'metrocuadrado') != 'metrocuadrado':
                 raise ConsultaInvalida('Fuente no compatible')
-            url = valores.get('url', '')
-            from urllib.parse import urlsplit
-            partes = urlsplit(url.strip())
-            if (partes.scheme not in ('http', 'https') or partes.hostname not in ('metrocuadrado.com', 'www.metrocuadrado.com')
-                or partes.username or partes.password or any(c.isspace() or ord(c) < 32 for c in url.strip())
-                or len(url) > 4096 or not partes.path.startswith('/inmuebles/') or partes.port not in (None, 80, 443)):
-                raise ConsultaInvalida('Usa una URL de búsqueda de Metrocuadrado, con ruta /inmuebles/.')
-            identificador = catalogo.normalizar_busqueda(url.strip())
+            url = metrocuadrado.validar_url(valores.get('url', ''))
+            identificador = catalogo.normalizar_busqueda(url)
             if any(b['id_busqueda'] == identificador for b in catalogo.listar_busquedas()):
                 return RedirectResponse('/v0.6/?mensaje=fuente_duplicada#agregar-fuente', 303)
             catalogo.guardar_busqueda('metrocuadrado', identificador, valores.get('nombre', ''))

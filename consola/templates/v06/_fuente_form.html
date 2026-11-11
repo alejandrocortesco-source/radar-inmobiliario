@@ -4,7 +4,7 @@
 <label>Fuente<select name="fuente" data-source-select><option value="metrocuadrado" {{'selected' if not es_wasi and not es_fr else ''}}>Metrocuadrado</option><option value="wasi" {{'selected' if es_wasi else ''}}>Wasi</option><option value="fincaraiz" {{'selected' if es_fr else ''}}>Fincaraíz</option></select></label>
 <button class="secondary" type="submit" formaction="/v0.6/fuentes/opciones" formnovalidate>Actualizar formulario</button>
 <label>Nombre descriptivo<input name="nombre" required maxlength="120" value="{{fuente_valores.get('nombre','')}}" placeholder="Ej. Apartamentos en La Carolina"></label>
-<label data-metro-field {% if es_wasi or es_fr %}hidden{% endif %}>URL de búsqueda de Metrocuadrado<input type="url" name="url" {{'disabled' if es_wasi or es_fr else 'required'}} maxlength="4096" value="{{fuente_valores.get('url','')}}" placeholder="https://www.metrocuadrado.com/inmuebles/…"></label>
+<label data-metro-field {% if es_wasi or es_fr %}hidden{% endif %}>URL de búsqueda de Metrocuadrado<input type="url" name="url" {{'disabled' if es_wasi or es_fr else 'required'}} maxlength="4096" value="{{fuente_valores.get('url','')}}" placeholder="https://www.metrocuadrado.com/apartamento-casa/arriendo/…"><small>Admite búsquedas con /inmuebles/ o con tipo de inmueble y operación. Conserva los filtros de la URL; no uses una ficha individual.</small></label>
 <div data-wasi-fields {% if not es_wasi %}hidden{% endif %}>
 <p>Elige ciudad y al menos una localidad o zona / barrio. Las opciones corresponden a Wasi. Si falta una opción, actualiza las opciones de la fuente con los filtros anteriores elegidos.</p>
 <button class="secondary" type="submit" formaction="/v0.6/fuentes/wasi/opciones" formnovalidate>Actualizar opciones de Wasi</button>

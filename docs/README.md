@@ -14,6 +14,8 @@ Punto de entrada a las guías y a la evidencia del proyecto. La entrega vigente 
 | Consola y navegación | [Guía de consola](../consola/README.md) |
 | Configuración y pruebas de la consola | [V06](../consola/docs/V06.md) |
 | Acceso Google/IAP y preparación pendiente en Cloud Run | [Acceso con IAP](../consola/docs/ACCESO_IAP.md) |
+| Validación sintética previa a Cloud, instancia local y cuatro casos manuales | [Validación del 11 de noviembre](../consola/docs/VALIDACION_PRECLOUD_20261111.md) |
+| Corrección del rechazo de URLs Metrocuadrado por tipos y operación | [Hallazgo y regresión del 11 de noviembre](../consola/docs/CORRECCION_URL_METRO_20261111.md) |
 | Entrega local de identificación y pruebas | [Informe del 10 de noviembre](ENTREGA_IDENTIFICACION.md) |
 | Identificación física y revisión humana | [Reglas, migración y operación](IDENTIFICACION.md) |
 | Catálogo y persistencia | [Guía de catálogo](../catalogo/README.md) |
