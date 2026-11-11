@@ -54,10 +54,12 @@ def test_contextos_editor_detalle_y_sin_desbordamiento(servidor,pagina,w,h):
     assert 'offset=12' in page.url
     assert first==page.locator('.property-link').first.get_attribute('href')
     page.get_by_role('link',name='Coincidencias',exact=True).click()
+    page.wait_for_load_state('load')
     assert 'match_orden=precio_desc' in page.url
     assert page.locator('main table.catalog-table').count()==1
     assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
     page.get_by_role('link',name='Editar',exact=True).click()
+    page.wait_for_load_state('load')
     expect(page.locator('#editor')).to_be_visible()
     assert 'match_orden=precio_desc' in page.url
     page.locator('#crm_nombre').fill('Borrador de prueba')

@@ -1,0 +1,57 @@
+/* Identidad compartida. La referencia es Inicio /v0.6/: conservar sus valores. */
+:root {
+  color-scheme: light;
+  --bg: #f3f0e9;
+  --paper: var(--bg);
+  --surface: #fdfcf8;
+  --ink: #302e28;
+  --muted: #6a665b;
+  --line: #d5d0c5;
+  --accent: #71503c;
+  --accent-dark: #503626;
+  --olive: #4f5a3d;
+  --clay: var(--accent);
+  --soft: #e8e5da;
+  --field: #edeae2;
+  --field-line: #898476;
+  --focus: #694125;
+  --hover: #f6f3ec;
+  --zebra: var(--surface);
+  --warning: #f1e5ca;
+  --warning-ink: #75501f;
+  --warning-line: #896028;
+  --success: #e7ebde;
+  --success-ink: #35412b;
+  --danger: #f6e7e1;
+  --danger-ink: #843b2c;
+  --backdrop: rgb(48 46 40 / 35%);
+  --shadow: 0 8px 28px rgb(48 46 40 / 14%);
+  --radius: 0;
+  --font: Arial, Helvetica, sans-serif;
+  --page-width: 1536px;
+  --page-gutter: 40px;
+  --control-height: 40px;
+  font: 14px/1.5 var(--font);
+  color: var(--ink);
+  background: var(--bg);
+}
+* { box-sizing: border-box; }
+h1, h2, h3 { overflow-wrap: anywhere; }
+.page-heading > div { min-width: 0; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+:is(button, input, select, textarea):disabled,
+[aria-disabled="true"] { cursor: default; opacity: .65; }
+button:disabled:hover { background: var(--soft); color: var(--muted); }
+input[type="checkbox"], input[type="radio"] { accent-color: var(--accent); }
+[hidden] { display: none !important; }
+.radar-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+  padding: 0 var(--page-gutter);
+  min-height: 72px;
+}
+.radar-header .brand { color: var(--ink); font-size: 22px; font-weight: 400; letter-spacing: -.7px; }
+.radar-header nav a[aria-current] { border-bottom: 3px solid var(--accent); }
+.notice[role="alert"] { background: var(--danger); color: var(--danger-ink); border-left-color: var(--danger-ink); }
+@media (max-width: 1055px) { :root { --page-gutter: 24px; } }
+@media (max-width: 671px) { :root { --page-gutter: 16px; } }

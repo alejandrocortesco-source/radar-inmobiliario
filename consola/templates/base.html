@@ -4,12 +4,14 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="referrer" content="same-origin">
   <title>{% block title %}Radar Inmobiliario · Catálogo consolidado{% endblock %}</title>
+  <link rel="stylesheet" href="/consola/static/tema.css">
   <link rel="stylesheet" href="/consola/static/consola.css">
+  <link rel="stylesheet" href="/consola/static/compatibilidad.css">
   <script src="/consola/static/consola.js" defer></script>
 <link rel="stylesheet" href="/consola/static/anunciantes.css"><script src="/consola/static/anunciantes.js" defer></script></head>
 <body>
 <a class="skip-link" href="#contenido">Ir al contenido</a>
-<header class="site-header shell">
+<header class="site-header shell radar-header">
   <a class="brand" href="/consola/">Radar Inmobiliario</a>
   <p>Consola v0.3 · Catálogo consolidado</p>
   {% if captura is defined %}<nav class="workspace-nav" aria-label="Áreas de la Consola"><a href="#necesidades-cliente">01 Necesidades</a><a href="#matching-resumen">02 Resumen</a><a href="#matching-resultados">03 Resultados</a><a href="#catalogo-completo">Explorar catálogo</a><a href="/v0.6/identificacion">Revisar publicaciones</a></nav>{% endif %}

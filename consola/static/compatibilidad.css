@@ -1,0 +1,47 @@
+/* Distribuciones históricas: la identidad procede de tema.css. */
+.v04 .radar-header {
+  margin: 0 calc(-1 * var(--page-gutter));
+  padding: 12px var(--page-gutter);
+  gap: 24px;
+}
+.v04-header nav { flex-wrap: wrap; gap: 16px 24px; }
+.v04-header nav a { color: var(--muted); }
+.v04-header nav .button-link { color: #fff; }
+.v04 .context-tabs { max-width: var(--page-width); margin: 0 auto; height: 48px; gap: 32px; }
+.v04 button:hover, .v04 .button-link:hover { background: var(--accent-dark); color: #fff; }
+.v04 button:disabled:hover { background: var(--soft); color: var(--muted); }
+.v04 .popover > summary { background: var(--field); border: 0; border-bottom: 1px solid var(--field-line); }
+.v04 .popover[open] > summary, .v04 .popover > summary:hover { background: var(--soft); color: var(--accent-dark); }
+.v04 .catalog-table tbody tr:hover { background: var(--hover); }
+.v04 .notice { padding: 16px; border-left: 3px solid var(--warning-line); background: var(--warning); color: var(--ink); }
+.v04 .surface-header { background: var(--surface); padding: 16px 24px; }
+.v04 .surface-content { padding: 24px; }
+.v04 .capture-actions { bottom: -24px; margin-bottom: -24px; padding: 16px 8px; }
+.site-header.radar-header { max-width: none; padding-top: 24px; padding-bottom: 24px; margin-bottom: 40px; }
+.site-header .brand { text-decoration: none; }
+.site-header .workspace-nav a { padding: 8px 0; }
+.shell { min-width: 0; }
+.capture, .workspace-area { border-color: var(--line); border-radius: var(--radius); box-shadow: none; }
+.capture textarea, .capture input:not([type="checkbox"]):not([type="radio"]), .capture select,
+.inline-field input, .inline-field select, .popover-body input, .popover-body select {
+  border: 0; border-bottom: 1px solid var(--field-line); background: var(--field); border-radius: var(--radius);
+}
+.popover-body { box-shadow: var(--shadow); }
+.notice { padding: 16px; background: var(--warning); border-left: 3px solid var(--warning-line); color: var(--ink); }
+.empty-state { background: var(--surface); padding: 32px 24px; border-top: 1px solid var(--line); }
+.pagination > div, .matching-controls, .matching-controls form { flex-wrap: wrap; }
+.detail-heading h1, .summary-line, .summary-line strong, .need-facts dd { min-width: 0; overflow-wrap: anywhere; }
+@media (max-width: 800px) {
+  .v04 .surface-content { padding: 16px; }
+  .v04 .capture-actions { bottom: -16px; margin-bottom: -16px; }
+  .v04 .radar-header { gap: 12px; }
+  .v04-header nav { gap: 12px 16px; justify-content: flex-start; }
+}
+@media (max-width: 671px) {
+  .v04 h1 { font-size: 28px; }
+  .v04 h2, .area-heading h2 { font-size: 20px; }
+  .v04 .client-picker { flex-wrap: wrap; }
+  .v04 .client-picker label { width: 100%; }
+  .v04 .pagination > div { flex-wrap: wrap; }
+  .site-header.radar-header { margin-bottom: 24px; }
+}
