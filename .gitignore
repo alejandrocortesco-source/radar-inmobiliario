@@ -42,3 +42,6 @@ samples-*.csv
 
 # Documentos privados del equipo; no forman parte del repositorio
 /.local/
+
+# Documento privado conservado en la raiz; nunca publicar
+/20261111 Next Steps.docx

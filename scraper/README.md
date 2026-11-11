@@ -1,5 +1,7 @@
 # Scrapers de Metrocuadrado, Wasi y Fincaraíz — Radar Inmobiliario
 
+Acceso web: modo local explícito y solo loopback; configuración y preparación pendiente de [Google/IAP directo en Cloud Run](../consola/docs/ACCESO_IAP.md). OpenAPI y documentación interactiva se deshabilitan en modo IAP.
+
 Componente de [Radar Inmobiliario](../README.md) para descubrir anuncios, mantener un catálogo incremental por cambios de precio y revisar los resultados con FastAPI. Recorre todos los listados y abre las fichas nuevas, con precio modificado o que requieren revisión de integridad. Puede ejecutarse por consola sin iniciar la interfaz. No necesita Sheets, Gemini ni WhatsApp. No contacta anunciantes. Metrocuadrado usa búsquedas públicas; Wasi aplica controles de búsqueda y el login normal con secretos externos. La [guía Wasi](docs/WASI.md) documenta acceso, búsquedas, recuperación y preparación de Cloud Run; los comandos siguientes conservan el uso de Metrocuadrado.
 
 ## Instalación (Windows / PowerShell)
@@ -35,6 +37,7 @@ En el equipo donde se desarrolló la primera versión se conserva el entorno exi
 .\.venv\Scripts\python.exe -m metro status 1
 
 # Interfaz independiente del scraper
+$env:RADAR_AUTH_MODE = 'local'
 .\.venv\Scripts\python.exe -m metro serve
 ```
 
@@ -45,6 +48,7 @@ También se puede ejecutar desde la raíz mediante `scraper/run.py`. Con el ento
 ```powershell
 .\.venv\Scripts\python.exe scraper\run.py scrape
 .\.venv\Scripts\python.exe scraper\run.py status 1
+$env:RADAR_AUTH_MODE = 'local'
 .\.venv\Scripts\python.exe scraper\run.py serve
 # Interfaz persistente; puede invocarse desde la raíz
 .\scraper\start-interface.ps1

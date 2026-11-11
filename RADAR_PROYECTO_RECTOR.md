@@ -1,6 +1,12 @@
-# Radar Inmobiliario — documento rector v0.10.0
+# Radar Inmobiliario — documento rector v0.11.0
 
 La especificación funcional del usuario de 3 de noviembre de 2026 gobierna esta entrega. El producto acompaña el trabajo de Mónica con unos 30 clientes activos. Debe permanecer sencillo y de bajo mantenimiento; el objetivo de operación inferior a US$10/mes está **pendiente de validación de consumo y alojamiento**, no es una garantía.
+
+## Acceso privado preparado para IAP (11 de noviembre de 2026)
+
+La versión funcional vigente es **0.11.0**: incorpora las funciones posteriores a `v0.10.0`, incluyendo matching manual, novedades, validación real de Gemini ya documentada y acceso privado. El incremento MINOR sigue [Git y versionado](GIT_WORKFLOW.md); la compatibilidad de acceso durante 0.x y el alcance están en [CHANGELOG](CHANGELOG.md). El versionado actual no vuelve a ejecutar pruebas reales del proveedor.
+
+El acceso previsto abre Radar e inicia sesión con Google; solo las cuentas elegidas en IAP/IAM entran, con el mismo acceso funcional. Una barrera central protege páginas, API, rutas históricas, exportaciones y acciones mediante la credencial firmada IAP con audiencia de Cloud Run directo. Sin configuración válida se rechaza el acceso; modo local explícito, solo loopback y prohibido en Cloud Run. GET/HEAD `/health` exacto es la única excepción básica. Las escrituras exigen Origin estricto, sin cuentas ni sesiones propias ni listas en SQLite. Diseño, variables, uso local y preparación pendiente: [Acceso con IAP](consola/docs/ACCESO_IAP.md). La solicitud inicial autorizó implementación y pruebas sintéticas locales sin publicación. La solicitud posterior del 11 de noviembre autoriza revisar, versionar, hacer commit y sincronizar `develop` con GitHub, conservando los tags previos y sin despliegue ni cambios en Google Cloud. No añade Dockerfile web, persistencia en nube o servicios nuevos.
 
 ## Matching manual y Gemini bajo solicitud (11 de noviembre de 2026)
 

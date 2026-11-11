@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 from playwright.sync_api import sync_playwright
 from metro.storage import Store
+from consola.tests.acceso_http import acceso_local_sintetico
 
 A = 'https://www.metrocuadrado.com/inmuebles/venta/bogota/la-carolina'
 B = 'https://www.metrocuadrado.com/inmuebles/venta/bogota/norte'

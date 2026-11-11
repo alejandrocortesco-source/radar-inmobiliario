@@ -20,8 +20,10 @@ from catalogo.persistencia.asociaciones import AsociacionesSQLite
 from consola.rutas import crear_router as crear_router_consola, ESTATICOS
 from consola.v04 import crear_router as crear_router_v04, ESTATICOS as ESTATICOS_V04
 from consola.v06 import crear_router as crear_router_v06
+from consola.acceso import AccesoRadar
 
 app = FastAPI(title='Metrocuadrado · Revisión local',version=__version__)
+app.add_middleware(AccesoRadar)
 templates = Jinja2Templates(directory=str(Path(__file__).parent/'templates'))
 templates.env.filters['from_json'] = json.loads
 

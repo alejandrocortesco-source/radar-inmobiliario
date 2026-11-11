@@ -2,7 +2,7 @@
 
 Radar Inmobiliario es un proyecto para recopilar y revisar información pública de inmuebles.
 
-La **Consola v0.10.0 — identificación supervisada** abre en [http://127.0.0.1:8000/v0.6/](http://127.0.0.1:8000/v0.6/): dashboard de cuatro secciones, clientes Activos/Inactivos y ficha individual para revisar coincidencias. Integra Fincaraíz, Wasi y Metrocuadrado reutilizando catálogo, clientes, oportunidades y matching determinista; conserva decisiones persistentes y una segunda capa opcional con Gemini Flash. Guardar una fuente no ejecuta scraping. «Buscar coincidencias» actualiza resultados sin IA; únicamente «Evaluar con Gemini» autoriza consumo. Las novedades por oportunidad persisten hasta marcarlas como vistas.
+La **Consola v0.11.0 — matching manual, Gemini y acceso privado** abre en [http://127.0.0.1:8000/v0.6/](http://127.0.0.1:8000/v0.6/): dashboard de cuatro secciones, clientes Activos/Inactivos y ficha individual para revisar coincidencias. Integra Fincaraíz, Wasi y Metrocuadrado reutilizando catálogo, clientes, oportunidades y matching determinista; conserva decisiones persistentes y una segunda capa opcional con Gemini Flash. Guardar una fuente no ejecuta scraping. «Buscar coincidencias» actualiza resultados sin IA; únicamente «Evaluar con Gemini» autoriza consumo. Las novedades por oportunidad persisten hasta marcarlas como vistas.
 
 Todos los precios y presupuestos inmobiliarios son COP. El presupuesto se compara directamente con el precio numérico, con límites inclusivos, sin solicitar ni verificar moneda y sin conversiones. Los campos históricos de moneda se conservan como metadatos.
 
@@ -18,8 +18,14 @@ El catálogo detallado de v0.5 se conserva en `/v0.4/`, con filtros, fichas, com
 Inicio local desde la raíz:
 
 ```powershell
+$env:RADAR_AUTH_MODE = 'local'
 .\.venv\Scripts\python.exe scraper/run.py serve
 ```
+
+El desarrollo local solo admite loopback. En Google Cloud el acceso previsto usa
+Google e IAP directo en Cloud Run, con las cuentas concretas autorizadas en IAM.
+Sin configuración válida, la aplicación rechaza el acceso. Variables, pruebas y
+preparación pendiente: [Acceso con IAP](consola/docs/ACCESO_IAP.md).
 
 Las evaluaciones reales de Gemini requieren `GEMINI_API_KEY` y un `GEMINI_MODEL` Flash disponible para la cuenta. Sin configuración, o ante error, el motor determinista permanece disponible y se informa la limitación. El objetivo de operación inferior a US$10/mes queda sujeto a medir consumo y alojamiento. No hay despliegue de producción ni migración a Sheets en esta entrega.
 
@@ -29,7 +35,7 @@ Las evaluaciones reales de Gemini requieren `GEMINI_API_KEY` y un `GEMINI_MODEL`
 
 ## Estado y ramas
 
-Entrega v0.10.0: identificación supervisada compatible; etiqueta anotada `v0.10.0` según la política Git. Véase [changelog](CHANGELOG.md). Publicación en GitHub no acredita despliegue.
+Entrega v0.11.0: matching manual, Gemini bajo solicitud y acceso privado preparado para IAP; etiqueta anotada `v0.11.0` según la política Git. El tag `v0.10.0` conserva el hito anterior de identificación supervisada. Véase [changelog](CHANGELOG.md). Publicación en GitHub no acredita despliegue.
 
 - `develop`: rama de todo nuevo desarrollo y commit. Política operativa: [GIT_WORKFLOW.md](GIT_WORKFLOW.md).
 - `v0.8.0`: tag anotado de la entrega funcional v0.8 en `4781daeb9adefc310028d40dcec88795657530eb`; el commit documental posterior no cambia esa versión. Las rutas `/v0.6/`, `/v0.4/` y demás existentes se conservan.

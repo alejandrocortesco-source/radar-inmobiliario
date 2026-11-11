@@ -5,9 +5,10 @@ from test_browser import servidor, pagina, seleccionar_barrio
 
 
 def crear(page, url):
-    c=page.request.post(url+'/api/clientes',data={'nombre':'Mónica'}).json()
+    # APIRequestContext no es un formulario del navegador: Origin explícito.
+    c=page.request.post(url+'/api/clientes',data={'nombre':'Mónica'},headers={'Origin':url}).json()
     datos={'cliente_id':c['id'],'necesidades':{'operacion':'compra','tipo':'casa','ciudad':'Bogotá','barrios':['La Carolina'],'presupuesto_max':'110000000','habitaciones_min':3}}
-    return [page.request.post(url+'/api/oportunidades',data=datos).json()['id'] for _ in range(2)]
+    return [page.request.post(url+'/api/oportunidades',data=datos,headers={'Origin':url}).json()['id'] for _ in range(2)]
 
 
 def test_comentario_error_recarga_dos_oportunidades_y_borrador(servidor,pagina):

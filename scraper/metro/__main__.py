@@ -39,8 +39,11 @@ def main():
     command = args.pop('command')
     if command == 'serve':
         os.environ['METRO_DB']=args['db']
+        from consola.acceso import loopback
+        if os.getenv('RADAR_AUTH_MODE') == 'local' and not (args['host'] == 'localhost' or loopback(args['host'])):
+            parser.error('RADAR_AUTH_MODE=local requiere --host de loopback')
         import uvicorn
-        uvicorn.run('metro.web:app',host=args['host'],port=args['port'])
+        uvicorn.run('metro.web:app',host=args['host'],port=args['port'],proxy_headers=False)
         return
     if command == 'status':
         print(json.dumps(Store(args['db']).summary(args['run']),ensure_ascii=False,indent=2))
