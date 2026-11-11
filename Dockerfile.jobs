@@ -1,11 +1,14 @@
 FROM mcr.microsoft.com/playwright/python:v1.55.0-noble
+ARG RADAR_SOURCE_SHA=unknown
+LABEL org.opencontainers.image.revision=$RADAR_SOURCE_SHA
 WORKDIR /app
-COPY scraper/requirements.txt scraper/requirements-cloud.txt ./
-RUN pip install --no-cache-dir -r requirements.txt -r requirements-cloud.txt
+COPY scraper/requirements.lock.txt scraper/requirements-cloud.txt ./
+RUN pip install --no-cache-dir -r requirements.lock.txt -r requirements-cloud.txt
 COPY scraper/metro ./scraper/metro
 COPY scraper/wasi ./scraper/wasi
 COPY scraper/fincaraiz ./scraper/fincaraiz
 COPY scraper/job.py ./scraper/job.py
+COPY deployment/state_probe.py ./deployment/state_probe.py
 COPY catalogo ./catalogo
 COPY oportunidades ./oportunidades
 ENV PYTHONUNBUFFERED=1 RADAR_DATA_DIR=/data

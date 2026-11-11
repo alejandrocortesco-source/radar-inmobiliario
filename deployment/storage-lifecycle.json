@@ -1,0 +1,1 @@
+{"rule":[{"action":{"type":"Delete"},"condition":{"isLive":false,"numNewerVersions":30,"daysSinceNoncurrentTime":7}},{"action":{"type":"Delete"},"condition":{"age":14,"matchesPrefix":["builds/"]}}]}

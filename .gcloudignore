@@ -1,0 +1,14 @@
+.git
+.venv
+.tmp
+.local
+**/__pycache__
+**/.pytest_cache
+**/*.sqlite*
+**/*.log
+**/.env*
+**/*.key
+**/*.pem
+**/credentials*.json
+**/service-account*.json
+20261111 Next Steps.docx

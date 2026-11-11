@@ -1,0 +1,7 @@
+param([Parameter(Mandatory)][string]$WebDigest, [string]$PublicOrigin='https://radar-56106530298.us-central1.run.app')
+$ErrorActionPreference='Stop'
+if($WebDigest -notmatch '^us-central1-docker.pkg.dev/radar-inmobiliario-co/radar/web@sha256:[a-f0-9]{64}$'){throw 'Digest web exacto obligatorio'}
+$cloud=Join-Path $PSScriptRoot '../../cloud.ps1'
+$sha=(git -C (Join-Path $PSScriptRoot '..') rev-parse HEAD).Trim()
+& $cloud run deploy radar --image=$WebDigest --project=radar-inmobiliario-co --region=us-central1 --service-account=radar-web@radar-inmobiliario-co.iam.gserviceaccount.com --iap --no-allow-unauthenticated --invoker-iam-check --ingress=all --cpu=1 --memory=2Gi --cpu-throttling --min=0 --max=1 --min-instances=0 --max-instances=1 --concurrency=1 --timeout=300 --port=8080 --execution-environment=gen2 --no-cpu-boost --startup-probe=httpGet.path=/health,httpGet.port=8080,initialDelaySeconds=0,periodSeconds=5,timeoutSeconds=3,failureThreshold=12 "--set-env-vars=RADAR_AUTH_MODE=iap,RADAR_IAP_AUDIENCE=/projects/56106530298/locations/us-central1/services/radar,RADAR_PUBLIC_ORIGIN=$PublicOrigin,RADAR_STATE_BUCKET=radar-inmobiliario-co-state,RADAR_STATE_OBJECT=radar/state.tar.gz,RADAR_DATA_DIR=/data" --set-secrets=GEMINI_API_KEY=gemini-api-key:1 --labels="app=radar,source-sha=$($sha.Substring(0,12))" --quiet
+if($LASTEXITCODE -ne 0){throw 'Despliegue web no confirmado'}

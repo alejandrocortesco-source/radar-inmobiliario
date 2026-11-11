@@ -1,5 +1,6 @@
 """Una observación por ID interno; adición independiente del esquema de v0.3."""
 import sqlite3
+from contextlib import closing
 from oportunidades.persistencia import ErrorPersistencia
 
 
@@ -11,7 +12,7 @@ class Comentarios:
         if not self.ruta.exists():
             return ''
         try:
-            with sqlite3.connect(self.ruta.as_uri() + '?mode=ro', uri=True, timeout=10) as db:
+            with closing(sqlite3.connect(self.ruta.as_uri() + '?mode=ro', uri=True, timeout=10)) as db:
                 if not db.execute("SELECT 1 FROM sqlite_master WHERE name='consola_comentarios'").fetchone():
                     return ''
                 fila = db.execute('SELECT texto FROM consola_comentarios WHERE inmueble_id=?', (identificador,)).fetchone()
@@ -22,7 +23,7 @@ class Comentarios:
     def guardar(self, identificador, texto):
         try:
             self.ruta.parent.mkdir(parents=True, exist_ok=True)
-            with sqlite3.connect(self.ruta, timeout=10) as db:
+            with closing(sqlite3.connect(self.ruta, timeout=10)) as db, db:
                 db.execute('BEGIN IMMEDIATE')
                 db.execute('CREATE TABLE IF NOT EXISTS consola_comentarios (inmueble_id TEXT PRIMARY KEY, texto TEXT NOT NULL)')
                 db.execute('INSERT INTO consola_comentarios VALUES (?,?) ON CONFLICT(inmueble_id) DO UPDATE SET texto=excluded.texto', (identificador, texto))

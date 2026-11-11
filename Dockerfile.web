@@ -1,0 +1,17 @@
+FROM mcr.microsoft.com/playwright/python:v1.55.0-noble
+ARG RADAR_SOURCE_SHA=unknown
+LABEL org.opencontainers.image.revision=$RADAR_SOURCE_SHA
+WORKDIR /app
+COPY scraper/requirements.lock.txt scraper/requirements-cloud.txt ./
+RUN pip install --no-cache-dir -r requirements.lock.txt -r requirements-cloud.txt
+COPY scraper/metro ./scraper/metro
+COPY scraper/wasi ./scraper/wasi
+COPY scraper/fincaraiz ./scraper/fincaraiz
+COPY scraper/job.py ./scraper/job.py
+COPY catalogo ./catalogo
+COPY oportunidades ./oportunidades
+COPY consola ./consola
+ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=/app:/app/scraper RADAR_DATA_DIR=/data
+RUN useradd --create-home --uid 10001 radar && mkdir -p /data && chown radar:radar /data
+USER radar
+CMD ["sh", "-c", "exec python -m uvicorn consola.cloud:app --host 0.0.0.0 --port ${PORT:-8080} --no-proxy-headers --workers 1 --no-access-log"]
