@@ -64,7 +64,8 @@ Sí se confirma el defecto del adaptador y el estado residual del registro.
 
 ## Validación
 
-Pruebas nuevas con SDK real y transporte simulado versionado: 11 aprobadas.
+Pruebas nuevas de reconciliación y generaciones: 11 aprobadas; incluyen el SDK
+real y un transporte simulado con versiones históricas.
 Flujos afectados y Chromium: 57 aprobadas antes de agregar la última reproducción;
 no sumar estas ejecuciones repetidas como pruebas distintas.
 Catálogo completo: 249 aprobadas. Scraper completo: 122 aprobadas.
@@ -88,7 +89,17 @@ Se compiló únicamente web y se desplegó la revisión privada
 `radar-central-reconcile-20261113`, sin tráfico de producción.
 Runtime inicial de la corrección: cee0ceb84c980daf3a55dd86a0ad484d3c7ca73e.
 Build inicial SUCCESS: b700555d-b189-4043-a4e3-2d7a4b4275fb.
-La etiqueta fija de cabecera se alinea en el build final, registrado al cierre.
+Runtime final: 87f192b7cc328e4485fa627003b575272416bec6.
+Build web final SUCCESS: 57f9f939-e343-4fd4-89af-ca96d9fd9900.
+Imagen final: us-central1-docker.pkg.dev/radar-inmobiliario-co/radar/web@sha256:816adb3a74baebfbe201fb0bd338f73a380a1d45ba16505ea70141576637203b.
+Revisión final confirmada: radar-central-reconcile-20261113-b, mismo tag privado,
+0% de tráfico de producción. Producción conserva el 100% en radar-verify-20261111.
+IAP verificado en la revisión final: cabecera v0.12.2 e informe Interrumpida;
+sin sesión, 302 a Google. El informe se recupera al recargar. Auditoría final:
+tres búsquedas, una ejecución interrumpida, mismo snapshot/generación/hash y
+solo el Job histórico radar-manual-review-9cl2d, terminado. El Job conserva su
+imagen c41811d3c16e6cf71e374a4cad9e4f5d6b6c89b1c2bd3682406b92db791832e8.
+El commit documental posterior solo registra este cierre; no cambia el runtime.
 Las imágenes y configuración de Jobs, IAP/OAuth, secretos, permisos y Scheduler se
 conservan. No se inicia scraping. Los fixes del adaptador quedan también preparados
 en código para futuros builds de Jobs; esta tarea no sustituye sus imágenes.
@@ -146,3 +157,12 @@ _ejecucion_aviso06.html y _ejecuciones_historial06.html. Pruebas:
 consola/tests/test_ejecuciones.py y test_ejecuciones_generaciones.py.
 Documentación: CHANGELOG.md, README.md, docs/README.md,
 consola/docs/EJECUCIONES.md y este informe. Sin migraciones de datos.
+
+Reversión concreta al primer runtime corregido (misma protección y datos):
+
+```powershell
+& ../cloud.ps1 run services update-traffic radar --update-tags=ejecuciones-review=radar-central-reconcile-20261113 --project=radar-inmobiliario-co --region=us-central1
+```
+
+Este comando mueve solo el tag de revisión privada. No asignar porcentajes,
+restaurar snapshots o volver a marcar running el registro ya reconciliado.
