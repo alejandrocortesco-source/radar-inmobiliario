@@ -26,6 +26,10 @@ def duration(value):
 def remaining(doc, run):
     if not run or run['status'] not in ACTIVE:
         return None
+    if run['status'] == 'reconciling':
+        return 'Tiempo restante no disponible mientras se reconcilia el cierre con Cloud Run.'
+    if not any(b['status'] in {'pending', 'running'} for b in run['searches']):
+        return 'Confirmando cierre y guardado remoto. Tiempo restante: por estimar.'
     low = high = 0
     for b in run['searches']:
         if b['status'] not in {'pending', 'running'}:

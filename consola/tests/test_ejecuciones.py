@@ -631,3 +631,46 @@ def test_missing_expired_execution_reconciles_after_stale_heartbeat(execution):
         doc['runs'][0].update(updated='2020-01-01T00:00:00+00:00',reconciled=None)
     svc.control.change(stale)
     assert reconcile(svc.control,svc.cloud)['runs'][0]['status']=='interrupted'
+
+
+
+def test_browser_starts_only_chosen_search_and_reload_reuses_run(execution, chromium):
+    from urllib.parse import urlsplit
+    from playwright.sync_api import expect
+    svc = execution[0]
+    client = TestClient(app)
+    context = chromium.new_context(viewport={'width':1200,'height':900})
+    page = context.new_page()
+    errors=[]
+    requests=[]
+    page.on('pageerror', lambda exc:errors.append(str(exc)))
+    def route_request(route):
+        req=route.request
+        url=urlsplit(req.url)
+        response=client.request(req.method,url.path + ('?' + url.query if url.query else ''),content=req.post_data_buffer,headers={k:v for k,v in req.headers.items() if k.lower() in {'content-type','origin'}},follow_redirects=False)
+        if req.method == 'POST':
+            requests.append((response.status_code,response.text))
+        route.fulfill(status=response.status_code,headers={k:v for k,v in response.headers.items() if k.lower() not in {'content-length','content-encoding'}},body=response.content)
+    page.route('**/*',route_request)
+    try:
+        page.goto('http://127.0.0.1/v0.6/ejecuciones')
+        page.get_by_label('Seleccionar Norte',exact=True).check()
+        page.get_by_role('button',name='Iniciar ejecución',exact=True).click()
+        try:
+            expect(page.locator('[data-execution-report]')).to_contain_text('Esperando Job')
+        except AssertionError:
+            pytest.fail(str({'errors':errors,'responses':requests,'notice':page.locator('[data-start-error]').inner_text()}))
+        assert len(svc.cloud.launched)==1
+        run=svc.control.get(svc.cloud.launched[0])
+        assert [b['id_busqueda'] for b in run['searches']]==[B]
+        page.reload()
+        expect(page.locator('[data-execution-report]')).to_contain_text(run['id'])
+        assert len(svc.cloud.launched)==1
+    finally:
+        context.close()
+
+
+
+def test_final_persistence_phase_does_not_claim_estimate_was_exceeded():
+    assert 'por estimar' in remaining(empty(), {'status':'saving','searches':[{'status':'extracted'}]})
+    assert 'reconcilia' in remaining(empty(), {'status':'reconciling','searches':[{'status':'interrupted'}]})
