@@ -1,13 +1,15 @@
 # Operación privada de Cloud Run desde copia independiente
 
-Este directorio pertenece exclusivamente al clon de despliegue. La autorización
-actual permite esta rama local, commits locales y Google Cloud; no permite push.
+Este directorio pertenece exclusivamente al clon de despliegue. La solicitud inicial limitó los cambios al clon y Google Cloud. La solicitud
+del 13 de noviembre autoriza publicar estos ajustes en develop, sin modificar
+el checkout original.
 Origen: d84f1dda914b5a211b0e00eef61de1c5b28a2b88 (develop publicado).
 Versión funcional: 0.11.0, con correcciones posteriores al tag v0.11.0.
 
 Proyecto único: radar-inmobiliario-co (56106530298). Región elegida: us-central1,
 por ausencia de destinos existentes y tarifas/free tier adecuados. No se consulta
-ni modifica Mayordomo Gaya. Operador/acceso final: alejandro.cortes.co@gmail.com.
+ni modifica Mayordomo Gaya. Operador: alejandro.cortes.co@gmail.com. Acceso privado autorizado también
+para radar.inmobiliario.co@gmail.com desde el 13 de noviembre de 2026.
 
 ## Persistencia y límites aceptados
 
@@ -159,3 +161,15 @@ montajes, tareas y paralelismo. deploy-jobs.ps1 es creación inicial y falla ant
 nombres existentes. configure-wasi.ps1 también evita reemplazar secretos existentes.
 El script web exige SourceSha explícito del build para no atribuir a una imagen
 anterior los commits posteriores de scripts/documentación.
+
+## Ampliación de acceso — 13 de noviembre de 2026
+
+Por solicitud expresa se añadió radar.inmobiliario.co@gmail.com a
+roles/iap.httpsResourceAccessor únicamente en el servicio radar y como segundo
+usuario de prueba de OAuth. Se conserva alejandro.cortes.co@gmail.com.
+OAuth permanece externo en Prueba; no se habilitó acceso público ni se añadieron
+permisos administrativos. Se verificaron la política IAP y los dos usuarios en
+Google Auth Platform. El login con la segunda cuenta queda por comprobar.
+Este cambio de infraestructura no requiere nueva imagen ni despliegue.
+La publicación en develop se hace desde el clon independiente; el repositorio
+original permanece sin modificaciones realizadas por esta operación.
