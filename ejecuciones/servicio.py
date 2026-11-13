@@ -6,13 +6,13 @@ from google.api_core.exceptions import PreconditionFailed, NotFound
 from catalogo.persistencia.busquedas import BusquedasSQLite
 from wasi.durable import EstadoGCS
 from .control import ControlGCS, ACTIVE, Conflict, now, projection, select, reserve
-from .cloud_run import CloudRun, reconcile
+from .cloud_run import reconcile, cloud_configurado
 
 
 class ServicioEjecuciones:
     def __init__(self, control=None, cloud=None, state_factory=None, data_dir=None):
         self.control = control or ControlGCS()
-        self.cloud = cloud or CloudRun()
+        self.cloud = cloud or cloud_configurado(os.getenv('RADAR_EXECUTION_JOB', 'radar-manual'))
         self.state_factory = state_factory or (lambda: EstadoGCS(os.environ['RADAR_STATE_BUCKET'], os.getenv('RADAR_STATE_OBJECT', 'radar/state.tar.gz')))
         self.data_dir = data_dir or os.getenv('RADAR_DATA_DIR', '/data')
 
@@ -27,7 +27,7 @@ class ServicioEjecuciones:
                 generation = int(state.lock.generation)
                 if state.lock.download_as_bytes(if_generation_match=generation, timeout=10) != token.encode():
                     return
-            state.lock.delete(if_generation_match=int(generation), timeout=10)
+            state.bucket.blob(state.objeto + ".lock").delete(if_generation_match=int(generation), timeout=10)
         except (NotFound, PreconditionFailed):
             pass
 
@@ -41,15 +41,16 @@ class ServicioEjecuciones:
             raise Conflict('El catálogo está ocupado por otra operación o Job. Puedes consultar el seguimiento y volver a intentar después.') from None
 
     def overview(self, refresh=False):
-        self.control.change(lambda d: None)  # Retención oportunista, sin Scheduler.
         doc = reconcile(self.control, self.cloud, self.unlock)
         warning = None
+        if not any(r['status'] in ACTIVE for r in doc['runs']):
+            self.control.change(lambda d: None, idle_only=True)  # Retención cuando no hay ejecutor escribiendo.
         if refresh and not any(r['status'] in ACTIVE for r in doc['runs']):
             def sync(rows):
                 def mutate(d):
                     if d['searches'] != rows:
                         d.update(searches=rows, catalog_updated=now())
-                self.control.change(mutate)
+                self.control.change(mutate, idle_only=True)
             try:
                 self.snapshot_searches(sync)
             except Conflict as exc:
@@ -73,19 +74,9 @@ class ServicioEjecuciones:
         if not created:
             return run
         try:
-            operation = self.cloud.launch(run['id'])
-            def launched(doc):
-                r = next(r for r in doc['runs'] if r['id'] == run['id'])
-                r['operation'] = operation
-                if r['status'] == 'launching':
-                    r.update(status='queued', phase='Esperando inicio del Job', updated=now())
-            self.control.change(launched)
+            self.cloud.launch(run['id'])
         except Exception:
-            # La respuesta puede perderse después de que Cloud Run aceptó el lanzamiento.
-            def uncertain(doc):
-                r = next(r for r in doc['runs'] if r['id'] == run['id'])
-                if r['status'] == 'launching':
-                    r.update(status='uncertain', updated=now(), phase='Reconciliando lanzamiento',
-                             error='No se pudo confirmar el lanzamiento. Se consultará Cloud Run antes de permitir otro intento.')
-            self.control.change(uncertain)
+            # La reserva ya es durable. No reintentar ni escribir sobre la reclamación
+            # concurrente del ejecutor; consultar su UUID en Cloud Run en la siguiente visita.
+            pass
         return self.control.get(run['id'])

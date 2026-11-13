@@ -67,8 +67,9 @@ class Storage:
     def blob(self, name):
         return self.blobs.setdefault(name, Blob())
 
-class Cloud:
+class Cloud(CloudRun):
     def __init__(self):
+        super().__init__("radar-manual", session=object())
         self.launched = []
         self.rows = []
         self.uncertain = False
@@ -197,7 +198,7 @@ def test_uncertain_launch_is_not_repeated_and_recovers_after_reload(execution):
     svc = execution[0]
     svc.cloud.uncertain = True
     r = start(execution)
-    assert r['status'] == 'uncertain'
+    assert r['status'] == 'launching'
     assert start(execution, request_id=r['id'])['id'] == r['id']
     assert len(svc.cloud.launched) == 1
     rebuilt = ServicioEjecuciones(ControlGCS('synthetic', client=execution[2]), svc.cloud, execution[3], str(execution[4] / 'reload'))
@@ -498,12 +499,19 @@ def test_browser_states_selection_focus_and_no_page_overflow(execution, chromium
         expect(page.get_by_text('No hay búsquedas guardadas disponibles.', exact=False)).to_be_visible()
         doc['searches'] = copy.deepcopy(original['searches'])
         r, _ = reserve(svc.control, str(uuid4()), doc['searches'])
-        r.update(status='running', started=now(), phase='Recorriendo resultados')
+        r.update(status='running', started=now(), phase='Recorriendo resultados', verification={'state':'active','checked':now()})
         r['searches'][0].update(status='running',started=now(),phase='Recorriendo resultados',processed=7)
         doc['runs'] = [r]
         verify('progreso')
         expect(page.locator('[data-start]')).to_be_disabled()
         expect(page.get_by_text('En proceso:',exact=False)).to_be_visible()
+        # Si la API deja de confirmar actividad, el aviso cambia sin recargar.
+        r['verification']['state'] = 'unknown'
+        page.evaluate('poll()')
+        expect(page.locator('[data-active-notice]')).to_contain_text('Verificando el estado de una actualización anterior')
+        expect(page.locator('[data-active-notice]')).not_to_contain_text('Actualización en curso')
+        verify('verificando')
+        r['verification']['state'] = 'active'
         # Recargar recupera el mismo ID, sin nuevos Jobs.
         page.reload()
         expect(page.locator('[data-execution-report]')).to_contain_text(r['id'])
@@ -609,6 +617,7 @@ def test_failed_lock_cleanup_retains_reservation_until_reconciled(execution):
     def failure(*a):
         raise TimeoutError('synthetic')
     assert reconcile(svc.control,svc.cloud,failure)['runs'][0]['status']=='reconciling'
+    svc.unlock = failure
     with pytest.raises(Conflict):
         start(execution)
     svc.control.patch(r['id'], {'reconciled':None})
@@ -630,7 +639,7 @@ def test_missing_expired_execution_reconciles_after_stale_heartbeat(execution):
     def stale(doc):
         doc['runs'][0].update(updated='2020-01-01T00:00:00+00:00',reconciled=None)
     svc.control.change(stale)
-    assert reconcile(svc.control,svc.cloud)['runs'][0]['status']=='interrupted'
+    assert reconcile(svc.control,svc.cloud,force=True)['runs'][0]['status']=='interrupted'
 
 
 
@@ -657,7 +666,7 @@ def test_browser_starts_only_chosen_search_and_reload_reuses_run(execution, chro
         page.get_by_label('Seleccionar Norte',exact=True).check()
         page.get_by_role('button',name='Iniciar ejecución',exact=True).click()
         try:
-            expect(page.locator('[data-execution-report]')).to_contain_text('Esperando Job')
+            expect(page.locator('[data-execution-report]')).to_contain_text('Verificando el estado de una actualización anterior')
         except AssertionError:
             pytest.fail(str({'errors':errors,'responses':requests,'notice':page.locator('[data-start-error]').inner_text()}))
         assert len(svc.cloud.launched)==1

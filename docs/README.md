@@ -49,3 +49,5 @@ Las guías técnicas explican la implementación. El documento rector gobierna l
 Se conservan los nombres, ubicaciones y referencias de los informes para mantener su trazabilidad. Sus autorizaciones antiguas no son instrucciones para nuevas publicaciones.
 
 Los diagnósticos privados del equipo pertenecen a `.local/diagnosticos/`, no a esta carpeta compartida. No enlazar su contenido desde documentos públicos ni incorporarlo a commits o imágenes Docker.
+
+- [Radar Central: diagnóstico y reconciliación del 13/11/2026](../consola/docs/RADAR_CENTRAL_RECONCILIACION_20261113.md).

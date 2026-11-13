@@ -6,7 +6,7 @@
 {% if error %}<div class="notice" role="alert">{{error}}</div>{% endif %}
 {% if warning %}<div class="notice" role="status">{{warning}}</div>{% endif %}
 <p class="notice">Las búsquedas amplias y frecuentes pueden aumentar el consumo y el costo de operación. La primera ejecución puede tardar más.</p>
-{% if active %}<p class="notice" data-active-notice>Hay una ejecución incompatible en curso: <a href="/v0.6/ejecuciones?run={{active.id}}">{{active.id}}</a>. Espera su cierre confirmado antes de iniciar otra. El seguimiento sigue disponible aunque cierres esta página.</p>{% endif %}
+<div data-active-notice>{% include '_ejecucion_aviso06.html' %}</div>
 <section class="tile execution-section" aria-labelledby="searches-title"><div class="tile-heading"><h2 id="searches-title">Búsquedas guardadas</h2><a class="button secondary" href="/v0.6/ejecuciones/busquedas">Agregar búsquedas <span aria-hidden="true">+</span></a></div>
 <p class="caption">Guardar o editar una búsqueda no inicia scraping. Se ejecutarán únicamente las seleccionadas, en secuencia. {% if catalog_updated %}Lista comprobada: {{catalog_updated|fecha}} (America/Bogota).{% endif %}</p>
 <form method="post" action="/v0.6/ejecuciones" data-execution-form>
@@ -16,7 +16,7 @@
 <div class="table-scroll" tabindex="0" role="region" aria-label="Búsquedas disponibles"><table class="execution-table"><thead><tr><th scope="col">Seleccionar</th><th scope="col">Búsqueda y criterios</th><th scope="col">Fuente / estado</th><th scope="col">Última ejecución</th><th scope="col">Carga estimada</th></tr></thead><tbody>
 {% for b in searches %}<tr><td><label class="execution-check"><input type="checkbox" name="search" value="{{b.token}}" data-search data-active="{{'1' if b.activa else '0'}}" {% if not b.activa or active or not configured %}disabled{% endif %}><span class="sr-only">Seleccionar {{b.nombre}}</span></label></td>
 <th scope="row">{{b.nombre}}<small class="execution-criteria">{{b.summary}}</small></th><td>{{b.fuente}}<small class="tag {{'verified' if b.activa else 'verify'}}">{{'Activa' if b.activa else 'Inactiva · no ejecutable'}}</small></td>
-<td>{% if b.last %}{{b.last.started|fecha}}<small>{{duration(b.last.duration)}} · {{labels.get(b.last.status,b.last.status)}}{% if b.last.scope is defined and b.last.scope == 'captura compartida' %}<br>Captura compartida: {{duration(b.last.technical_duration)}}; duración individual no disponible.{% endif %}</small>{% else %}Sin ejecuciones registradas{% endif %}</td>
+<td>{% if b.last %}{{b.last.started|fecha}}<small>{{duration(b.last.duration)}} · {{b.last_label or labels.get(b.last.status,b.last.status)}}{% if b.last.scope is defined and b.last.scope == 'captura compartida' %}<br>Captura compartida: {{duration(b.last.technical_duration)}}; duración individual no disponible.{% endif %}</small>{% else %}Sin ejecuciones registradas{% endif %}</td>
 <td>{{b.measurement.load}}{% if b.measurement.range %}<small>{{duration(b.measurement.range[0])}} a {{duration(b.measurement.range[1])}}</small>{% endif %}</td></tr>{% endfor %}
 </tbody></table></div>
 <p class="notice" role="alert" data-start-error hidden></p>

@@ -51,6 +51,7 @@ class EstadoGCS:
             from google.cloud import storage
             client = storage.Client()  # ADC: identidad del Job, sin claves JSON.
         self.bucket = client.bucket(bucket)
+        self.objeto = objeto
         self.estado = self.bucket.blob(objeto)
         self.lock = self.bucket.blob(objeto + '.lock')
         self.generacion = 0
@@ -77,6 +78,7 @@ class EstadoGCS:
         return self
 
     def cargar(self, carpeta):
+        self.estado = self.bucket.blob(self.objeto)
         self.estado.reload(timeout=30)
         self.generacion = int(self.estado.generation)
         restaurar(self.estado.download_as_bytes(if_generation_match=self.generacion, timeout=120), carpeta)
@@ -85,16 +87,18 @@ class EstadoGCS:
         # Nunca guardar tras perder la propiedad del bloqueo compartido.
         if self.lock_generacion is None:
             raise RuntimeError('Bloqueo durable no adquirido')
-        self.lock.reload(timeout=15)
-        if int(self.lock.generation) != int(self.lock_generacion):
+        live = self.bucket.blob(self.objeto + ".lock")
+        live.reload(timeout=15)
+        if int(live.generation) != int(self.lock_generacion):
             raise RuntimeError('Se perdió el bloqueo durable')
 
     def guardar(self, carpeta):
         self.asegurar_bloqueo()
+        self.estado = self.bucket.blob(self.objeto)
         self.estado.upload_from_string(empaquetar(Path(carpeta).resolve()), content_type='application/gzip',
                                       if_generation_match=self.generacion, timeout=120)
         self.generacion = int(self.estado.generation)
 
     def __exit__(self, *args):
         if self.lock_generacion is not None:
-            self.lock.delete(if_generation_match=self.lock_generacion, timeout=30)
+            self.bucket.blob(self.objeto + ".lock").delete(if_generation_match=self.lock_generacion, timeout=30)

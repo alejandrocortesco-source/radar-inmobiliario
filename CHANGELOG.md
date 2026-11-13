@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.12.2 — 2026-11-13
+
+- Corregir lectura de generaciones GCS y comprobación del bloqueo vigente; los
+  reintentos CAS recuperan cambios concurrentes en vez de releer una versión anterior.
+- Consultar el progreso sin escrituras web sobre un trabajador activo, compatible
+  con la imagen existente del Job. Mantenimiento protegido también por CAS.
+- Reconciliar cierres con Cloud Run y distinguir actividad confirmada de estado por
+  verificar, con nombre, hora, seguimiento y referencias técnicas en detalle.
+- Pruebas sintéticas con el SDK real y objetos versionados, carreras, locks vivos,
+  lanzamientos inciertos y actualización del aviso en escritorio, tablet y móvil.
+
 ## 0.12.1 — 2026-11-13
 
 Radar Central sustituye el recuadro Agregar fuente de Inicio y el nombre visible

@@ -1,4 +1,4 @@
-# Radar Central — ejecución manual v0.12.1
+# Radar Central — ejecución manual v0.12.2
 
 Implementación en el clon independiente `Radar-CloudRun-20261111/repo`, rama
 `codex/ejecuciones-manuales`, por autorización del 13 de noviembre de 2026.
@@ -59,7 +59,7 @@ Un lanzamiento que pierde respuesta queda incierto, sin reintento automático.
 Solo un CLOUD_RUN_EXECUTION puede reclamar el UUID; duplicados, reintentos y Jobs
 tardíos tras el cierre de la reserva salen antes de tocar SQLite o el portal.
 
-Mientras hay ejecución activa, una consulta como máximo cada 60 s contrasta
+Mientras hay una reserva activa, una consulta como máximo cada 60 s por proceso web contrasta
 Cloud Run (referencia exacta del trabajador o lista paginada filtrada por RADAR_RUN_ID).
 Se consulta el Job guardado en el registro, aunque una revisión posterior configure
 otro Job. Una reclamación concurrente invalida el cierre; primero se revoca la
@@ -69,6 +69,25 @@ sin cierre confirmado queda interrumpido. Si no aparece ningún Job después de
 10 min y la consulta remota fue exitosa, se cierra y revoca la reserva: un lanzamiento
 tardío no podrá capturar. Una caída de la API conserva la reserva y muestra el
 problema; no autoriza otro lanzamiento. No se reutiliza la solicitud incierta.
+La web no escribe acknowledgements del lanzamiento, marcas de consulta ni retención
+sobre un registro activo. La reserva durable queda Solicitando Job hasta la reclamación
+del trabajador; una respuesta incierta conserva esa reserva y se verifica por UUID,
+sin volver a lanzar. La referencia del Job/trabajador permite consultar el resultado;
+la operación HTTP puede quedar sin referencia si su respuesta no se conserva.
+La observación remota se almacena solo en una caché de lectura de hasta 60 s, nunca
+como autorización para repetir el lanzamiento. Retención y proyección de búsquedas
+exigen ausencia de reservas activas dentro del mismo CAS, incluso después de una
+carrera. Así se conserva compatibilidad con la imagen de Job anterior, que mantiene
+un handle de Blob fijado a su última generación. El adaptador corregido usa un handle
+nuevo para leer la generación vigente en cada lectura/reintento y validar el lock vivo.
+
+Actualización en curso requiere confirmación de Cloud Run. Si falta, el aviso dice
+Verificando el estado de una actualización anterior, con nombre, fuente, hora y
+seguimiento; el UUID y referencias quedan en Detalle técnico. El sondeo actualiza
+ambos mensajes. Una lectura incierta nunca convierte antigüedad en permiso para
+liberar el bloqueo. Un cierre terminal conserva la fecha real de Cloud Run y distingue
+interrupción de guardado durable confirmado.
+
 La reconciliación es oportunista al consultar/iniciar; sin visitas no consume
 recursos ni crea Scheduler. La siguiente visita recupera el estado real.
 

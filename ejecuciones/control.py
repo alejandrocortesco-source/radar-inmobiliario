@@ -52,14 +52,20 @@ class ControlGCS:
         if client is None:
             from google.cloud import storage
             client = storage.Client()
-        self.blob = client.bucket(bucket or os.environ['RADAR_STATE_BUCKET']).blob(
-            objeto or os.getenv('RADAR_CONTROL_OBJECT', 'radar/executions/control.json'))
+        self.bucket = client.bucket(bucket or os.environ['RADAR_STATE_BUCKET'])
+        self.objeto = objeto or os.getenv('RADAR_CONTROL_OBJECT', 'radar/executions/control.json')
+
+    @property
+    def blob(self):
+        # Un handle reutilizado conserva ?generation=... incluso al hacer reload.
+        return self.bucket.blob(self.objeto)
 
     def read(self):
+        blob = self.blob
         try:
-            self.blob.reload(timeout=10)
-            generation = int(self.blob.generation)
-            raw = self.blob.download_as_bytes(if_generation_match=generation, timeout=15)
+            blob.reload(timeout=10)
+            generation = int(blob.generation)
+            raw = blob.download_as_bytes(if_generation_match=generation, timeout=15)
         except NotFound:
             return empty(), 0
         doc = json.loads(raw)
@@ -67,10 +73,12 @@ class ControlGCS:
             raise IntegrityError('Registro de ejecuciones incompatible')
         return doc, generation
 
-    def change(self, mutate):
+    def change(self, mutate, *, idle_only=False):
         for attempt in range(8):
             try:
                 doc, generation = self.read()
+                if idle_only and any(r['status'] in ACTIVE for r in doc['runs']):
+                    return None
                 before = copy.deepcopy(doc)
                 result = mutate(doc)
                 prune(doc)

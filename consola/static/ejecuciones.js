@@ -45,6 +45,7 @@ async function poll() {
     const data = await response.json();
     // HTML renderizado y escapado por Jinja en una ruta del mismo origen.
     report.innerHTML = data.html;
+    document.querySelector('[data-active-notice]').innerHTML = data.notice_html;
     document.querySelector('[data-execution-history]').innerHTML = data.history_html;
     message.textContent = 'Seguimiento actualizado. Las consultas se pausan al ocultar esta pestaña.';
     if (!data.active) {active = false; location.replace(location.href); return;}

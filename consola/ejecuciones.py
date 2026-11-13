@@ -45,18 +45,35 @@ def remaining(doc, run):
     return f'Tiempo restante orientativo: {duration(low)} a {duration(high)}. Depende del portal y del volumen.'
 
 
+def tracking(run):
+    if not run or run['status'] not in ACTIVE:
+        return None
+    confirmed = run.get('verification', {}).get('state') == 'active'
+    names = [b['nombre'] + ' · ' + b['fuente'] for b in run['searches'] if b['status'] == 'running']
+    if not names:
+        names = [b['nombre'] + ' · ' + b['fuente'] for b in run['searches'][:2]]
+    return {'confirmed': confirmed,
+            'title': 'Actualización en curso' if confirmed else 'Verificando el estado de una actualización anterior',
+            'names': '; '.join(names),
+            'state': LABELS.get(run['status'], run['status']) if confirmed else 'Cierre o lanzamiento por confirmar'}
+
+
 def context(doc, requested=None):
     runs = sorted(doc['runs'], key=lambda r: r['created'], reverse=True)
     active = next((r for r in runs if r['status'] in ACTIVE), None)
     run = next((r for r in runs if r['id'] == requested), None) if requested else (active or (runs[0] if runs else None))
     searches = []
     for b in doc['searches']:
-        history = next((s for r in runs for s in r['searches'] if (s['fuente'], s['id_busqueda']) == (b['fuente'], b['id_busqueda']) and s.get('started')), None)
+        entry = next(((r,s) for r in runs for s in r['searches'] if (s['fuente'], s['id_busqueda']) == (b['fuente'], b['id_busqueda']) and s.get('started')), None)
+        history = entry[1] if entry else None
+        last_tracking = tracking(entry[0]) if entry else None
+        last_label = 'Por verificar' if last_tracking and not last_tracking['confirmed'] else None
         searches.append(dict(b, token=json.dumps([b['fuente'], b['id_busqueda']], ensure_ascii=False),
-                             measurement=measurements(doc, b), last=history or b.get('legacy_last')))
+                             measurement=measurements(doc, b), last=history or b.get('legacy_last'), last_label=last_label))
     totals = {k: (sum(b[k] for b in run['searches']) if all(b.get(k) is not None for b in run['searches']) else None) for k in ('processed','new','changed','unchanged')} if run else {}
     return {'totals': totals, 'searches': searches, 'runs': runs, 'active': active, 'run': run,
-            'labels': LABELS, 'duration': duration, 'age': age,
+            'labels': LABELS, 'duration': duration, 'age': age, 'tracking': tracking,
+            'active_tracking': tracking(active), 'run_tracking': tracking(run),
             'remaining': remaining(doc, run), 'catalog_updated': doc.get('catalog_updated')}
 
 
@@ -167,7 +184,8 @@ def crear_router():
             ctx['request'] = request
             html = templates.env.get_template('_ejecucion06.html').render(ctx)
             history = templates.env.get_template('_ejecuciones_historial06.html').render(ctx)
-            return JSONResponse({'active': ctx['active']['id'] if ctx['active'] else None, 'run': ctx['run'], 'html': html, 'history_html': history},
+            notice = templates.env.get_template('_ejecucion_aviso06.html').render(ctx)
+            return JSONResponse({'active': ctx['active']['id'] if ctx['active'] else None, 'run': ctx['run'], 'html': html, 'history_html': history, 'notice_html': notice},
                                 headers={'Cache-Control': 'no-store'})
         except Exception:
             return JSONResponse({'detail': 'Seguimiento temporalmente no disponible; esto no significa que el Job haya fallado.'}, 503, headers={'Cache-Control': 'no-store'})
