@@ -112,7 +112,9 @@ def projection(repo, folder=None):
         summary = b['url']
         if b['fuente'] == 'wasi':
             config = repo.configuracion_wasi(b['id_busqueda']) or {}
-            summary = ' · '.join(str(v) for v in config.get('filtros', {}).values() if v) or b['url']
+            from catalogo.fuentes.wasi import LABELS
+            labels = config.get('etiquetas', {})
+            summary = ' · '.join(f"{LABELS.get(k, k)}: {labels.get(k) or v}" for k, v in config.get('filtros', {}).items() if v) or b['url']
         rows.append({k: b[k] for k in ('fuente', 'id_busqueda', 'nombre', 'url', 'activa')} | {'summary': summary[:700]})
     if folder is not None:
         from .mediciones import previous

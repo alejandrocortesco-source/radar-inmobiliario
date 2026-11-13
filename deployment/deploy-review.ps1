@@ -15,7 +15,8 @@ $job='radar-manual-review'
 # Crear solo el Job manual nuevo. No ejecutar ni sustituir los tres Jobs anteriores.
 & $cloud run jobs create $job --project=$project --region=$region --image=$JobsDigest --service-account=radar-jobs@radar-inmobiliario-co.iam.gserviceaccount.com --tasks=1 --parallelism=1 --max-retries=0 --task-timeout=10800 --cpu=1 --memory=2Gi '--args=--execution,00000000-0000-0000-0000-000000000000' '--set-env-vars=RADAR_STATE_BUCKET=radar-inmobiliario-co-state,RADAR_STATE_OBJECT=radar/state.tar.gz,RADAR_CONTROL_OBJECT=radar/executions/control.json,RADAR_EXECUTION_JOB=radar-manual-review,RADAR_DATA_DIR=/data,PYTHONPATH=/app:/app/scraper,WASI_USER_FILE=/secrets/wasi-user/value,WASI_PASSWORD_FILE=/secrets/wasi-password/value' '--set-secrets=/secrets/wasi-user/value=wasi-user:1,/secrets/wasi-password/value=wasi-password:1' --labels="app=radar,source-sha=$($SourceSha.Substring(0,12))" --quiet
 if($LASTEXITCODE -ne 0){throw 'Job manual no creado: revisar antes de reemplazar recursos existentes'}
-& $cloud iam roles create radarManualExecution --project=$project --file=(Join-Path $PSScriptRoot 'manual-job-role.json') --quiet
+$roleFile=Join-Path $PSScriptRoot 'manual-job-role.json'
+& $cloud iam roles create radarManualExecution --project=$project "--file=$roleFile" --quiet
 if($LASTEXITCODE -ne 0){throw 'Rol no creado: revisar antes de reutilizar uno existente'}
 & $cloud run jobs add-iam-policy-binding $job --project=$project --region=$region --member=serviceAccount:radar-web@radar-inmobiliario-co.iam.gserviceaccount.com --role=projects/radar-inmobiliario-co/roles/radarManualExecution --quiet
 if($LASTEXITCODE -ne 0){throw 'Permiso de ejecución no confirmado'}
