@@ -7,6 +7,7 @@ Una sola carpeta de trabajo y un solo repositorio: no crear carpetas como copias
 | Ubicación | Contenido | Conservación |
 | --- | --- | --- |
 | Raíz | README, instrucciones, decisiones y política Git | Versionado; puntos de entrada estables |
+| `ejecuciones/` | Control GCS, lanzamiento, reconciliación y orquestación manual de Jobs | Versionado; persistencia separada del snapshot |
 | `catalogo/` | Modelo común, filtros, identidad, geografía, adaptadores y pruebas | Versionado; no mover por cambios de versión |
 | `consola/` | FastAPI, Jinja2, CSS, JavaScript, pruebas y herramientas de interfaz | Versionado; conservar imports, plantillas y rutas |
 | `oportunidades/` | Clientes, necesidades, matching, decisiones y proveedor Gemini | Versionado; reglas separadas de presentación |

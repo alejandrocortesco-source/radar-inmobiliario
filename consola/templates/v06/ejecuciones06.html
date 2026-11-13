@@ -1,0 +1,32 @@
+{% extends "base06.html" %}
+{% block title %}Ejecuciones{% endblock %}
+{% block content %}
+<script src="/consola/static/ejecuciones.js" defer></script>
+<div class="page-heading"><div><p class="eyebrow">Actualización del catálogo</p><h1>Ejecuciones</h1><p class="muted">Selecciona búsquedas guardadas y consulta su captura e informe.</p></div></div>
+{% if error %}<div class="notice" role="alert">{{error}}</div>{% endif %}
+{% if warning %}<div class="notice" role="status">{{warning}}</div>{% endif %}
+<p class="notice">Las búsquedas amplias y frecuentes pueden aumentar el consumo y el costo de operación. La primera ejecución puede tardar más.</p>
+{% if active %}<p class="notice" data-active-notice>Hay una ejecución incompatible en curso: <a href="/v0.6/ejecuciones?run={{active.id}}">{{active.id}}</a>. Espera su cierre confirmado antes de iniciar otra. El seguimiento sigue disponible aunque cierres esta página.</p>{% endif %}
+<section class="tile execution-section" aria-labelledby="searches-title"><div class="tile-heading"><h2 id="searches-title">Búsquedas guardadas</h2><a href="/v0.6/#agregar-fuente">Agregar o editar búsquedas</a></div>
+<p class="caption">Guardar o editar una búsqueda no inicia scraping. Se ejecutarán únicamente las seleccionadas, en secuencia. {% if catalog_updated %}Lista comprobada: {{catalog_updated|fecha}} (America/Bogota).{% endif %}</p>
+<form method="post" action="/v0.6/ejecuciones" data-execution-form>
+<input type="hidden" name="request_id" value="{{request_id}}">
+{% if searches %}
+<label class="execution-check execution-select-all"><input type="checkbox" data-select-all {% if active or not configured %}disabled{% endif %}>Seleccionar todas las búsquedas activas</label>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Búsquedas disponibles"><table class="execution-table"><thead><tr><th scope="col">Seleccionar</th><th scope="col">Búsqueda y criterios</th><th scope="col">Fuente / estado</th><th scope="col">Última ejecución</th><th scope="col">Carga estimada</th></tr></thead><tbody>
+{% for b in searches %}<tr><td><label class="execution-check"><input type="checkbox" name="search" value="{{b.token}}" data-search data-active="{{'1' if b.activa else '0'}}" {% if not b.activa or active or not configured %}disabled{% endif %}><span class="sr-only">Seleccionar {{b.nombre}}</span></label></td>
+<th scope="row">{{b.nombre}}<small class="execution-criteria">{{b.summary}}</small></th><td>{{b.fuente}}<small class="tag {{'verified' if b.activa else 'verify'}}">{{'Activa' if b.activa else 'Inactiva · no ejecutable'}}</small></td>
+<td>{% if b.last %}{{b.last.started|fecha}}<small>{{duration(b.last.duration)}} · {{labels.get(b.last.status,b.last.status)}}{% if b.last.scope is defined and b.last.scope == 'captura compartida' %}<br>Captura compartida: {{duration(b.last.technical_duration)}}; duración individual no disponible.{% endif %}</small>{% else %}Sin ejecuciones registradas{% endif %}</td>
+<td>{{b.measurement.load}}{% if b.measurement.range %}<small>{{duration(b.measurement.range[0])}} a {{duration(b.measurement.range[1])}}</small>{% endif %}</td></tr>{% endfor %}
+</tbody></table></div>
+<p class="notice" role="alert" data-start-error hidden></p>
+<div class="capture-actions"><button type="submit" disabled data-start>Iniciar ejecución</button><p class="caption" data-selection-status role="status">Selecciona al menos una búsqueda activa.</p></div>
+<noscript><p class="notice">Activa JavaScript para seleccionar e iniciar una ejecución. Puedes consultar los informes recargando esta página.</p></noscript>
+{% else %}<p class="empty">No hay búsquedas guardadas disponibles. Guarda una desde Inicio para poder ejecutarla por primera vez.</p>{% endif %}
+</form>
+<details><summary>Criterios de carga y duración</summary><p class="caption">Orientación relativa, sin cálculo de facturación. Se usan hasta cinco ejecuciones completas y guardadas de la misma búsqueda: liviana si todas duran menos de 3 min y procesan menos de 100 anuncios; moderada desde 3 min o 100 anuncios; pesada desde 15 min o 500 anuncios. Sin mediciones: por estimar. Un rango exige tres ejecuciones comparables; depende del portal y del volumen.</p></details>
+</section>
+<p class="caption" data-poll-message role="status"></p>
+<div data-execution-report data-active-run="{{active.id if active else ''}}" data-report-run="{{run.id if run else ''}}">{% include '_ejecucion06.html' %}</div>
+<section class="tile execution-section" aria-labelledby="history-title"><h2 id="history-title">Historial y mantenimiento</h2><p class="caption">Hasta 30 días, 100 registros terminados y 2 MB de registro de control. Las ejecuciones activas se conservan. Esta limpieza no borra el catálogo.</p><div data-execution-history>{% include '_ejecuciones_historial06.html' %}</div></section>
+{% endblock %}

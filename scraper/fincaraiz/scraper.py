@@ -1,5 +1,6 @@
 """Tercera fuente sobre el motor incremental común de Radar."""
 import asyncio
+import sqlite3
 import hashlib
 import json
 import os
@@ -146,6 +147,8 @@ class FincaraizScraper(Scraper):
                     self.store.result(self.run_id, job['property_id'], 'blocked', error='fincaraiz_access_blocked')
                     self.stopping.set(); return
                 except Exception as exc:
+                    if isinstance(exc, (sqlite3.Error, OSError)):
+                        raise
                     self.store.result(self.run_id, job['property_id'], 'failed', error=type(exc).__name__)
                     if attempt < self.cfg.retries:
                         await asyncio.sleep(min(2 ** attempt, 8))

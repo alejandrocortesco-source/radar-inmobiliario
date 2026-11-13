@@ -1,6 +1,20 @@
-# Radar Inmobiliario — documento rector v0.11.0
+# Radar Inmobiliario — documento rector v0.12.0
 
 La especificación funcional del usuario de 3 de noviembre de 2026 gobierna esta entrega. El producto acompaña el trabajo de Mónica con unos 30 clientes activos. Debe permanecer sencillo y de bajo mantenimiento; el objetivo de operación inferior a US$10/mes está **pendiente de validación de consumo y alojamiento**, no es una garantía.
+
+## Ejecuciones manuales — 13 de noviembre de 2026
+
+La solicitud actual autoriza v0.12.0 exclusivamente en el clon independiente
+Radar-CloudRun-20261111/repo, con rama de funcionalidad y revisión privada sin tráfico.
+Prevalece sobre la regla general de desarrollo en develop para esta entrega; no
+restaura código histórico. Añade `/v0.6/ejecuciones` a la navegación, conserva las
+cuatro secciones de Inicio y reutiliza los scrapers/Jobs y las identidades actuales.
+Selección estricta de búsquedas activas, Job secuencial, progreso/control GCS
+separado del snapshot, idempotencia, reconciliación, informe y retención acotada.
+No activa programación ni autoriza scraping de prueba real sin selección concreta.
+La revisión comparte datos y bloqueo con producción. Diseño, métricas, permisos,
+límites y reversión: [Ejecuciones](consola/docs/EJECUCIONES.md). El resultado de
+pruebas/despliegue se documenta tras verificarlo, sin equiparar build con éxito.
 
 ## Acceso privado preparado para IAP (11 de noviembre de 2026)
 

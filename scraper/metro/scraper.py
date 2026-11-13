@@ -1,4 +1,5 @@
 import asyncio
+import sqlite3
 import json
 import logging
 import random
@@ -279,6 +280,8 @@ class Scraper:
                     self.stopping.set()
                     return
                 except Exception as exc:
+                    if isinstance(exc, (sqlite3.Error, OSError)):
+                        raise
                     self.store.result(self.run_id,job['property_id'],'failed',error=str(exc)[:2000])
                     self.event('detail_error',{'id':job['property_id'],'error':str(exc)[:1000]},'error')
         finally:
@@ -368,6 +371,8 @@ class Scraper:
                         except Restricted:
                             raise
                         except Exception as exc:
+                            if isinstance(exc, (sqlite3.Error, OSError)):
+                                raise
                             # Una búsqueda incompleta impide contar ausencias en toda la ejecución.
                             self.event('listing_incomplete',{'search_url':search['search_url'],'error':str(exc)[:1500]},'error')
                     self.store.plan_incremental(self.run_id)
@@ -392,6 +397,8 @@ class Scraper:
             self.store.update_run(self.run_id,status='blocked',finished=now())
             self.event('access_restricted',{'error':str(exc)},'error')
         except BaseException as exc:
+            if isinstance(exc, (sqlite3.Error, OSError)):
+                raise
             self.store.update_run(self.run_id,status='interrupted' if isinstance(exc,(KeyboardInterrupt,asyncio.CancelledError)) else 'failed',finished=now())
             self.event('run_error',{'type':type(exc).__name__,'error':str(exc)[:1000]},'error')
             if isinstance(exc,(KeyboardInterrupt,asyncio.CancelledError)):

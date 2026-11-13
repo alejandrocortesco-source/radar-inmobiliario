@@ -173,3 +173,14 @@ Google Auth Platform. El login con la segunda cuenta queda por comprobar.
 Este cambio de infraestructura no requiere nueva imagen ni despliegue.
 La publicación en develop se hace desde el clon independiente; el repositorio
 original permanece sin modificaciones realizadas por esta operación.
+
+## Ejecuciones manuales — revisión del 13 de noviembre
+
+Procedimiento aditivo: `deploy-review.ps1`, rol mínimo `manual-job-role.json`,
+Job radar-manual-review y tag ejecuciones-review sin tráfico de producción.
+Usa los mismos snapshot, lock, identidades y secretos que producción. No es un
+sandbox de datos. Consultar no captura; iniciar exige selección concreta autorizada.
+No altera IAP/OAuth ni los tres Jobs preparados. La guía completa de estados,
+retención, permisos y reversión está en [Ejecuciones](../consola/docs/EJECUCIONES.md).
+El bloqueo web histórico descrito arriba ahora exceptúa las consultas de control,
+que leen GCS separado. El resto de operaciones mantiene el bloqueo compartido.

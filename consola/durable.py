@@ -40,7 +40,7 @@ class WebDurable:
 
     async def __call__(self, scope, receive, send):
         path = scope.get('path', '')
-        if scope['type'] != 'http' or path == '/health' or path.startswith(('/v0.4/static/', '/consola/static/')):
+        if scope['type'] != 'http' or path == '/health' or path == '/v0.6/ejecuciones' or path.startswith('/v0.6/ejecuciones/') or path.startswith(('/v0.4/static/', '/consola/static/')):
             return await self.app(scope, receive, send)
         async with self.local:
             estado = None
@@ -88,7 +88,7 @@ class WebDurable:
                     '<meta name="viewport" content="width=device-width,initial-scale=1">'
                     '<title>Radar temporalmente ocupado</title><main style="max-width:42rem;margin:10vh auto;padding:1rem;font:1.1rem system-ui">'
                     '<h1>Radar temporalmente ocupado</h1><p>' + error + '</p>'
-                    '<p><a href="/v0.6/">Volver al inicio</a></p></main></html>',
+                    '<p><a href="/v0.6/ejecuciones">Consultar ejecuciones</a> · <a href="/v0.6/">Volver al inicio</a></p></main></html>',
                     status_code=503, headers={'Retry-After': '30', 'Cache-Control': 'no-store'})
                 return await response(scope, receive, send)
             for message in mensajes:

@@ -46,6 +46,8 @@ app.include_router(crear_router(servicio))
 app.include_router(crear_router_consola(servicio))
 app.include_router(crear_router_v04(servicio))
 app.include_router(crear_router_v06(servicio))
+from consola.ejecuciones import crear_router as crear_router_ejecuciones
+app.include_router(crear_router_ejecuciones())
 app.mount('/v0.4/static', StaticFiles(directory=str(ESTATICOS_V04)), name='v04-static')
 app.mount('/consola/static', StaticFiles(directory=str(ESTATICOS)), name='consola-static')
 

@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.12.0 — 2026-11-13
+
+Entrega compatible en la rama local autorizada `codex/ejecuciones-manuales`, sin
+push, merge ni tags. Página Ejecuciones: selección estricta de búsquedas activas,
+Job durable secuencial, progreso durante el bloqueo, informe y control GCS acotado.
+Reutiliza los tres scrapers y matching determinista, con guardado remoto confirmado
+y recuperación de lanzamientos inciertos. IAP y Origin existentes; sin Scheduler.
+La revisión de prueba comparte snapshot y recursos con producción y no recibe su
+tráfico. Detalles y límites: [Ejecuciones](consola/docs/EJECUCIONES.md).
+
 ## 0.11.0 — 2026-11-11
 
 Entrega MINOR en `develop`, posterior al tag `v0.10.0` (`91802de`). Incluye el commit ya publicado `a9f6992` de matching manual/Gemini y la protección de acceso implementada posteriormente. Conserva rutas históricas, identidades y datos; etiqueta anotada `v0.11.0`.

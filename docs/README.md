@@ -1,11 +1,12 @@
 # Documentación de Radar Inmobiliario
 
-Punto de entrada a las guías y a la evidencia del proyecto. La entrega vigente es v0.11.0 — matching manual, Gemini bajo solicitud y acceso privado preparado para IAP (versionado y sincronización autorizados el 11 de noviembre de 2026); `v0.10.0` conserva la identificación supervisada anterior; las rutas heredadas no identifican la versión ni la rama de trabajo.
+Punto de entrada a las guías y a la evidencia del proyecto. La entrega de esta rama es v0.12.0 — ejecuciones manuales; v0.11.0 — matching manual, Gemini bajo solicitud y acceso privado preparado para IAP (versionado y sincronización autorizados el 11 de noviembre de 2026); `v0.10.0` conserva la identificación supervisada anterior; las rutas heredadas no identifican la versión ni la rama de trabajo.
 
 ## Referencias vigentes
 
 | Consulta | Documento |
 | --- | --- |
+| Ejecuciones manuales y revisión privada | [Guía](../consola/docs/EJECUCIONES.md) |
 | Inicio y ejecución local | [README principal](../README.md) |
 | Decisiones funcionales y límites | [Documento rector](../RADAR_PROYECTO_RECTOR.md) |
 | Instrucciones para agentes | [AGENTS.md](../AGENTS.md) |

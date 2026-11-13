@@ -74,6 +74,7 @@ async def ejecutar(carpeta, fuentes, resume_wasi=None, estado=None, resume_finca
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--execution', help='ID del registro durable de una ejecución manual')
     parser.add_argument('--data-dir', default=os.getenv('RADAR_DATA_DIR', str(paths.DEFAULT_DB.parent)))
     parser.add_argument('--source', choices=('all', 'metrocuadrado', 'wasi', 'fincaraiz'), default='all')
     parser.add_argument('--resume-wasi', type=int)
@@ -87,6 +88,11 @@ def main():
             return
         carpeta = Path(args.data_dir).resolve()
         carpeta.mkdir(parents=True, exist_ok=True)
+        if args.execution:
+            from ejecuciones.worker import run_manual
+            if not run_manual(carpeta, args.execution):
+                raise SystemExit(2)
+            return
         fuentes = ('metrocuadrado', 'wasi', 'fincaraiz') if args.source == 'all' else (args.source,)
         bucket = os.getenv('RADAR_STATE_BUCKET')
         if os.getenv('CLOUD_RUN_JOB') and not bucket:

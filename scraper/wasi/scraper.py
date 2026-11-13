@@ -1,5 +1,6 @@
 """Wasi reutiliza cola, decisiones, historial, checkpoints y ausencias de Metro."""
 import asyncio
+import sqlite3
 import hashlib
 import json
 import os
@@ -170,6 +171,8 @@ class WasiScraper(Scraper):
                                 self.store.result(self.run_id, item['id'], 'blocked', error='wasi_access_blocked')
                                 raise
                             except Exception as exc:
+                                if isinstance(exc, (sqlite3.Error, OSError)):
+                                    raise
                                 # Nada de HTML, request payloads ni excepciones
                                 # Playwright potencialmente sensibles en evidencias.
                                 self.store.result(self.run_id, item['id'], 'failed', error='wasi_' + fase + '_' + type(exc).__name__)

@@ -55,9 +55,24 @@ class EstadoGCS:
         self.lock = self.bucket.blob(objeto + '.lock')
         self.generacion = 0
         self.lock_generacion = None
+        self.lock_token = str(uuid.uuid4())
 
     def __enter__(self):
-        self.lock.upload_from_string(str(uuid.uuid4()), if_generation_match=0, timeout=30)
+        try:
+            self.lock.upload_from_string(self.lock_token, if_generation_match=0, timeout=30)
+        except Exception:
+            # Una respuesta perdida no prueba que la creación del lock haya fallado.
+            try:
+                self.lock.reload(timeout=15)
+                generation = int(self.lock.generation)
+                content = self.lock.download_as_bytes(if_generation_match=generation, timeout=15)
+                if content != self.lock_token.encode():
+                    raise RuntimeError('El bloqueo pertenece a otra operación')
+                self.lock_generacion = generation
+                return self
+            except Exception:
+                pass
+            raise
         self.lock_generacion = self.lock.generation
         return self
 
@@ -66,7 +81,16 @@ class EstadoGCS:
         self.generacion = int(self.estado.generation)
         restaurar(self.estado.download_as_bytes(if_generation_match=self.generacion, timeout=120), carpeta)
 
+    def asegurar_bloqueo(self):
+        # Nunca guardar tras perder la propiedad del bloqueo compartido.
+        if self.lock_generacion is None:
+            raise RuntimeError('Bloqueo durable no adquirido')
+        self.lock.reload(timeout=15)
+        if int(self.lock.generation) != int(self.lock_generacion):
+            raise RuntimeError('Se perdió el bloqueo durable')
+
     def guardar(self, carpeta):
+        self.asegurar_bloqueo()
         self.estado.upload_from_string(empaquetar(Path(carpeta).resolve()), content_type='application/gzip',
                                       if_generation_match=self.generacion, timeout=120)
         self.generacion = int(self.estado.generation)

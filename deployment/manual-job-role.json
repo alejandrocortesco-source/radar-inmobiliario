@@ -1,0 +1,6 @@
+{
+  "title": "Radar manual execution",
+  "description": "Launch and reconcile only the manual Radar Job; bind on that Job.",
+  "stage": "GA",
+  "includedPermissions": ["run.jobs.run", "run.jobs.runWithOverrides", "run.executions.get", "run.executions.list"]
+}
