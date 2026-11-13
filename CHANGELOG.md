@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.12.1 — 2026-11-13
+
+Radar Central sustituye el recuadro Agregar fuente de Inicio y el nombre visible
+Ejecuciones. Resume hasta tres búsquedas con estado y acceso a la ejecución manual.
+La gestión de búsquedas se abre desde Radar Central, conservando formularios,
+validaciones, endpoints POST, historial y bloqueo de escritura. Las rutas de
+seguimiento siguen operativas. No cambia scrapers, Jobs ni matching.
+
 ## 0.12.0 — 2026-11-13
 
 Entrega compatible en la rama local autorizada `codex/ejecuciones-manuales`, sin

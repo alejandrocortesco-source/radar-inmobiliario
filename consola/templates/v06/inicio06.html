@@ -11,27 +11,14 @@
 <dl class="metrics"><div class="metric-total"><dt>Total de inmuebles</dt><dd>{{indicadores.total|numero}}</dd>{% if indicadores.publicaciones != indicadores.total %}<small>{{indicadores.publicaciones}} publicaciones</small>{% endif %}</div><div class="metric-date"><dt>Última actualización exitosa</dt><dd>{{indicadores.ultima|fecha if indicadores.ultima else 'Sin actualización exitosa'}}<small>Hora de Colombia</small></dd></div><div><dt>Nuevos</dt><dd>{{indicadores.nuevos}}</dd></div><div><dt>Actualizados</dt><dd>{{indicadores.actualizados}}</dd></div><div><dt>Ausentes</dt><dd>{{indicadores.ausentes}}</dd></div></dl>
 <p class="caption">Nuevos y actualizados: última ejecución exitosa por búsqueda. Actualizados incluye cambios de precio. Ausentes cuenta inmuebles que faltan en al menos una búsqueda; pueden seguir activos en otra. La ausencia no confirma retiro ni venta.</p>
 </section>
-<section class="tile source" aria-labelledby="fuente-titulo" id="agregar-fuente" data-dashboard-section="fuente">
-<p class="eyebrow">03 / Ampliar la búsqueda</p><h2 id="fuente-titulo">Agregar fuente</h2><p class="muted">Registra una búsqueda de Metrocuadrado, Wasi o Fincaraíz para futuras actualizaciones.</p>
-{% if mensaje == 'fuente_eliminada' %}<p class="notice success" role="status">Búsqueda eliminada. Se conservaron los inmuebles y su historial.</p>{% endif %}
-{% if mensaje == 'fuente_guardada' %}<p class="notice success" role="status">Fuente guardada. No se inició una extracción.</p>{% elif mensaje == 'fuente_duplicada' %}<p class="notice" role="status">Esta búsqueda ya está registrada. Se conservó su nombre.</p>{% endif %}
-{% if fuente_error %}<p class="notice" id="fuente-error" role="alert">{{fuente_error}}</p>{% endif %}
-{% if fuente_aviso %}<p class="notice success" role="status">{{fuente_aviso}}</p>{% endif %}
-{% include '_fuente_form.html' %}
-<p class="caption">Guardar configura la búsqueda; la extracción se ejecuta por separado.</p>
-<details class="registered-sources" {% if mensaje in ('fuente_guardada', 'fuente_duplicada', 'fuente_eliminada') %}open{% endif %}>
-<summary>Búsquedas registradas ({{fuentes|length}})</summary>
-{% if fuentes %}<ul class="source-list">
-{% for fuente in fuentes %}<li data-registered-source>
-<strong>{{fuente.nombre}}</strong> <small>{{'Fincaraíz' if fuente.fuente == 'fincaraiz' else fuente.fuente|capitalize}}</small>{% if fuente.fuente == 'fincaraiz' %}<span>{{'Activa' if fuente.activa else 'Inactiva'}}</span><a href="/v0.6/?editar_fincaraiz={{fuente.id_busqueda|urlencode}}#agregar-fuente">Editar búsqueda</a><form action="/v0.6/fuentes/estado" method="post"><input type="hidden" name="fuente" value="fincaraiz"><input type="hidden" name="id_busqueda" value="{{fuente.id_busqueda}}"><button class="secondary" name="activa" value="{{'0' if fuente.activa else '1'}}">{{'Desactivar' if fuente.activa else 'Activar'}}</button></form>{% endif %}{% if fuente.fuente == 'wasi' %}<a href="/v0.6/?editar_wasi={{fuente.id_busqueda|urlencode}}#agregar-fuente">Editar filtros</a>{% endif %}<a href="{{fuente.url}}" target="_blank" rel="noopener noreferrer">{{fuente.url}}</a>
-<details class="source-delete"><summary>Eliminar búsqueda: {{fuente.nombre}}</summary>
-<p>Se quitará de las fuentes registradas para futuras ejecuciones. Los inmuebles y su historial se conservan. Una ejecución en curso o reanudada mantiene sus fuentes.</p>
-<form action="/v0.6/fuentes/eliminar" method="post">
-<input type="hidden" name="fuente" value="{{fuente.fuente}}"><input type="hidden" name="id_busqueda" value="{{fuente.id_busqueda}}">
-<button class="secondary" type="submit" name="confirmar" value="1">Confirmar eliminación</button>
-</form></details></li>{% endfor %}</ul>
-{% else %}<p class="caption">No hay búsquedas registradas. Agrega una URL para empezar.</p>{% endif %}
-</details>
+<section class="tile source radar-central" aria-labelledby="radar-titulo" data-dashboard-section="radar-central">
+<div class="tile-heading"><div><p class="eyebrow">03 / Tu radar en marcha</p><h2 id="radar-titulo">Radar Central</h2></div><a class="button secondary" href="/v0.6/ejecuciones">Abrir Radar Central <span aria-hidden="true">→</span></a></div>
+<p class="muted">Las búsquedas más recientes y su último estado.</p>
+{% if radar_busquedas %}<ul class="radar-recent" aria-label="Búsquedas recientes">
+{% for b in radar_busquedas %}<li><div><a href="{{b.href}}">{{b.nombre}}</a><small>{{'Fincaraíz' if b.fuente == 'fincaraiz' else b.fuente|capitalize}}{% if b.fecha %} · {{b.fecha|fecha}}{% endif %}</small></div><span class="tag {{b.clase}}">{{b.estado}}</span></li>{% endfor %}
+</ul>{% else %}<p class="empty">Aún no hay búsquedas guardadas. Agrega la primera desde Radar Central.</p>{% endif %}
+{% if radar_aviso %}<p class="caption">{{radar_aviso}}</p>{% endif %}
+<p class="caption">Consulta el progreso, revisa informes y agrega búsquedas en Radar Central.</p>
 </section>
 <section class="tile new-client" aria-labelledby="nuevo-titulo" data-dashboard-section="nuevo-cliente">
 <p class="eyebrow">04 / Una nueva necesidad</p><h2 id="nuevo-titulo">Nuevo cliente</h2><p>Registra a quién acompañas y qué está buscando. Sus coincidencias tendrán un espacio propio.</p><a class="button primary" href="/v0.6/nuevo">Registrar cliente y necesidad <span aria-hidden="true">→</span></a><p class="caption">También puedes seleccionar un cliente existente.</p>

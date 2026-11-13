@@ -383,6 +383,7 @@ def test_tabla_matching_orden_pagina_y_ficha(pagina, servidor, ancho):
     pagina.get_by_role('link', name='Ordenar matching por Precio', exact=True).click()
     pagina.get_by_role('link', name='Ordenar matching por Precio', exact=True).click()
     expect(pagina.locator('.matching-table tbody tr').first).to_have_attribute('data-match-id', '13-M13')
+    pagina.wait_for_load_state('load')  # Medir después de cargar los estilos de la navegación.
     assert pagina.evaluate('document.documentElement.scrollWidth <= innerWidth')
     if ancho == 390:
         assert pagina.locator('[data-match-scroll]').evaluate('(e) => e.scrollWidth > e.clientWidth')

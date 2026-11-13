@@ -471,9 +471,9 @@ def test_browser_states_selection_focus_and_no_page_overflow(execution, chromium
     def verify(name):
         page.goto('http://127.0.0.1/v0.6/ejecuciones')
         page.wait_for_load_state('networkidle')
-        assert page.locator('h1').inner_text() == 'Ejecuciones'
+        assert page.locator('h1').inner_text() == 'Radar Central'
         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
-        assert page.locator('nav a[aria-current="page"]').inner_text() == 'Ejecuciones'
+        assert page.locator('nav a[aria-current="page"]').inner_text() == 'Radar Central'
         page.keyboard.press('Tab')
         assert page.locator(':focus').count() == 1
         out = Path.cwd() / '.tmp' / 'ejecuciones-visual'

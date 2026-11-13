@@ -1,13 +1,13 @@
 {% extends "base06.html" %}
-{% block title %}Ejecuciones{% endblock %}
+{% block title %}Radar Central{% endblock %}
 {% block content %}
 <script src="/consola/static/ejecuciones.js" defer></script>
-<div class="page-heading"><div><p class="eyebrow">Actualización del catálogo</p><h1>Ejecuciones</h1><p class="muted">Selecciona búsquedas guardadas y consulta su captura e informe.</p></div></div>
+<div class="page-heading"><div><p class="eyebrow">Actualización del catálogo</p><h1>Radar Central</h1><p class="muted">Selecciona búsquedas guardadas y consulta su captura e informe.</p></div></div>
 {% if error %}<div class="notice" role="alert">{{error}}</div>{% endif %}
 {% if warning %}<div class="notice" role="status">{{warning}}</div>{% endif %}
 <p class="notice">Las búsquedas amplias y frecuentes pueden aumentar el consumo y el costo de operación. La primera ejecución puede tardar más.</p>
 {% if active %}<p class="notice" data-active-notice>Hay una ejecución incompatible en curso: <a href="/v0.6/ejecuciones?run={{active.id}}">{{active.id}}</a>. Espera su cierre confirmado antes de iniciar otra. El seguimiento sigue disponible aunque cierres esta página.</p>{% endif %}
-<section class="tile execution-section" aria-labelledby="searches-title"><div class="tile-heading"><h2 id="searches-title">Búsquedas guardadas</h2><a href="/v0.6/#agregar-fuente">Agregar o editar búsquedas</a></div>
+<section class="tile execution-section" aria-labelledby="searches-title"><div class="tile-heading"><h2 id="searches-title">Búsquedas guardadas</h2><a class="button secondary" href="/v0.6/ejecuciones/busquedas">Agregar búsquedas <span aria-hidden="true">+</span></a></div>
 <p class="caption">Guardar o editar una búsqueda no inicia scraping. Se ejecutarán únicamente las seleccionadas, en secuencia. {% if catalog_updated %}Lista comprobada: {{catalog_updated|fecha}} (America/Bogota).{% endif %}</p>
 <form method="post" action="/v0.6/ejecuciones" data-execution-form>
 <input type="hidden" name="request_id" value="{{request_id}}">
@@ -22,7 +22,7 @@
 <p class="notice" role="alert" data-start-error hidden></p>
 <div class="capture-actions"><button type="submit" disabled data-start>Iniciar ejecución</button><p class="caption" data-selection-status role="status">Selecciona al menos una búsqueda activa.</p></div>
 <noscript><p class="notice">Activa JavaScript para seleccionar e iniciar una ejecución. Puedes consultar los informes recargando esta página.</p></noscript>
-{% else %}<p class="empty">No hay búsquedas guardadas disponibles. Guarda una desde Inicio para poder ejecutarla por primera vez.</p>{% endif %}
+{% else %}<p class="empty">No hay búsquedas guardadas disponibles. Agrega una búsqueda para poder ejecutarla por primera vez.</p>{% endif %}
 </form>
 <details><summary>Criterios de carga y duración</summary><p class="caption">Orientación relativa, sin cálculo de facturación. Se usan hasta cinco ejecuciones completas y guardadas de la misma búsqueda: liviana si todas duran menos de 3 min y procesan menos de 100 anuncios; moderada desde 3 min o 100 anuncios; pesada desde 15 min o 500 anuncios. Sin mediciones: por estimar. Un rango exige tres ejecuciones comparables; depende del portal y del volumen.</p></details>
 </section>

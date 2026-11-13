@@ -143,7 +143,7 @@ def test_formulario_wasi_responsivo_dependiente_y_sin_js(servidor,chromium,tmp_p
     context=chromium.new_context(viewport={'width':width,'height':900},java_script_enabled=javascript)
     page=context.new_page()
     try:
-        page.goto(servidor+'/v0.6/')
+        page.goto(servidor+'/v0.6/ejecuciones/busquedas')
         page.locator('[name=fuente]').select_option('wasi')
         if not javascript:
             page.get_by_role('button',name='Actualizar formulario').click()
@@ -162,7 +162,7 @@ def test_formulario_wasi_responsivo_dependiente_y_sin_js(servidor,chromium,tmp_p
         assert page.evaluate("document.activeElement.textContent.includes('Guardar fuente')")
         page.get_by_role('button',name='Guardar fuente').click()
         expect(page.locator('[data-registered-source]')).to_have_count(1)
-        assert page.locator('[data-dashboard-section]').count()==4
+        expect(page.get_by_role('heading', name='Agregar búsquedas', exact=True)).to_be_visible()
         page.wait_for_load_state('load')
         assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
         page.locator('[data-registered-source] a',has_text='Editar filtros').click()

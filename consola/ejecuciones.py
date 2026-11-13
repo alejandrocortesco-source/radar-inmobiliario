@@ -60,6 +60,52 @@ def context(doc, requested=None):
             'remaining': remaining(doc, run), 'catalog_updated': doc.get('catalog_updated')}
 
 
+def _control_dashboard():
+    # El dashboard ya está dentro de WebDurable: no restaurar otro snapshot aquí.
+    if not os.getenv('K_SERVICE') or not os.getenv('RADAR_STATE_BUCKET'):
+        return {'runs': [], 'searches': []}
+    return ServicioEjecuciones().control.read()[0]
+
+
+def resumen_dashboard(catalogo):
+    from ejecuciones.mediciones import previous
+    from pathlib import Path
+    aviso = None
+    try:
+        doc = _control_dashboard()
+    except Exception:
+        doc = {'runs': [], 'searches': []}
+        aviso = 'El seguimiento no está disponible temporalmente. Se muestra la última captura conocida.'
+    rows = []
+    for b in catalogo.listar_busquedas():
+        last = None
+        run = None
+        for r in sorted(doc['runs'], key=lambda r: r['created'], reverse=True):
+            found = next((x for x in r['searches'] if (x['fuente'],x['id_busqueda']) == (b['fuente'],b['id_busqueda'])), None)
+            if found:
+                last, run = found, r
+                break
+        if last is None and catalogo.busquedas:
+            last, _ = previous(Path(catalogo.busquedas.ruta).parent, b)
+        state = last['status'] if last else None
+        active = run is not None and run['status'] in ACTIVE
+        if not b.get('activa', True):
+            label, cls = 'Inactiva', ''
+        elif active:
+            label, cls = ('Por verificar' if age(run['updated']) > 120 else ('En espera' if state == 'pending' else LABELS.get(state, 'En ejecución'))), 'verify'
+        elif state == 'running':
+            label, cls = 'Sin cierre confirmado', 'verify'
+        else:
+            label = LABELS.get(state, 'Sin ejecutar')
+            cls = 'verified' if state == 'completed' else ('verify' if state in {'failed','partial','interrupted'} else '')
+        date = (last.get('started') or last.get('finished') or (run.get('created') if run else None)) if last else None
+        rows.append(dict(b, estado=label, clase=cls, fecha=date,
+                         href=PATH + ('?run=' + run['id'] if run else ''),
+                         prioridad=2 if active else (1 if last is None and b.get('activa',True) else 0)))
+    rows.sort(key=lambda b:(b['prioridad'],b['fecha'] or '',b['nombre']), reverse=True)
+    return rows[:3], aviso
+
+
 def crear_router():
     router = APIRouter(prefix=PATH, include_in_schema=False)
 

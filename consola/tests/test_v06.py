@@ -52,7 +52,7 @@ def test_dashboard_cuatro_secciones_contadores_y_catalogo_inalterado(escenario06
     antes = hashlib.sha256(escenario_consola['ruta'].read_bytes()).hexdigest()
     soup = BeautifulSoup(c.get('/v0.6/').text, 'html.parser')
     assert len(soup.select('main section')) == 4
-    assert [n['data-dashboard-section'] for n in soup.select('main section')] == ['oportunidades', 'catalogo', 'fuente', 'nuevo-cliente']
+    assert [n['data-dashboard-section'] for n in soup.select('main section')] == ['oportunidades', 'catalogo', 'radar-central', 'nuevo-cliente']
     assert [n.text.strip() for n in soup.select('.metrics dd')][0] == '26'
     assert '03/11/2026 · 11:11' in soup.select_one('.metric-date').text
     assert soup.select('.metrics dd')[2].text == '26'
@@ -176,7 +176,7 @@ def test_url_por_tipos_desde_formulario_chromium(servidor, pagina, escenario_con
     antes = escenario_consola['ruta'].read_bytes()
     for ancho, alto in [(1440, 900), (768, 1024)]:
         pagina.set_viewport_size({'width':ancho, 'height':alto})
-        pagina.goto(servidor+'/v0.6/')
+        pagina.goto(servidor+'/v0.6/ejecuciones/busquedas')
         pagina.locator('.source-form [name=nombre]').fill('Arriendo casas y apartamentos')
         pagina.locator('.source-form [name=url]').fill(url)
         pagina.get_by_role('button', name='Guardar fuente').click()

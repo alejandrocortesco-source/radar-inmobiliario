@@ -85,7 +85,7 @@ def test_agregar_y_eliminar_en_chromium(servidor, chromium, escenario_consola, a
     antes = escenario_consola['ruta'].read_bytes()
     contexto = chromium.new_context(viewport={'width': ancho, 'height': 900}, java_script_enabled=javascript)
     page = contexto.new_page()
-    page.goto(servidor + '/v0.6/')
+    page.goto(servidor + '/v0.6/ejecuciones/busquedas')
     page.locator('.source-form [name=nombre]').fill('Cedritos de prueba')
     page.locator('.source-form [name=url]').fill(URL + '/?utm_source=prueba#lista')
     page.get_by_role('button', name='Guardar fuente').click()
@@ -105,7 +105,7 @@ def test_agregar_y_eliminar_en_chromium(servidor, chromium, escenario_consola, a
     expect(page.get_by_role('button', name='Confirmar eliminación')).to_be_visible()
     page.wait_for_load_state('load')
     assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
-    assert page.locator('[data-dashboard-section]').count() == 4
+    expect(page.get_by_role('heading', name='Agregar búsquedas', exact=True)).to_be_visible()
     page.screenshot(path=str(__import__('pathlib').Path('.tmp') / f'fuentes-{ancho}-{javascript}.png'), full_page=True)
     page.get_by_role('button', name='Confirmar eliminación').click()
     expect(page.get_by_role('status')).to_contain_text('Búsqueda eliminada')

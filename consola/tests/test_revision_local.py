@@ -117,7 +117,7 @@ def test_entrega_navegador_integraciones_y_reinicio(tmp_path, chromium):
             expect(page.locator('[data-advertiser-content]')).to_contain_text('Agencia Demo')
             expect(page.locator('[data-advertiser-content]')).to_contain_text('No hay datos de contacto disponibles.')
             # Renombrar y desactivar una búsqueda conserva capturas y revisiones.
-            page.goto(url+'/v0.6/')
+            page.goto(url+'/v0.6/ejecuciones/busquedas')
             page.locator('.registered-sources > summary').click()
             fr = page.locator('[data-registered-source]').filter(has_text='Demo Fincaraíz')
             fr.get_by_role('link', name='Editar búsqueda').click()

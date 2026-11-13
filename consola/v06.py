@@ -47,14 +47,20 @@ def crear_router(proveedor):
         return render(request, 'error06.html', status, mensaje=str(exc))
 
     def dashboard(request, catalogo, s, status=200, **extras):
+        from .ejecuciones import resumen_dashboard
         todos = catalogo.listar()
         filas = resumen_clientes(s, seguimiento(s), todos)
+        busquedas, aviso = resumen_dashboard(catalogo)
+        return render(request, 'inicio06.html', status, recientes=[f for f in filas if f['activo']][:6],
+            indicadores=indicadores(todos, catalogo.ultima_actualizacion()),
+            radar_busquedas=busquedas, radar_aviso=aviso, **extras)
+
+    def formulario_fuentes(request, catalogo, s, status=200, **extras):
         registros = catalogo.busquedas.opciones_wasi() if catalogo.busquedas else wasi.opciones_iniciales()
         valores = {'id_pais': '1', 'id_dpto': '15', **(extras.get('fuente_valores') or {})}
         extras['fuente_valores'] = valores
         fr_opciones = catalogo.busquedas.opciones_fincaraiz() if catalogo.busquedas else fincaraiz.opciones_iniciales()
-        return render(request, 'inicio06.html', status, recientes=[f for f in filas if f['activo']][:6],
-            indicadores=indicadores(todos, catalogo.ultima_actualizacion()), fuentes=catalogo.listar_busquedas(),
+        return render(request, 'fuentes06.html', status, fuentes=catalogo.listar_busquedas(),
             fr_opciones=fr_opciones, wasi_campos=wasi.SELECTS, wasi_numeros=wasi.INPUTS, wasi_labels=wasi.LABELS,
             wasi_registros=registros, wasi_opciones={c: wasi.opciones(c, valores, registros) for c in wasi.SELECTS},
             mensaje=request.query_params.get('mensaje'), **extras)
@@ -65,6 +71,15 @@ def crear_router(proveedor):
 
     @router.get('/')
     def inicio(request: Request, catalogo=Depends(proveedor), s=Depends(proveedor_oportunidades)):
+        if request.query_params.get('editar_wasi') or request.query_params.get('editar_fincaraiz'):
+            return RedirectResponse('/v0.6/ejecuciones/busquedas?' + request.url.query, 307)
+        try:
+            return dashboard(request, catalogo, s)
+        except (ErrorPersistencia, ErrorLecturaCatalogo, FileNotFoundError) as exc:
+            return error(request, exc)
+
+    @router.get('/ejecuciones/busquedas')
+    def busquedas(request: Request, catalogo=Depends(proveedor), s=Depends(proveedor_oportunidades)):
         try:
             editar_fr = request.query_params.get('editar_fincaraiz')
             if editar_fr and catalogo.busquedas:
@@ -72,15 +87,15 @@ def crear_router(proveedor):
                 b = next((b for b in catalogo.listar_busquedas() if b['fuente'] == 'fincaraiz' and b['id_busqueda'] == editar_fr), None)
                 if not c or not b:
                     return error(request, 'Búsqueda Fincaraíz no encontrada', 404)
-                return dashboard(request, catalogo, s, fuente_valores={'fuente': 'fincaraiz', 'nombre': b['nombre'], 'fr_url': c['url_original'], 'reemplazar_fr': editar_fr})
+                return formulario_fuentes(request, catalogo, s, fuente_valores={'fuente': 'fincaraiz', 'nombre': b['nombre'], 'fr_url': c['url_original'], 'reemplazar_fr': editar_fr})
             editar = request.query_params.get('editar_wasi')
             if editar and catalogo.busquedas:
                 config = catalogo.busquedas.configuracion_wasi(editar)
                 registrada = next((b for b in catalogo.listar_busquedas() if b['fuente'] == 'wasi' and b['id_busqueda'] == editar), None)
                 if not config or not registrada:
                     return error(request, 'Búsqueda Wasi no encontrada.', 404)
-                return dashboard(request, catalogo, s, fuente_valores={**config['filtros'], 'fuente': 'wasi', 'nombre': registrada['nombre'], 'reemplazar': editar})
-            return dashboard(request, catalogo, s)
+                return formulario_fuentes(request, catalogo, s, fuente_valores={**config['filtros'], 'fuente': 'wasi', 'nombre': registrada['nombre'], 'reemplazar': editar})
+            return formulario_fuentes(request, catalogo, s)
         except (ErrorPersistencia, ErrorLecturaCatalogo, FileNotFoundError) as exc:
             return error(request, exc)
 
@@ -306,24 +321,24 @@ def crear_router(proveedor):
                 except (ExtractionError, Restricted, OSError, PortalError) as exc:
                     raise ValueError('No se pudo verificar la búsqueda en Fincaraíz. Revisa la URL o reintenta cuando el portal esté disponible. No se guardó ni se inició una extracción.') from exc
                 catalogo.busquedas.guardar_fincaraiz(valores.get('nombre', ''), config, valores.get('reemplazar_fr'))
-                return RedirectResponse('/v0.6/?mensaje=fuente_guardada#agregar-fuente', 303)
+                return RedirectResponse('/v0.6/ejecuciones/busquedas?mensaje=fuente_guardada#agregar-fuente', 303)
             if valores.get('fuente') == 'wasi':
                 if catalogo.busquedas is None:
                     raise ErrorLecturaCatalogo('Almacenamiento auxiliar no disponible')
                 config = wasi.configurar(valores, catalogo.busquedas.opciones_wasi())
                 catalogo.busquedas.guardar_wasi(valores.get('nombre', ''), config, valores.get('reemplazar'))
-                return RedirectResponse('/v0.6/?mensaje=fuente_guardada#agregar-fuente', 303)
+                return RedirectResponse('/v0.6/ejecuciones/busquedas?mensaje=fuente_guardada#agregar-fuente', 303)
             if valores.get('fuente', 'metrocuadrado') != 'metrocuadrado':
                 raise ConsultaInvalida('Fuente no compatible')
             url = metrocuadrado.validar_url(valores.get('url', ''))
             identificador = catalogo.normalizar_busqueda(url)
             if any(b['id_busqueda'] == identificador for b in catalogo.listar_busquedas()):
-                return RedirectResponse('/v0.6/?mensaje=fuente_duplicada#agregar-fuente', 303)
+                return RedirectResponse('/v0.6/ejecuciones/busquedas?mensaje=fuente_duplicada#agregar-fuente', 303)
             catalogo.guardar_busqueda('metrocuadrado', identificador, valores.get('nombre', ''))
-            return RedirectResponse('/v0.6/?mensaje=fuente_guardada#agregar-fuente', 303)
+            return RedirectResponse('/v0.6/ejecuciones/busquedas?mensaje=fuente_guardada#agregar-fuente', 303)
         except (ConsultaInvalida, ValueError, TypeError) as exc:
             try:
-                return dashboard(request, catalogo, s, 422, fuente_error=str(exc), fuente_valores=valores)
+                return formulario_fuentes(request, catalogo, s, 422, fuente_error=str(exc), fuente_valores=valores)
             except (ErrorPersistencia, ErrorLecturaCatalogo, FileNotFoundError):
                 return error(request, exc, 422)
         except (ErrorLecturaCatalogo, OSError, sqlite3.Error) as exc:
@@ -338,7 +353,7 @@ def crear_router(proveedor):
             for campo in wasi.GEO:
                 if valores.get(campo) and not any(o['value'] == valores[campo] for o in wasi.opciones(campo, valores, registros)):
                     valores[campo] = ''
-            return dashboard(request, catalogo, s, fuente_valores=valores)
+            return formulario_fuentes(request, catalogo, s, fuente_valores=valores)
         except (ErrorLecturaCatalogo, ErrorPersistencia, FileNotFoundError) as exc:
             return error(request, exc)
 
@@ -362,10 +377,10 @@ def crear_router(proveedor):
             with bloqueo(base_wasi):
                 # Acción separada de guardar: solo opciones, nunca capturas.
                 await actualizar_opciones(catalogo.busquedas, padres)
-            return dashboard(request, catalogo, s, fuente_valores=valores,
+            return formulario_fuentes(request, catalogo, s, fuente_valores=valores,
                              fuente_aviso='Opciones de Wasi actualizadas. Revisa los filtros y guarda la búsqueda cuando esté lista.')
         except (ValueError, OSError, ErrorLecturaCatalogo, Restricted) as exc:
-            return dashboard(request, catalogo, s, 503, fuente_valores=valores,
+            return formulario_fuentes(request, catalogo, s, 503, fuente_valores=valores,
                              fuente_error='No se pudieron actualizar las opciones de Wasi. Verifica el acceso configurado o reintenta cuando no haya una captura en curso.')
 
     @router.post('/fuentes/estado')
@@ -375,7 +390,7 @@ def crear_router(proveedor):
             if valores.get('fuente') != 'fincaraiz' or valores.get('activa') not in ('0', '1'):
                 raise ValueError('Estado o fuente inválidos')
             catalogo.busquedas.cambiar_estado('fincaraiz', valores.get('id_busqueda'), valores['activa'] == '1')
-            return RedirectResponse('/v0.6/#agregar-fuente', 303)
+            return RedirectResponse('/v0.6/ejecuciones/busquedas#agregar-fuente', 303)
         except (ValueError, OSError, ErrorLecturaCatalogo) as exc:
             return error(request, exc, 422)
 
@@ -387,7 +402,7 @@ def crear_router(proveedor):
                 raise ConsultaInvalida('Confirma que quieres eliminar esta búsqueda.')
             if not catalogo.eliminar_busqueda(valores.get('fuente', ''), valores.get('id_busqueda', '')):
                 return error(request, 'La búsqueda ya no está registrada.', 404)
-            return RedirectResponse('/v0.6/?mensaje=fuente_eliminada#agregar-fuente', 303)
+            return RedirectResponse('/v0.6/ejecuciones/busquedas?mensaje=fuente_eliminada#agregar-fuente', 303)
         except ConsultaInvalida as exc:
             return error(request, exc, 422)
         except (ErrorLecturaCatalogo, OSError, sqlite3.Error) as exc:

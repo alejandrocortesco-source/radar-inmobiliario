@@ -72,9 +72,9 @@ class ServicioCatalogo:
             raise ConsultaInvalida('Fuente, URL y nombre deben ser texto')
         fuente, url, nombre = normalizar_fuente(fuente), url.strip(), nombre.strip()
         if fuente == 'fincaraiz':
-            raise ConsultaInvalida('Configura Fincaraíz en Agregar fuente del inicio para verificar sus filtros.')
+            raise ConsultaInvalida('Configura Fincaraíz en Radar Central para verificar sus filtros.')
         if fuente == 'wasi':
-            raise ConsultaInvalida('Configura o edita los filtros Wasi en Agregar fuente del inicio.')
+            raise ConsultaInvalida('Configura o edita los filtros Wasi en Radar Central.')
         if fuente == 'metrocuadrado':
             from .fuentes.metrocuadrado import validar_url
             try:

@@ -90,7 +90,7 @@ def test_registro_por_url_criterios_edicion_estado_y_error_sin_captura(tercera, 
 def test_chromium_formulario_foco_errores_y_ancho(tercera, chromium, servidor, width, height):
     page=chromium.new_page(viewport={'width':width,'height':height})
     try:
-        page.goto(servidor+'/v0.6/');page.wait_for_load_state('networkidle')
+        page.goto(servidor+'/v0.6/ejecuciones/busquedas');page.wait_for_load_state('networkidle')
         source=page.locator('[data-source-select]');source.select_option('fincaraiz')
         expect(page.locator('[data-fr-fields]')).to_be_visible()
         assert page.locator('input[name=url]').is_disabled()

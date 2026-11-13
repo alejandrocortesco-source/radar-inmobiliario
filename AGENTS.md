@@ -11,7 +11,7 @@
 - La especificación funcional vigente está en `RADAR_PROYECTO_RECTOR.md`. Seguir la política única de [Git y versionado](GIT_WORKFLOW.md): todo desarrollo y commit nuevo se realiza en `develop`. v0.8 se identifica mediante el tag `v0.8.0`; las rutas existentes se conservan.
 - Reutilizar scraper, catálogo, identidades, historial, clientes, oportunidades y matching determinista. No reconstruirlos para un cambio visual.
 - FastAPI, Jinja2, CSS y JavaScript nativo. Sin React, Carbon instalado, Firestore ni infraestructura adicional.
-- El dashboard tiene **exactamente cuatro secciones**: oportunidades recientes, estado del catálogo, agregar fuente y nuevo cliente. La actividad pertenece a las dos primeras; no existe una quinta sección.
+- El dashboard tiene **exactamente cuatro secciones**: oportunidades recientes, estado del catálogo, Radar Central y nuevo cliente. La actividad pertenece a las dos primeras; no existe una quinta sección.
 - El catálogo es de solo lectura desde la consola. Guardar nombres, fuentes, comentarios, clientes, decisiones y caché en la base auxiliar; nunca escribir esos datos en SQLite del scraper.
 - Clientes y oportunidades son entidades distintas. Las oportunidades cerradas y clientes inactivos no participan en matching automático. Conservar relaciones e historial.
 - Operación, tipo, ubicación, presupuesto y límites de habitaciones son estrictos. Desconocido significa pendiente de verificar; baños, área y otras características son preferencias.

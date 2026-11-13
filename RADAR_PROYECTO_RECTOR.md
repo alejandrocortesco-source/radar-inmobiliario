@@ -1,6 +1,18 @@
-# Radar Inmobiliario — documento rector v0.12.0
+# Radar Inmobiliario — documento rector v0.12.1
 
 La especificación funcional del usuario de 3 de noviembre de 2026 gobierna esta entrega. El producto acompaña el trabajo de Mónica con unos 30 clientes activos. Debe permanecer sencillo y de bajo mantenimiento; el objetivo de operación inferior a US$10/mes está **pendiente de validación de consumo y alojamiento**, no es una garantía.
+
+## Radar Central — ajuste del 13 de noviembre de 2026
+
+La solicitud posterior reemplaza el recuadro Agregar fuente de Inicio por Radar
+Central, con hasta tres búsquedas recientes y su estado. La navegación y la página
+antes llamada Ejecuciones se presentan como Radar Central. Conserva `/v0.6/ejecuciones`
+y sus APIs; agregar/editar búsquedas vive en su subpágina `/v0.6/ejecuciones/busquedas`,
+con acceso desde Radar Central y los mismos formularios, IDs y validaciones previos.
+Inicio mantiene exactamente cuatro secciones. Guardar/editar sigue sin capturar.
+La gestión de búsquedas requiere el snapshot actual y su bloqueo; solo la página
+principal de Radar Central y su consulta de estado lo evitan durante una captura.
+Implementación en el mismo clon y rama autorizados, revisión privada sin tráfico.
 
 ## Ejecuciones manuales — 13 de noviembre de 2026
 
@@ -86,7 +98,8 @@ La entrada de la consola es `/v0.6/`. Tiene exactamente cuatro secciones:
 
 1. **Oportunidades recientes**: resumen por cliente, necesidad, pendientes y última actividad. Prioriza clientes con pendientes, luego actividad más reciente; muestra hasta seis clientes activos. La actividad se integra aquí.
 2. **Estado del catálogo**: total, última actualización exitosa global en hora de Colombia, nuevos, actualizados (clasificación de cambios de precio existente) y ausentes de al menos una búsqueda. Nuevos y actualizados usan la última ejecución completada por búsqueda de v0.5. La actividad de actualización se integra aquí. Una ausencia no confirma retiro ni venta; el inmueble puede seguir activo en otra búsqueda.
-3. **Agregar fuente**: URL de búsqueda de Metrocuadrado, controles dependientes de Wasi o búsqueda Fincaraíz y nombre, con identidad canónica, validación y deduplicación. Permite revisar las búsquedas registradas, editar filtros Wasi y eliminarlas con confirmación. Eliminar quita únicamente su selección auxiliar para futuras ejecuciones; conserva inmuebles, procedencias e historial y no cambia las fuentes de ejecuciones en curso o reanudadas. No extrae al guardar ni al eliminar. Metrocuadrado las incorpora con `scrape --fuentes-registradas`; Wasi usa `wasi_run.py scrape` y el Job puede procesar las tres fuentes.
+3. **Radar Central**: hasta tres búsquedas recientes con fuente y estado, priorizando las activas y las pendientes de primera captura. Abre Radar Central (`/v0.6/ejecuciones`) para seleccionar búsquedas, iniciar scraping manual, consultar progreso e informes. «Agregar búsquedas» abre la gestión de las tres fuentes; guardar, editar o eliminar conserva sus validaciones e historial y no inicia una captura.
+
 4. **Nuevo cliente**: acceso al formulario independiente de cliente y necesidades; permite seleccionar uno existente. Confirmar guarda una oportunidad y abre la ficha del cliente mientras se actualizan las coincidencias deterministas.
 
 **No hay quinta sección.** Las referencias históricas a interfaces anteriores no añaden secciones al dashboard.

@@ -1,9 +1,26 @@
-# Ejecuciones manuales — v0.12.0
+# Radar Central — ejecución manual v0.12.1
 
 Implementación en el clon independiente `Radar-CloudRun-20261111/repo`, rama
 `codex/ejecuciones-manuales`, por autorización del 13 de noviembre de 2026.
 Esta solicitud prevalece sobre la regla general de desarrollar en develop.
 No cambia el dashboard de cuatro secciones, los identificadores ni las rutas anteriores.
+
+## Ubicación actual
+
+El dashboard sustituye Agregar fuente por Radar Central y conserva cuatro secciones.
+Muestra hasta tres búsquedas, priorizando las de una ejecución activa, las que aún
+no tienen captura y las últimas por fecha real. Sin fechas de creación disponibles
+no se inventa una cronología de altas; una búsqueda nueva se identifica Sin ejecutar.
+Un control activo sin actualización reciente aparece Por verificar hasta abrir su
+seguimiento. Inicio solo lee el control, nunca restaura un segundo snapshot bajo el
+lock web ni lanza Jobs. En modo local usa las capturas técnicas sintéticas disponibles.
+
+Radar Central conserva la ruta `/v0.6/ejecuciones`. Su botón Agregar búsquedas abre
+`/v0.6/ejecuciones/busquedas`: formulario y gestión anteriores, con los mismos POST.
+Alta/edición, errores, duplicados, filtros dependientes, eliminación y activación
+regresan a esa subpágina. Los enlaces de edición antiguos del inicio se redirigen.
+Esta subpágina atraviesa WebDurable; solo las dos rutas de control exactas evitan
+el snapshot. El registro auxiliar y el control durable no cambian de esquema.
 
 ## Uso y arquitectura
 
@@ -162,7 +179,7 @@ No restaurar un backup para revertir UI; esa acción sí puede perder datos.
 
 1. Abrir Ejecuciones por IAP: comprobar las tres fuentes, nombres/criterios,
    estados, historial previo disponible y selección deshabilitada sin casillas.
-2. Guardar una búsqueda desde Inicio y volver: debe aparecer sin captura previa.
+2. Guardar una búsqueda desde Radar Central y volver: debe aparecer sin captura previa.
    Seleccionar individualmente o todas las activas; una inactiva no debe habilitarse.
 3. Con selección concreta autorizada, iniciar una vez y recargar el enlace del ID:
    mismo Job, avance por búsqueda y seguimiento disponible con catálogo ocupado.
