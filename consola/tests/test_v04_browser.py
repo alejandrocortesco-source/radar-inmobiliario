@@ -96,6 +96,8 @@ def test_captura_guardar_buscar_y_recuperar_cliente(servidor,pagina):
     page.get_by_role('link',name='Buscar coincidencias',exact=True).click()
     expect(page.locator('main table.catalog-table')).to_be_visible()
     page.get_by_role('link',name='Clientes y oportunidades',exact=True).click()
+    # El enlace ya existe en el HTML antes de cargar el script defer del modal.
+    page.wait_for_load_state('load')
     page.locator('#editor').get_by_role('link',name='Editar cliente',exact=True).click()
     expect(page.locator('#surface')).to_contain_text('todas sus oportunidades')
     assert page.locator('dialog[open]').count()==1

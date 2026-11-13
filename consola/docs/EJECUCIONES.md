@@ -174,3 +174,6 @@ Pruebas automatizadas y capturas nuevas: `consola/tests/test_ejecuciones.py`;
 regresión durable: `test_cloud_durable.py`; suites consola, catálogo y scraper en
 procesos separados, sin portales reales ni Gemini. Resultados de la entrega se
 registran aparte una vez ejecutados; este documento no atribuye pruebas históricas.
+
+Entrega comprobada, builds, permisos, resultados y manifiesto de archivos:
+[informe del 13 de noviembre](ENTREGA_EJECUCIONES_20261113.md).
