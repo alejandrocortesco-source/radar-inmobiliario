@@ -353,3 +353,83 @@ def test_horario_configurable_sin_desplegar():
     modulo=importlib.util.module_from_spec(spec);spec.loader.exec_module(modulo)
     assert modulo.horario('TUE,FRI')=={'schedule':'0 0 * * TUE,FRI','timeZone':'America/Bogota'}
     with pytest.raises(ValueError):modulo.horario('MON,MON')
+
+
+@pytest.mark.parametrize('mode', ['absent','close','no_control','unknown','stuck','ambiguous','changed_filters','stale'])
+def test_superposicion_buscar_acotada_y_verificacion(mode):
+    from wasi.diagnostico import WasiListingError
+    async def prueba():
+        async with async_playwright() as p:
+            browser=await p.chromium.launch()
+            try:
+                page=await browser.new_page()
+                await page.route('**/*',lambda route:route.abort())
+                await page.set_content(html([]))
+                await page.evaluate("""mode=>{
+                  window.closeCount=0;window.searchCount=0;
+                  const search=document.querySelector('#advanced_search');const original=search.onclick;
+                  search.onclick=()=>{searchCount++;if(mode==='stale')return;original();if(mode==='changed_filters')document.querySelector('.advanced-search #title').value='Otro filtro';};
+                  if(mode==='absent'||mode==='stale')return;
+                  const r=search.getBoundingClientRect();const overlay=document.createElement('div');
+                  overlay.className=mode==='unknown'?'unknown-window':'productfruits--container';
+                  overlay.style=`position:absolute;left:${r.left+scrollX}px;top:${r.top+scrollY}px;width:${r.width+40}px;height:${r.height+40}px;z-index:99999;background:white`;
+                  if(mode!=='no_control'){
+                    const close=document.createElement('button');close.setAttribute('aria-label','Cerrar');close.textContent='×';
+                    close.onclick=()=>{closeCount++;if(mode!=='stuck')overlay.remove();};overlay.append(close);
+                    if(mode==='ambiguous')overlay.append(close.cloneNode(true));
+                  }
+                  document.body.append(overlay);
+                }""",mode)
+                if mode in ['absent','close']:
+                    result=await aplicar(page,config(),900,AsyncMock())
+                    assert result['total']==0 and result['links']==[] and not result['next']
+                    assert await page.evaluate('searchCount')==1
+                    assert await page.evaluate('closeCount')==(1 if mode=='close' else 0)
+                else:
+                    with pytest.raises(ExtractionError) as caught:
+                        await aplicar(page,config(),900,AsyncMock())
+                    if mode not in ['changed_filters','stale']:
+                        assert isinstance(caught.value,WasiListingError)
+                        assert 'Call log' not in str(caught.value)
+                        assert await page.evaluate('searchCount')==0
+                        assert await page.locator('div').filter(has=page.get_by_role('button',name='Cerrar',exact=True)).count() or mode=='no_control'
+                    assert await page.evaluate('closeCount')<=1
+            finally:
+                await browser.close()
+    asyncio.run(prueba())
+
+
+def test_fallo_previo_listado_conserva_ausencias_y_diagnostico(tmp_path,monkeypatch):
+    from wasi.diagnostico import WasiListingError
+    from ejecuciones.worker import metrics
+    key=identidad(config())
+    cfg=WasiConfig(db=str(tmp_path/'wasi.sqlite'),url=key,urls=[key],searches={key:config()},delay=.5,timeout=1500)
+    store=WasiStore(cfg.db)
+    previous=descubrir(store,{key:[item()]});store.result(previous,'001','success',documento())
+    store.update_run(previous,status='completed');store.finalize_absences(previous)
+    with store.connect() as db: before=[tuple(r) for r in db.execute('select * from search_memberships')]
+    class Blocked(WasiScraper):
+        async def prepare_context(self,context): pass
+        async def abrir(self,context,config): raise WasiListingError('wasi_search_overlay')
+    scraper=Blocked(cfg)
+    result=asyncio.run(scraper.run())
+    assert result['status']=='incomplete' and result['pages']==0 and result['unique']==0
+    with scraper.store.connect() as db:
+        assert before==[tuple(r) for r in db.execute('select * from search_memberships')]
+        assert db.execute('select absence_applied from run_searches where run_id=?',(result['id'],)).fetchone()[0]==0
+    m=metrics(scraper)
+    assert m['processed']==0 and m['listing_error_count']==1 and m['error_count']==0
+    assert m['listing_code']=='wasi_search_overlay' and 'ventana del portal' in m['listing_error']
+
+
+def test_listado_vacio_valido_completa_cobertura(tmp_path,monkeypatch):
+    monkeypatch.setenv('WASI_USER','synthetic-user');monkeypatch.setenv('WASI_PASSWORD','synthetic-password')
+    key=identidad(config())
+    class Empty(WasiScraper):
+        async def create_context(self,browser):
+            context=await super().create_context(browser);await simulador(context,[]);return context
+        async def update_matching(self): pass
+    cfg=WasiConfig(db=str(tmp_path/'empty.sqlite'),url=key,urls=[key],searches={key:config()},delay=.5,timeout=1500)
+    result=asyncio.run(Empty(cfg).run())
+    assert result['status']=='completed' and result['listing_complete'] and result['unique']==0
+    assert result['pages']==1 and result['errors']==0

@@ -1,4 +1,4 @@
-# Radar Central — ejecución manual v0.12.2
+# Radar Central — ejecución manual v0.12.3
 
 Implementación en el clon independiente `Radar-CloudRun-20261111/repo`, rama
 `codex/ejecuciones-manuales`, por autorización del 13 de noviembre de 2026.
@@ -213,3 +213,20 @@ registran aparte una vez ejecutados; este documento no atribuye pruebas históri
 
 Entrega comprobada, builds, permisos, resultados y manifiesto de archivos:
 [informe del 13 de noviembre](ENTREGA_EJECUCIONES_20261113.md).
+
+## Wasi: superposición al buscar (v0.12.3)
+
+El Job y la web deben usar las imágenes de esta corrección: actualizar solo la web
+no modifica el scraper. El cierre exige interceptor dentro de ProductFruits y un
+único botón visible con nombre accesible Close/Cerrar (opcionalmente dialog/window/
+ventana/diálogo). Un botón ambiguo, ausente o inaccesible conserva incompleto.
+Se permite un único cierre y una comprobación posterior, con esperas acotadas;
+Buscar solo se pulsa después de verificar su accesibilidad. No hay force=True,
+remoción del DOM, aceptación de avisos ni toma automática de sesión.
+
+La renovación del tbody, valores de filtros, resumen y paginador siguen siendo
+obligatorios. Un total cero con respuesta renovada y cobertura verificada es válido;
+sin listado verificado no se confirman ausencias. Los nuevos informes agregan
+listing_error_count, listing_code, listing_pages y listing_complete, independientes
+de error_count por anuncio. Son campos aditivos, sin migración. Las ejecuciones
+históricas conservan sus mensajes originales, sin reescribir control ni catálogos.

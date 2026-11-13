@@ -1,5 +1,6 @@
 """Orquestación secuencial en el Job; ningún scraper se ejecuta en la web."""
 import asyncio
+import json
 import logging
 import os
 import signal
@@ -39,7 +40,15 @@ def metrics(scraper):
     processed = sum(n for s, n in summary['statuses'].items() if s in terminal)
     with scraper.store.connect() as db:
         counts = dict(db.execute("SELECT classification,count(*) FROM jobs WHERE run_id=? AND status IN ('success','unchanged') GROUP BY classification", (scraper.run_id,)))
-    return {'technical_run': scraper.run_id, 'processed': processed,
+        listing_count = db.execute("SELECT count(*) FROM events WHERE run_id=? AND kind='listing_incomplete'", (scraper.run_id,)).fetchone()[0]
+        listing = db.execute("SELECT context_json FROM events WHERE run_id=? AND kind='listing_incomplete' ORDER BY id DESC LIMIT 1", (scraper.run_id,)).fetchall()
+    from wasi.diagnostico import MESSAGES
+    code = json.loads(listing[0][0]).get('code') if listing else None
+    code = code if code in MESSAGES else ('listing_unverified' if listing else None)
+    listing_error = MESSAGES.get(code, 'Listado incompleto: no se pudo verificar su cobertura.') if listing else None
+    return {'listing_error_count': listing_count, 'listing_error': listing_error, 'listing_code': code,
+            'listing_complete': bool(summary.get('listing_complete')), 'listing_pages': summary.get('pages'),
+            'technical_run': scraper.run_id, 'processed': processed,
             'new': counts.get('new', 0), 'changed': counts.get('modified', 0), 'unchanged': counts.get('unchanged', 0),
             'phase': 'Revisando anuncios' if summary.get('listing_complete') else 'Recorriendo resultados',
             'error_count': summary.get('errors'), 'portal_status': summary['status']}
@@ -116,7 +125,7 @@ def run_manual(folder, run_id, control=None, state_factory=None, make_scraper=sc
                 b.update(status={'completed': 'extracted', 'incomplete': 'partial', 'interrupted': 'interrupted'}.get(result['status'], 'failed'),
                          finished=now(), duration=round(monotonic() - started, 1), phase='Extracción terminada')
                 if b['status'] != 'extracted':
-                    b['error'] = 'Portal: extracción ' + ('parcial' if b['status'] == 'partial' else 'no completada') + '. Revisar antes de repetir.'
+                    b['error'] = b.get('listing_error') or 'Portal: extracción ' + ('parcial' if b['status'] == 'partial' else 'no completada') + '. Revisar antes de repetir.'
                 patch(searches=rows)
                 await asyncio.to_thread(save)
             finally:

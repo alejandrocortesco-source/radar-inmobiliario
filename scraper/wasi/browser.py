@@ -7,6 +7,7 @@ from urllib.parse import urlsplit
 from catalogo.fuentes.wasi import GEO, SELECTS, INPUTS, NUMERIC_INPUTS, TEXT_INPUTS, RED
 from metro.extraction import ExtractionError
 from .auth import acceso, resolver_sesion_en_uso, AuthBlocked
+from .diagnostico import WasiListingError
 from .extraction import listado, whatsapp_limpio, publicacion_whatsapp
 from playwright.async_api import TimeoutError as BrowserTimeout, Error as BrowserError
 
@@ -83,6 +84,35 @@ async def aplicar(page, config, timeout, pace, _session_changes=0):
         raise
 
 
+async def preparar_buscar(page, timeout):
+    """Una sola ventana reconocida, un cierre normal, sin pulsar Buscar todavía."""
+    button = page.locator('#advanced_search')
+    limit = min(timeout, 2000)
+    try:
+        await button.scroll_into_view_if_needed(timeout=limit)
+        await button.click(trial=True, timeout=limit)
+        return
+    except BrowserTimeout:
+        pass
+    # Identifica el interceptor actual; no interpreta ni almacena su contenido.
+    recognized = await button.evaluate("""e => {
+      const r=e.getBoundingClientRect();const top=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);
+      return !!top?.closest('.productfruits--container');
+    }""")
+    if not recognized:
+        raise WasiListingError('wasi_search_unconfirmed')
+    hosts = page.locator('.productfruits--container:visible')
+    closes = hosts.get_by_role('button', name=re.compile(r'^(?:close|cerrar)(?: (?:dialog|window|ventana|diálogo))?$', re.I))
+    visible = [c for c in await closes.all() if await c.is_visible()]
+    if len(visible) != 1:
+        raise WasiListingError('wasi_search_overlay')
+    try:
+        await visible[0].click(timeout=limit)
+        await button.click(trial=True, timeout=limit)
+    except BrowserError:
+        raise WasiListingError('wasi_overlay_unclosable') from None
+
+
 async def _aplicar(page, config, timeout, pace, _session_changes=0):
     filtros = config['filtros']
     for campo in SELECTS:
@@ -110,7 +140,11 @@ async def _aplicar(page, config, timeout, pace, _session_changes=0):
         # antes de buscar; nunca interpretar la recarga como una tabla vacía.
         return await aplicar(page, config, timeout, pace, _session_changes + 1)
     await pace()
-    await cambio(page, '#properties_table tbody', lambda: page.locator('#advanced_search').click(timeout=timeout), timeout)
+    await preparar_buscar(page, timeout)
+    try:
+        await cambio(page, '#properties_table tbody', lambda: page.locator('#advanced_search').click(timeout=min(timeout, 5000)), timeout)
+    except BrowserError:
+        raise WasiListingError('wasi_search_unconfirmed') from None
     await page.locator('#properties_table_processing').wait_for(state='hidden', timeout=timeout)
     # Verifica los valores y etiquetas aplicados, además del resumen del portal
     # y una renovación efectiva del listado; la URL común nunca es evidencia.

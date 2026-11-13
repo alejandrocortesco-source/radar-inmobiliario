@@ -2,7 +2,7 @@
 
 Radar Inmobiliario es un proyecto para recopilar y revisar información pública de inmuebles.
 
-La **Consola v0.12.2 — Radar Central y acceso privado** abre en [http://127.0.0.1:8000/v0.6/](http://127.0.0.1:8000/v0.6/): dashboard de cuatro secciones, clientes Activos/Inactivos y ficha individual para revisar coincidencias. Integra Fincaraíz, Wasi y Metrocuadrado reutilizando catálogo, clientes, oportunidades y matching determinista; conserva decisiones persistentes y una segunda capa opcional con Gemini Flash. Guardar una fuente no ejecuta scraping. «Buscar coincidencias» actualiza resultados sin IA; únicamente «Evaluar con Gemini» autoriza consumo. Las novedades por oportunidad persisten hasta marcarlas como vistas.
+La **Consola v0.12.3 — Radar Central y acceso privado** abre en [http://127.0.0.1:8000/v0.6/](http://127.0.0.1:8000/v0.6/): dashboard de cuatro secciones, clientes Activos/Inactivos y ficha individual para revisar coincidencias. Integra Fincaraíz, Wasi y Metrocuadrado reutilizando catálogo, clientes, oportunidades y matching determinista; conserva decisiones persistentes y una segunda capa opcional con Gemini Flash. Guardar una fuente no ejecuta scraping. «Buscar coincidencias» actualiza resultados sin IA; únicamente «Evaluar con Gemini» autoriza consumo. Las novedades por oportunidad persisten hasta marcarlas como vistas.
 
 Todos los precios y presupuestos inmobiliarios son COP. El presupuesto se compara directamente con el precio numérico, con límites inclusivos, sin solicitar ni verificar moneda y sin conversiones. Los campos históricos de moneda se conservan como metadatos.
 

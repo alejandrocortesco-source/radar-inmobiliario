@@ -374,7 +374,7 @@ class Scraper:
                             if isinstance(exc, (sqlite3.Error, OSError)):
                                 raise
                             # Una búsqueda incompleta impide contar ausencias en toda la ejecución.
-                            self.event('listing_incomplete',{'search_url':search['search_url'],'error':str(exc)[:1500]},'error')
+                            self.event('listing_incomplete',{'search_url':search['search_url'],'error':str(exc)[:1500], 'code':getattr(exc, 'wasi_code', None)},'error')
                     self.store.plan_incremental(self.run_id)
                     await self.process_details(context)
                 finally:

@@ -525,6 +525,13 @@ def test_browser_states_selection_focus_and_no_page_overflow(execution, chromium
         r['searches'][0].update(status='failed',error='Portal: extracción no completada.')
         verify('error')
         expect(page.get_by_text('El guardado final no está confirmado.',exact=False)).to_be_visible()
+        r.update(status='partial',persisted=True,error=None,phase='Guardado remoto confirmado')
+        r['searches'][0].update(status='partial',processed=0,new=0,changed=0,unchanged=0,
+            error='Listado no obtenido: una ventana del portal bloqueó el botón Buscar.',
+            listing_error_count=1,error_count=0,listing_code='wasi_search_overlay',listing_pages=0,listing_complete=False)
+        verify('listado-error')
+        expect(page.get_by_text('Incidencias de listado: 1',exact=False)).to_be_visible()
+
     finally:
         browser_context.close()
 
@@ -683,3 +690,26 @@ def test_browser_starts_only_chosen_search_and_reload_reuses_run(execution, chro
 def test_final_persistence_phase_does_not_claim_estimate_was_exceeded():
     assert 'por estimar' in remaining(empty(), {'status':'saving','searches':[{'status':'extracted'}]})
     assert 'reconcilia' in remaining(empty(), {'status':'reconciling','searches':[{'status':'interrupted'}]})
+
+
+def test_informe_separa_error_listado_y_anuncios_sin_exponer_traza(execution):
+    svc,_,_,factory,tmp=execution
+    r=start(execution)
+    class ListingFailure:
+        def __init__(self,repo,folder,search):
+            self.store=Store(folder/'metro.sqlite');self.run_id=None
+        async def run(self):
+            self.run_id=self.store.new_run(A,{'urls':[A]})
+            self.store.event(self.run_id,'listing_incomplete',{'code':'wasi_search_overlay','error':'SECRET_COOKIE_HTML_NOT_FOR_UI'},'error')
+            self.store.update_run(self.run_id,status='incomplete',finished=now())
+            return self.store.summary(self.run_id)
+    assert run_manual(tmp/'worker',r['id'],svc.control,factory,ListingFailure,heartbeat=.001)
+    result=svc.control.get(r['id'])
+    assert result['status']=='partial' and result['persisted'] is True
+    b=result['searches'][0]
+    assert b['processed']==0 and b['listing_error_count']==1 and b['error_count']==0
+    assert b['error']=='Listado no obtenido: una ventana del portal bloqueó el botón Buscar.'
+    page=TestClient(app).get('/v0.6/ejecuciones?run='+r['id'])
+    assert page.status_code==200 and b['error'] in page.text
+    assert 'Incidencias de listado: 1' in page.text and 'Incidencias de anuncios: 0' in page.text
+    assert 'wasi_search_overlay' in page.text and 'SECRET_COOKIE' not in page.text

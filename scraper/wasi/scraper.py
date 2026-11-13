@@ -12,6 +12,7 @@ from metro.scraper import Scraper, Config
 from metro.storage import Store
 from metro.prices import listing_price
 from metro.extraction import ExtractionError, Restricted
+from .diagnostico import WasiListingError
 from .auth import autenticar, acceso
 from .browser import aplicar, lote, siguiente, ficha, contactos
 from .extraction import normalizar
@@ -90,6 +91,14 @@ class WasiScraper(Scraper):
             raise
 
     async def discover(self, context, source_url=None):
+        try:
+            return await self._discover(context, source_url)
+        except (sqlite3.Error, OSError, Restricted, WasiListingError):
+            raise
+        except Exception:
+            raise WasiListingError('wasi_listing_unverified') from None
+
+    async def _discover(self, context, source_url=None):
         clave = source_url or self.cfg.url
         saved = self.store.pages(self.run_id, clave)
         search = next(s for s in self.store.searches(self.run_id) if s['search_url'] == clave)

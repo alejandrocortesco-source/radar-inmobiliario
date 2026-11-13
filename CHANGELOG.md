@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.12.3 — 2026-11-13
+
+- Wasi reconoce el contenedor ProductFruits y permite un único cierre normal con
+  botón explícito Close/Cerrar. No fuerza clics ni elimina elementos del portal.
+- Mantiene comprobación de filtros, renovación del listado y cobertura; un bloqueo
+  no resuelto conserva el resultado incompleto y no confirma ausencias.
+- Radar separa incidencias de listado y anuncios, con mensaje comprensible y
+  códigos técnicos fijos; no copia trazas o contenido del portal al informe.
+- Se preparan imágenes web y Jobs para actualizar solo los componentes de revisión.
+
 ## 0.12.2 — 2026-11-13
 
 - Corregir lectura de generaciones GCS y comprobación del bloqueo vigente; los
