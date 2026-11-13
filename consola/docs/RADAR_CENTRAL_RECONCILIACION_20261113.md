@@ -68,7 +68,14 @@ Pruebas nuevas con SDK real y transporte simulado versionado: 11 aprobadas.
 Flujos afectados y Chromium: 57 aprobadas antes de agregar la última reproducción;
 no sumar estas ejecuciones repetidas como pruebas distintas.
 Catálogo completo: 249 aprobadas. Scraper completo: 122 aprobadas.
-Consola completa y comprobación privada: se registran al terminar la preparación.
+Consola completa sobre el código final: 456 aprobadas (259,83 s), incluidas las
+11 pruebas nuevas. Pasada previa: 454 aprobadas; después se cerró y probó la carrera
+de mantenimiento y se agregó la reproducción completa del adaptador anterior.
+La comprobación real por IAP cerró el registro y verificó el mismo informe al recargar.
+El detalle técnico muestra UUID y trabajador correctos. No se seleccionó ni inició
+ninguna búsqueda real. La cabecera fija de versión se alineó después, sin cambios
+funcionales; suite específica final y Chromium: 58 aprobadas. Sin sesión, la
+revisión devuelve 302 a accounts.google.com. No se comprobó otra cuenta.
 Solo bases sintéticas, sin portales reales ni Gemini. Se revisaron capturas de
 escritorio 1440×900, tablet 768×1024 y móvil 390×844: foco, ausencia de overflow,
 selección, aviso activo/por verificar, vacíos, progreso, completado y fallo.
@@ -77,7 +84,11 @@ conocida de BlockingPortal en Starlette/AnyIO.
 
 ## Alcance operativo y reversión
 
-Se prepara únicamente una imagen web y una revisión privada sin tráfico de producción.
+Se compiló únicamente web y se desplegó la revisión privada
+`radar-central-reconcile-20261113`, sin tráfico de producción.
+Runtime inicial de la corrección: cee0ceb84c980daf3a55dd86a0ad484d3c7ca73e.
+Build inicial SUCCESS: b700555d-b189-4043-a4e3-2d7a4b4275fb.
+La etiqueta fija de cabecera se alinea en el build final, registrado al cierre.
 Las imágenes y configuración de Jobs, IAP/OAuth, secretos, permisos y Scheduler se
 conservan. No se inicia scraping. Los fixes del adaptador quedan también preparados
 en código para futuros builds de Jobs; esta tarea no sustituye sus imágenes.
@@ -103,3 +114,35 @@ snapshot ni un control histórico para revertir código.
 3. Recargar y abrir el mismo enlace en otra pestaña: mismo informe, sin nuevos Jobs.
 4. Abrir Inicio y volver a Radar Central: tres búsquedas existentes; el botón Iniciar
    sigue deshabilitado sin selección. No iniciarlo durante esta comprobación.
+
+## Modificación remota confirmada
+
+La visita por IAP a las 06:01 usó el reconciliador, sin editar objetos manualmente:
+control running → reconciling → interrupted, una sola ejecución conservada,
+job_result=failed, fin real 05:28:10.004012. Generación final de control observada:
+1794567662708366. No había lock que retirar: 404 antes y después. Las lecturas del
+listado usan su adquisición/liberación normal del lock compartido; no retiran
+bloqueos ajenos. El snapshot no se subió ni se restauró durante esta reparación:
+generación 1794565546045367, tamaño 6048505 bytes y MD5 zzSUE3eQHfS7R6qDdmYJIw==
+idénticos antes y después. Se conservan las tres búsquedas. Métricas desconocidas
+siguen N/D; no se afirma guardado final de la captura fallida.
+
+URL privada del informe:
+https://ejecuciones-review---radar-dvhqhy5u3q-uc.a.run.app/v0.6/ejecuciones?run=da02fdb6-7055-47e8-8d8a-f0e941668284
+
+Producción permanece al 100% en radar-verify-20261111. Se cambian solo la imagen
+web de revisión y su tag privado; se generan los artefactos normales de Cloud Build.
+No hay cambios de permisos, autenticación, tráfico porcentual, secretos ni Jobs.
+No se canceló ni lanzó ningún Job.
+
+## Archivos y Git
+
+Cambios locales, sin push, merge, tags ni conflictos, en la rama conservada.
+Archivos de ejecución: ejecuciones/control.py, cloud_run.py y servicio.py;
+adaptador compartido scraper/wasi/durable.py; versión scraper/metro/__init__.py.
+Presentación: consola/ejecuciones.py, consola/static/ejecuciones.js,
+consola/templates/v06/base06.html, ejecuciones06.html, _ejecucion06.html,
+_ejecucion_aviso06.html y _ejecuciones_historial06.html. Pruebas:
+consola/tests/test_ejecuciones.py y test_ejecuciones_generaciones.py.
+Documentación: CHANGELOG.md, README.md, docs/README.md,
+consola/docs/EJECUCIONES.md y este informe. Sin migraciones de datos.
