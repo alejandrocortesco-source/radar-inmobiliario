@@ -46,8 +46,10 @@ Sin cambios de esquema, migraciones, identidad, filtros o catálogo inmobiliario
 
 Wasi: 32 pruebas aprobadas. Ejecuciones: 43 aprobadas, incluida persistencia del
 resultado parcial y renderizado con incidencias de listado=1 y anuncios=0, sin
-filtrar texto crudo. Catálogo: 249 aprobadas. Las suites completas restantes se
-registran al cierre, sin sumar repeticiones como pruebas distintas.
+filtrar texto crudo. Catálogo: 249 aprobadas. Suites completas: consola 457 aprobadas (311,54 s), catálogo 249 y scraper 132
+(94,85 s). Las repeticiones específicas no se suman como pruebas distintas.
+Pip check, compilación y git diff --check correctos; persiste la advertencia
+conocida de BlockingPortal en Starlette/AnyIO.
 Chromium sintético verifica escritorio, tablet y móvil, foco y overflow. La tabla
 ancha conserva scroll propio. Se revisó la captura de error de listado en móvil.
 El simulador de tabla vacía ahora representa la fila normal Sin resultados: así
@@ -90,3 +92,48 @@ reversión operativa explícita. Los campos de control son aditivos y compatible
    sin aparentar un vacío válido ni marcar retiros.
 4. Comprobar cierre, confirmación durable, referencia del nuevo Job y contadores.
    El resultado histórico anterior no cambia al desplegar la corrección.
+
+## Imágenes construidas
+
+Runtime: c70cce66951ec74717b7a5be068df4fdbefb9e78.
+Ambos builds terminaron SUCCESS, sin ejecutar captura:
+
+| Componente | Build | Imagen |
+| --- | --- | --- |
+| Web | 510c3151-7b7b-419c-b90a-a98d1c00c708 | web@sha256:00c9864c0ec2bbaa0de3188fffb70df083057b57cc4f39750a5a06a49575ce16 |
+| Job manual de revisión | d4ba1b13-3222-4c09-ae8a-8cf7aa1ce05e | jobs@sha256:096dd89ccf155ad93d411ad91594cf8987db88f2b75fc01c6884f90f471a4c4e |
+
+Prefijo de ambas imágenes: us-central1-docker.pkg.dev/radar-inmobiliario-co/radar/.
+Confirmación final: radar-manual-review describe devuelve exactamente el digest Jobs
+anterior de esta tabla. Se comparó toda la especificación antes/después: solo cambió
+la imagen y client.knative.dev/nonce, identificador automático de Cloud Run. Todo
+lo demás coincide, incluidos secretos, identidad, argumentos, variables, recursos,
+paralelismo y timeout. El nonce hizo detener la comprobación estricta inicial;
+se verificó la diferencia antes de continuar, sin ampliar el alcance del cambio.
+
+Web privada: radar-wasi-overlay-20261113, 0% de tráfico de producción. Producción
+conserva el 100% en radar-verify-20261111. La imagen del servicio se desplegó por
+su digest exacto, con el tag privado existente ejecuciones-review. No se cambió
+IAP/OAuth, IAM, secretos, Scheduler, recursos o programación de los otros Jobs.
+
+URL privada verificada con sesión IAP (cabecera v0.12.3):
+https://ejecuciones-review---radar-dvhqhy5u3q-uc.a.run.app/v0.6/ejecuciones
+Sin sesión: 302 a accounts.google.com. No se comprobó otra cuenta.
+La comprobación solo abrió Radar Central; no se seleccionó ni inició una captura.
+
+Auditoría final: siguen las cuatro ejecuciones históricas del Job, todas cerradas;
+no se lanzó ninguna nueva. El snapshot conserva generación 1794577683941500,
+MD5 knEzP+PG1gvU3VjQ0zo+cA== y 51101388 bytes, idénticos a los anteriores a esta
+tarea. El objeto de lock devuelve 404. No se restauraron ni sustituyeron bases.
+La próxima captura real corresponde al usuario desde la revisión privada.
+
+Git: runtime c70cce6, rama conservada codex/ejecuciones-manuales, sin conflictos,
+push, merge o tags Git. El commit documental posterior solo completa esta evidencia;
+no modifica las imágenes. Se conserva intacto el trabajo anterior.
+
+Archivos de ejecución: scraper/wasi/browser.py, diagnostico.py y scraper.py;
+scraper/metro/scraper.py (código fijo en evento de listado), ejecuciones/worker.py.
+Presentación: consola/templates/v06/_ejecucion06.html y base06.html. Pruebas:
+scraper/tests/test_wasi.py, fixtures/wasi_network.html y consola/tests/test_ejecuciones.py.
+Versión/documentación: scraper/metro/__init__.py, README.md, CHANGELOG.md,
+consola/docs/EJECUCIONES.md, docs/README.md y este informe.
