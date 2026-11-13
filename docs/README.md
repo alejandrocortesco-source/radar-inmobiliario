@@ -6,7 +6,7 @@ Punto de entrada a las guías y a la evidencia del proyecto. La entrega de esta 
 
 | Consulta | Documento |
 | --- | --- |
-| Radar Central y ejecución manual | [Guía](../consola/docs/EJECUCIONES.md) y [entrega verificada](../consola/docs/ENTREGA_EJECUCIONES_20261113.md) |
+| Radar Central y ejecución manual | [Guía](../consola/docs/EJECUCIONES.md), [ajuste de Radar Central](../consola/docs/RADAR_CENTRAL_20261113.md) y [entrega verificada](../consola/docs/ENTREGA_EJECUCIONES_20261113.md) |
 | Inicio y ejecución local | [README principal](../README.md) |
 | Decisiones funcionales y límites | [Documento rector](../RADAR_PROYECTO_RECTOR.md) |
 | Instrucciones para agentes | [AGENTS.md](../AGENTS.md) |
