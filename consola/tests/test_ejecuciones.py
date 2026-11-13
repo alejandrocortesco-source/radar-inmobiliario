@@ -84,8 +84,11 @@ class Cloud:
         if self.failure:
             raise PermissionError('SECRET_TOKEN_MUST_NOT_APPEAR')
         return self.rows
-    def operation(self, name):
-        return {'done': False}
+    def execution(self, worker):
+        self.calls += 1
+        if self.failure:
+            raise PermissionError('synthetic')
+        return self.rows[0] if self.rows else {'name':worker}
 
 @pytest.fixture
 def execution(tmp_path, monkeypatch):
@@ -580,3 +583,51 @@ def test_reconcile_cleans_lock_after_kill_before_generation_record(execution):
     reconcile(svc.control,svc.cloud,svc.unlock)
     assert state.lock.data is None
     assert svc.control.get(r['id'])['status']=='interrupted'
+
+
+
+def test_worker_claim_racing_reconciliation_is_not_closed_or_unlocked(execution):
+    svc = execution[0]
+    svc.cloud.uncertain = True
+    r = start(execution)
+    svc.control.patch(r['id'], {'created':'2020-01-01T00:00:00+00:00','reconciled':None})
+    def racing(key):
+        svc.control.patch(key, {'worker':'just-started','status':'running'})
+        return []
+    svc.cloud.executions = racing
+    def forbidden(*a):
+        pytest.fail('No puede retirar el lock de un trabajador que acaba de empezar')
+    doc = reconcile(svc.control,svc.cloud,forbidden)
+    assert doc['runs'][0]['status']=='running'
+
+
+def test_failed_lock_cleanup_retains_reservation_until_reconciled(execution):
+    svc = execution[0]
+    r = start(execution)
+    svc.cloud.rows = [{'completionTime':now()}]
+    svc.control.patch(r['id'], {'worker':'synthetic','lock_generation':'123','reconciled':None})
+    def failure(*a):
+        raise TimeoutError('synthetic')
+    assert reconcile(svc.control,svc.cloud,failure)['runs'][0]['status']=='reconciling'
+    with pytest.raises(Conflict):
+        start(execution)
+    svc.control.patch(r['id'], {'reconciled':None})
+    assert reconcile(svc.control,svc.cloud,lambda *a:None)['runs'][0]['status']=='interrupted'
+
+
+
+def test_missing_expired_execution_reconciles_after_stale_heartbeat(execution):
+    from requests import HTTPError, Response
+    svc = execution[0]
+    r = start(execution)
+    def missing(worker):
+        response = Response()
+        response.status_code=404
+        raise HTTPError(response=response)
+    svc.cloud.execution = missing
+    svc.control.patch(r['id'], {'worker':'expired-job','created':'2020-01-01T00:00:00+00:00','reconciled':None})
+    assert reconcile(svc.control,svc.cloud)['runs'][0]['status'] in ACTIVE
+    def stale(doc):
+        doc['runs'][0].update(updated='2020-01-01T00:00:00+00:00',reconciled=None)
+    svc.control.change(stale)
+    assert reconcile(svc.control,svc.cloud)['runs'][0]['status']=='interrupted'

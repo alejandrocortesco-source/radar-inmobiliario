@@ -69,7 +69,7 @@ def run_manual(folder, run_id, control=None, state_factory=None, make_scraper=sc
         nonlocal claimed
         claimed = False
         r = next((r for r in doc['runs'] if r['id'] == run_id), None)
-        if r and r['status'] in ACTIVE and not r.get('worker'):
+        if r and r['status'] in {'launching', 'queued', 'uncertain'} and not r.get('worker'):
             r.update(worker=worker, status='running', started=now(), updated=now(), phase='Recuperando snapshot')
             claimed = True
     control.change(claim)

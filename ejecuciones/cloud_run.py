@@ -32,6 +32,11 @@ class CloudRun:
             {'args': ['--execution', run_id], 'env': [{'name': 'RADAR_RUN_ID', 'value': run_id}]}], 'taskCount': 1}})
         return op.get('name')
 
+    def execution(self, worker):
+        if not isinstance(worker, str) or not re.fullmatch(r'[a-z0-9][a-z0-9-]{0,127}', worker):
+            raise ValueError('Referencia de ejecución inválida')
+        return self.request('GET', self.name + '/executions/' + worker)
+
     def executions(self, run_id):
         result, token = [], None
         while True:
@@ -71,7 +76,18 @@ def reconcile(control, cloud, unlock=None):
     if not claimed:
         return control.read()[0]
     try:
-        executions = cloud.executions(r['id'])
+        if isinstance(cloud, CloudRun) and cloud.job != r['job']:
+            cloud = CloudRun(r['job'])
+        if r.get('worker'):
+            try:
+                executions = [cloud.execution(r['worker'])]
+            except Exception as exc:
+                # Una ejecución eliminada/expirada no deja el control activo para siempre.
+                if getattr(getattr(exc, 'response', None), 'status_code', None) != 404 or age(r['updated']) < 600:
+                    raise
+                executions = cloud.executions(r['id'])
+        else:
+            executions = cloud.executions(r['id'])
         if any(not terminal(e) for e in executions):
             # Falta de heartbeat no implica fallo si Cloud Run aún lo tiene activo.
             def note(d):
@@ -84,14 +100,22 @@ def reconcile(control, cloud, unlock=None):
             return control.read()[0]
         # Sin Job después de 10 min: cerrar/fencear la reserva; un Job tardío no podrá reclamarla.
         # No relanzar una solicitud ambigua. El próximo clic requiere un ID nuevo.
-        r = control.get(r['id'])
-        if r['status'] not in ACTIVE:
+        observed_worker = r.get('worker')
+        def fence(d):
+            current = next(x for x in d['runs'] if x['id'] == r['id'])
+            if current['status'] not in ACTIVE or current.get('worker') != observed_worker or current['updated'] != r['updated']:
+                return None  # Un trabajador reclamó la reserva después de consultar Cloud Run.
+            current.update(status='reconciling', phase='Reconciliando cierre y bloqueo')
+            return current
+        closed = control.change(fence)
+        if closed is None:
             return control.read()[0]
-        if unlock and (r.get('lock_generation') or r.get('lock_token')):
-            unlock(r.get('lock_generation'), r.get('lock_token'))
+        # La reserva está revocada antes de limpiar; un Job tardío no puede reclamarla.
+        if unlock and (closed.get('lock_generation') or closed.get('lock_token')):
+            unlock(closed.get('lock_generation'), closed.get('lock_token'))
         def finish(d):
             current = next(x for x in d['runs'] if x['id'] == r['id'])
-            if current['status'] not in ACTIVE:
+            if current['status'] != 'reconciling' or current.get('worker') != observed_worker:
                 return
             current.update(status='interrupted', phase='Job terminado sin cierre confirmado', finished=now(), updated=now(),
                            error='Infraestructura: ejecución terminada o lanzamiento no confirmado; se conserva el último snapshot confirmado.')

@@ -97,7 +97,7 @@ class ControlGCS:
     def patch(self, run_id, values, worker=None):
         def mutate(doc):
             r = next(r for r in doc['runs'] if r['id'] == run_id)
-            if r['status'] not in ACTIVE or (worker and r.get('worker') != worker):
+            if r['status'] not in ACTIVE or (worker and (r.get('worker') != worker or r['status'] == 'reconciling')):
                 raise IntegrityError('La ejecución perdió su autorización de escritura')
             r.update(values, updated=now())
             return r

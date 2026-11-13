@@ -43,7 +43,10 @@ Solo un CLOUD_RUN_EXECUTION puede reclamar el UUID; duplicados, reintentos y Job
 tardíos tras el cierre de la reserva salen antes de tocar SQLite o el portal.
 
 Mientras hay ejecución activa, una consulta como máximo cada 60 s contrasta
-Cloud Run (lista paginada filtrada por RADAR_RUN_ID). Un heartbeat viejo no prueba
+Cloud Run (referencia exacta del trabajador o lista paginada filtrada por RADAR_RUN_ID).
+Se consulta el Job guardado en el registro, aunque una revisión posterior configure
+otro Job. Una reclamación concurrente invalida el cierre; primero se revoca la
+reserva por CAS y luego se limpia el lock. Un fallo de limpieza conserva la reserva. Un heartbeat viejo no prueba
 un fallo: si el Job sigue activo se mantiene la reserva y se avisa. Un Job terminal
 sin cierre confirmado queda interrumpido. Si no aparece ningún Job después de
 10 min y la consulta remota fue exitosa, se cierra y revoca la reserva: un lanzamiento
