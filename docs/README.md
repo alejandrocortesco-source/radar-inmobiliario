@@ -61,3 +61,5 @@ Los diagnósticos privados del equipo pertenecen a `.local/diagnosticos/`, no a 
 - [Ejecuciones: clasificación final y conciliación de contadores](../consola/docs/RESULTADOS_FINALES_20261116.md).
 
 - [Programación semanal y revisión privada v0.13.0](../consola/docs/PROGRAMACION.md).
+
+- [Wasi: diagnóstico por etapas y única captura de revisión del 16/11/2026](../consola/docs/WASI_DIAGNOSTICO_20261116.md).

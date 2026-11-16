@@ -43,6 +43,7 @@ def test_precise_stages_and_privacy(case):
     if case in {'popup_recovered','empty'}:
      result=await step(case,'operación sintética',operation(),page,200)
      if case=='empty':assert result['total']==0
+     if case=='popup_recovered':assert any(r.get('outcome')=='recovered' for r in diag.records)
      diag.finish(True)
      assert not any(r.get('outcome')=='failed' for r in records)
     else:

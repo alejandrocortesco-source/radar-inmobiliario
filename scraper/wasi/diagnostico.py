@@ -165,7 +165,7 @@ class Diagnostic:
         else:
             self.last=stage
             self.records.append(dict(record,outcome='completed',duration_ms=round((time.monotonic()-start)*1000)))
-            self.records=[r for r in self.records if r['outcome']=='failed'][-8:]+[r for r in self.records if r['outcome']=='completed'][-92:]
+            self.records=[r for r in self.records if r['outcome']=='failed'][-8:]+[r for r in self.records if r['outcome']=='recovered'][-8:]+[r for r in self.records if r['outcome']=='completed'][-84:]
             return value
 
     def finish(self, success):
@@ -174,7 +174,7 @@ class Diagnostic:
                 record.update(recovered=success,affects_result=not success)
                 self.emit(record)
         if success:
-            self.emit({'source':'wasi','stage':'listing_complete','outcome':'completed','last_completed':self.last,'recovered':any(r['outcome']=='failed' for r in self.records)})
+            self.emit({'source':'wasi','stage':'listing_complete','outcome':'completed','last_completed':self.last,'recovered':any(r['outcome'] in {'failed','recovered'} for r in self.records)})
 
 async def step(stage, action, operation, page=None, timeout=None, selector=None, expected=None):
     diagnostic=current.get()

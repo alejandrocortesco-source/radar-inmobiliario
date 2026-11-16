@@ -206,3 +206,15 @@ Referencias técnicas: `scraper/README.md`, `scraper/docs/INCREMENTAL.md`, `cata
 
 
 Corrección posterior autorizada del contrato JobName: [normalización exacta y diagnóstico](consola/docs/CORRECCION_SCHEDULER_ID_20261116.md). La validación operativa sigue pendiente; Scheduler permanece pausado.
+
+## Diagnóstico Wasi y captura acotada — 16 de noviembre de 2026
+
+La autorización posterior permite instrumentar y desplegar solo en revisión, y una
+única ejecución manual durable de la búsqueda Wasi original. Se conservaron filtros,
+reintentos, cobertura y reglas de ausencias; sin nueva corrección funcional supuesta.
+La captura c3dc2dbe-231b-4c08-b704-2afa08bf7ab9 completó dos páginas y 69 anuncios,
+con guardado confirmado; no reprodujo el fallo genérico de la captura automática.
+No permite determinar retrospectivamente su causa. Programación vigente conservada:
+activa lunes 09:00 Bogotá, próxima 23/11/2026; sin cambios de selección/Scheduler.
+Evidencia, instrumentación, pruebas, límites y reversión:
+[diagnóstico por etapas](consola/docs/WASI_DIAGNOSTICO_20261116.md).
