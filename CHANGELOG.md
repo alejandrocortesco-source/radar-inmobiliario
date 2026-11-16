@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.13.1 — 2026-11-16 (revisión privada)
+
+- Conserva la programación automática semanal y el flujo durable compartido con ejecuciones manuales.
+- Reconoce el ID corto y el nombre completo del Scheduler configurado, normalizados a una identidad canónica para deduplicación.
+- Añade diagnóstico detallado de Wasi por etapas, evidencia privada acotada y advertencias recuperadas en el informe.
+- Validación: pruebas aisladas documentadas y una captura individual Wasi completada, con dos páginas, 69 anuncios y guardado durable confirmado. El fallo intermitente de las 09:00 no se reprodujo y su causa sigue pendiente.
+- Registro de versión en Git; no cambia despliegues, programación activa ni diseño. Sin tag nuevo.
+
 ## 0.13.0 — 2026-11-16 (revisión privada)
 
 - Programación general de búsquedas por días y hora de Bogotá, con guardado,
