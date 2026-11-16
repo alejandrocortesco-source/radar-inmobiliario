@@ -106,7 +106,60 @@ Se inspeccionaron visualmente desktop y móvil, además de las comprobaciones
 Chromium de tablet. Panel recortado al informe: informe-69-panel-{1440,768,390}.png.
 Los datos son sintéticos, sin IDs ni contenido de fichas operativas.
 
-Builds y verificaciones de despliegue se completan al confirmarlos.
+## Builds y componentes efectivos
+
+Commit fuente compartido: `680ef8b45a4f1773f8e8ef5c98a4f46241a51809`.
+Ambos builds SUCCESS, proyecto radar-inmobiliario-co, us-central1:
+
+| Componente | Build | Horario Bogotá 16/11/2026 |
+| --- | --- | --- |
+| Job | 3c1f7856-bc3b-47d0-a266-6d0adc5f3bde | 06:21:54–06:23:46 |
+| Web | 4e810438-6f21-4816-8fce-e053015984db | 06:21:58–06:23:19 |
+
+Imagen efectiva de radar-manual-review, Ready=True:
+`us-central1-docker.pkg.dev/radar-inmobiliario-co/radar/jobs@sha256:cba1da6dc8eab2e4dde7af9b4ec0d303cebf7fff7bfa58df00f0f54e0b3ea7e3`.
+
+Revisión web privada: `radar-resultados-20261116-680ef8b`, Ready=True, 0% de tráfico.
+Imagen efectiva en spec y status.imageDigest de la revisión:
+`us-central1-docker.pkg.dev/radar-inmobiliario-co/radar/web@sha256:b9681ad636a3b1909199b86057466bcf60dc563a9ceee1471227596c5455933d`.
+
+Los dos digests coinciden entre Cloud Build, Artifact Registry y recursos efectivos.
+La identificación del runtime es commit/digest; no se creó un tag Git ni se cambió
+la versión visible de la cabecera para identificar estas imágenes.
+
+El Job conserva toda su configuración salvo imagen y nonce generado por Cloud Run.
+En web se cambian imagen, metadatos de revisión/source-sha y destino del tag privado.
+Se compararon entorno, secretos, identidad, recursos, probes y anotaciones de acceso:
+ningún cambio funcional de configuración o IAP. Producción mantiene exactamente
+100% en radar-verify-20261111 y la spec de esa revisión es idéntica. Otros Jobs intactos.
+No se añadieron permisos, identidades, secretos, Jobs o infraestructura permanente;
+solo los dos builds, imágenes, fuente/logs y la revisión web de prueba.
+
+## Verificación privada y conservación
+
+Se utilizó la sesión IAP disponible mediante la habilidad computer-use y la
+superficie de navegador de solo lectura. Se abrió únicamente el endpoint existente
+`/v0.6/ejecuciones/estado?run=e0cb409c-ee6a-41cb-b4bc-56bc8116cb21` para evitar
+refrescar proyecciones operativas del catálogo al comprobar el informe.
+No se interactuó con autenticación ni se seleccionaron búsquedas.
+
+La respuesta privada real confirmó:
+
+- status=completed; processed=69; new=1; changed=0; unchanged=68.
+- reused=55; reread_unchanged=13.
+- report_origin=snapshot y nota explícita de derivación.
+- reported.unchanged=55: el control original no se reescribe.
+- El HTML del mismo endpoint contiene 1 / 0 / 68, consistente con el JSON.
+
+Después de esa lectura, snapshot y control mantienen exactamente sus generaciones
+y MD5 previos. Lista de ejecuciones idéntica antes/después: ninguna nueva captura.
+Lock ausente (404); no se retiró ningún bloqueo. No hubo scraping, Gemini o Scheduler.
+Esto verifica el cálculo/presentación y la lectura histórica privada, no una nueva
+prueba operativa de extracción o persistencia de futuros Jobs.
+
+Evidencia local excluida: `.tmp/resultados-finales-20261116/verification.json`,
+metadatos before/after, builds, Registry, logs de suites y capturas sintéticas.
+No se publican snapshots operativos ni registros crudos con datos privados.
 
 ## Componentes y revisión
 
@@ -173,3 +226,19 @@ Sin cambios en scraper/, catalogo/, oportunidades/, bases o configuración de
 extracción. Se verifica diff vacío de todos los scrapers frente a 6c68007.
 Rama conservada, sin conflictos. Commit local para build reproducible; sin push,
 merge ni tags. El commit documental posterior registra digests y no cambia runtime.
+
+
+Comandos de reversión (documentados, no ejecutados), tras confirmar que no hay
+procesos activos:
+
+```powershell
+& ../cloud.ps1 run jobs update radar-manual-review --project=radar-inmobiliario-co --region=us-central1 --image=us-central1-docker.pkg.dev/radar-inmobiliario-co/radar/jobs@sha256:f70659597246158745994c6fe5efd8a33c459166c546b11f837b570e4c28519d --quiet
+& ../cloud.ps1 run services update-traffic radar --update-tags=ejecuciones-review=radar-wasi-overlay-20261113 --project=radar-inmobiliario-co --region=us-central1 --quiet
+```
+
+Comprobar después Job digest, tag privado y radar-verify-20261111 al 100%.
+No restaurar datos ni cambiar porcentajes como sustituto de revertir la revisión.
+
+Cierre: rama conservada, árbol limpio y scrapers sin diferencias frente a la base.
+El commit documental posterior no requiere reconstruir imágenes. No hay push,
+merge, tags ni conflictos.
