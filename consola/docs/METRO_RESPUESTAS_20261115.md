@@ -57,7 +57,36 @@ Comando por suite, con PYTHONPATH apuntando a raíz, scraper y consola/tests:
 ` .venv/Scripts/python.exe -m pytest --rootdir=. -o pythonpath= COMPONENTE/tests -q --basetemp=.tmp/metro-response-regression-COMPONENTE-20261115 `.
 Evidencias locales excluidas: `.tmp/metro-response-20261115/tests-*.txt`.
 
-Build y digest se registrarán después de verificarlos.
+## Imagen desplegada y verificación posterior
+
+- Commit fuente de runtime: `aa260cc4163e1e88ee6c973ff74ff8e6119be3a4`.
+- Build regional: `cd551d75-54fc-4636-b981-0db15c0110fa`, SUCCESS.
+  Inicio/fin: 15/11/2026 19:14:49–19:16:59 America/Bogota.
+- Imagen construida: `us-central1-docker.pkg.dev/radar-inmobiliario-co/radar/jobs:aa260cc4163e`.
+- Imagen efectiva de `radar-manual-review`:
+  `us-central1-docker.pkg.dev/radar-inmobiliario-co/radar/jobs@sha256:890356e5be7562dab9bb9c510cab4f1883fbee6441ba781f1c91e0b15bd8025d`.
+- Digest coincidente entre Cloud Build, Artifact Registry y spec del Job. Job Ready=True.
+  Se fijó por digest inmutable, no por un tag móvil. No se ha lanzado una ejecución
+  nueva con esta imagen; su comportamiento real sigue pendiente de prueba manual.
+- Única modificación de spec: imagen y nonce de plantilla generado por Cloud Run.
+  Idénticos argumentos, entorno, referencias Secret Manager, cuenta de servicio,
+  recursos, una tarea, paralelismo, reintentos y timeout. La etiqueta histórica
+  `source-sha=adccc7a10cef` no se cambió: no identifica este runtime; usar digest y
+  commit fuente de este informe, acreditados en el build y el argumento OCI.
+- No se reconstruyó ni desplegó web: el cambio está exclusivamente en el scraper.
+  Web spec, anotaciones de acceso y status.traffic idénticos antes/después.
+  Producción mantiene `radar-verify-20261111` al 100%; el tag de revisión sigue
+  `radar-wasi-overlay-20261113` sin tráfico de producción.
+- Todos los demás Jobs mantienen su spec. Las generaciones y MD5 de snapshot
+  y control son idénticas a las del apartado de estado previo. Lock sigue 404.
+  Lista de ejecuciones idéntica antes/después, todas con completionTime.
+- No se añadieron recursos permanentes ni permisos. Se generaron imagen, build,
+  fuente temporal y logs asociados; solo costo habitual de construcción/almacenamiento.
+  El scraping manual futuro conserva sus recursos y persistencia compartidos.
+
+Evidencia local excluida: `.tmp/metro-response-20261115/verification.json`,
+`build.json`, `registry-image.json`, descripciones before/after y metadatos GCS.
+No se borró ni modificó control, bloqueo, snapshot o catálogo.
 
 ## Cómo repetir manualmente
 
@@ -88,13 +117,39 @@ la captura real manual y su guardado durable.
 ## Reversión
 
 Sin procesos activos, volver únicamente la imagen de `radar-manual-review` al digest
-anterior (registrado al desplegar) mediante `../cloud.ps1 run jobs update`, indicando
+anterior indicado abajo mediante `../cloud.ps1 run jobs update`, indicando
 `--project=radar-inmobiliario-co --region=us-central1 --image=IMAGEN_ANTERIOR --quiet`.
 Comprobar después el digest efectivo. No ejecutar el Job como parte del rollback.
 No cambiar web/tráfico ni restaurar SQLite, snapshot, control o historial: no existe
 migración. La imagen anterior reproduce el defecto de reconocimiento del endpoint
 nuevo; conservar ese límite al decidir repetir. No cancelar procesos ni retirar
 bloqueos para revertir código.
+
+Desde el clon autorizado, una vez confirmado que no hay procesos activos:
+
+```powershell
+& ../cloud.ps1 run jobs update radar-manual-review --project=radar-inmobiliario-co --region=us-central1 --image=us-central1-docker.pkg.dev/radar-inmobiliario-co/radar/jobs@sha256:096dd89ccf155ad93d411ad91594cf8987db88f2b75fc01c6884f90f471a4c4e --quiet
+& ../cloud.ps1 run jobs describe radar-manual-review --project=radar-inmobiliario-co --region=us-central1 --format="value(spec.template.spec.template.spec.containers[0].image)"
+```
+
+## Git y archivos
+
+Rama `codex/ejecuciones-manuales`, base conservada `195b521`. Commit de runtime
+`aa260cc` y un commit documental posterior para registrar resultados del despliegue.
+Sin push, merge ni tags Git. Ningún archivo del checkout original fue modificado.
+
+Archivos de esta entrega:
+
+- `scraper/metro/scraper.py`: comparación exacta y uso en el único listener.
+- `scraper/tests/test_metro_responses.py`: pruebas aisladas de rutas, avance y cobertura.
+- `scraper/README.md`: endpoints y principales.
+- `consola/docs/EJECUCIONES.md`: criterio de reconocimiento y cobertura.
+- `consola/docs/METRO_RESPUESTAS_20261115.md`: entrega, evidencia y reversión.
+- `docs/README.md`: acceso al informe.
+- `CHANGELOG.md`: corrección compatible sin nueva publicación funcional.
+
+Sin conflictos. Al cerrar se comprueba árbol limpio. Los artefactos locales de
+`.tmp/` permanecen excluidos de Git y de las imágenes. No hay migración de datos.
 
 
 ## Estado previo verificado en Cloud
