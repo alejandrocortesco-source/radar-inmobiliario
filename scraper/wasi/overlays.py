@@ -109,7 +109,7 @@ async def dismiss_announcements(page, timeout):
         try:
             from .diagnostico import current
             diagnostic=current.get()
-            if closed and diagnostic and len([r for r in diagnostic.records if r.get('outcome')=='recovered'])<8:
+            if closed and diagnostic and __import__('sys').exc_info()[0] is None and len([r for r in diagnostic.records if r.get('outcome')=='recovered'])<8:
                 record={'source':'wasi','radar_run':__import__('os').getenv('RADAR_RUN_ID'),
                     'technical_run':diagnostic.scraper.run_id,'search':diagnostic.scraper.cfg.url,
                     'stage':'recognized_popup','last_completed':diagnostic.last,'outcome':'recovered',
