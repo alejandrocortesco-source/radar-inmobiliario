@@ -124,15 +124,43 @@ automática de búsquedas interrumpidas desde esta primera página.
 
 ## Métricas y estimación
 
-Procesados: anuncios distintos por búsqueda con resultado técnico success,
-unchanged, partial, failed o blocked. Incluye reutilización de ficha e incidencias;
-excluye anuncios aún pendientes. No cuenta visitas HTTP ni inmuebles físicos únicos.
-Nuevas/actualizadas/sin cambios: filas fiables success/unchanged, clasificadas como
-new/modified/unchanged por el motor actual. Modified corresponde a cambio de precio;
-no pretende contabilizar toda diferencia posible de atributos. Otras revisiones
-pueden no entrar en esas tres categorías. Las sumas generales pueden repetir una
-publicación presente en varias búsquedas. Una métrica no disponible aparece N/D,
-nunca cero inventado. Se omiten los textos crudos de excepciones del proveedor.
+Desde la corrección del 16/11/2026, la clasificación del informe es final y
+separa la decisión inicial del scraper. `classification` y `decision_reason` se
+conservan sin modificaciones en SQLite. Actualizados significa cambio de **precio
+comparable**, no de cualquier atributo. Sin cambios también se refiere solo al
+precio: no afirma igualdad de toda la ficha.
+
+Procesados son anuncios distintos por búsqueda con estado técnico terminal:
+success, unchanged, partial, failed o blocked. Su total se divide sin solapamientos
+en nuevos, actualizados (precio), sin cambios de precio, parciales, fallidos,
+bloqueados y sin clasificación final. Pendientes/processing se muestran aparte,
+fuera de procesados. No son visitas HTTP ni inmuebles físicos únicos; las sumas
+entre búsquedas pueden repetir una publicación.
+
+Una ficha fiable sin anterior (`new/no_catalog_detail`) es nueva. Para las otras
+fichas fiables se compara `previous_price_json` con el precio final del documento,
+usando los normalizadores existentes. Un `success` sin evidencia comparable no
+se convierte en sin cambios: queda sin clasificación final. Los estados parciales,
+fallidos y bloqueados se conservan como tales. Dentro de sin cambios se detallan
+fichas reutilizadas y releídas/confirmadas; esos subconjuntos no se suman de nuevo.
+Si un histórico no documenta el método, se indica también esa limitación.
+
+El Job guarda métricas aditivas `report_version=2` en el control de futuras
+capturas. Web y API usan la misma proyección. Para registros anteriores cerrados,
+se deriva la presentación en memoria desde el snapshot de generación exacta
+registrado por el cierre, con SQLite `mode=ro&immutable=1`, sin Store, migraciones,
+locks ni cambios del control o snapshot. Se comprueban la captura/búsqueda y el
+total registrado. No se usan datos posteriores del catálogo como prueba histórica.
+Si falta generación, referencia técnica, permiso, esquema o comparación, aparecen
+N/D o sin clasificación final; los contadores originales siguen consultables.
+La página identifica explícitamente la presentación derivada.
+
+La descarga histórica solo ocurre al consultar un registro antiguo seleccionado.
+Caché de hasta cuatro informes (solo métricas), una hora por generación inmutable,
+fallos durante treinta segundos. Los temporales se cierran y eliminan. Una captura
+activa se sigue desde control; no se carga un snapshot que esté siendo modificado.
+No cambia la duración ni la carga medida por anuncios terminales.
+Detalles, pruebas, evidencia sintética y reversión: [resultados finales](RESULTADOS_FINALES_20261116.md).
 
 Se leen en modo SQLite ro las últimas ejecuciones técnicas compatibles. Las capturas
 históricas de varias búsquedas se identifican como compartidas y no se usan para

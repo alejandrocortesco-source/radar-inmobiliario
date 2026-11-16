@@ -1,5 +1,17 @@
 # Changelog
 
+## Sin publicar — 2026-11-16 (informes de revisión)
+
+- Clasificación final compartida del informe, separada del motivo inicial de
+  relectura. Comparación de precios fiables anterior/final, sin tratar success
+  como prueba de igualdad y sin cambiar datos o decisiones de extracción.
+- Conciliación exhaustiva de procesados, estados no satisfactorios y resultados
+  sin evidencia; pendientes aparte. Reutilizados y releídos son subconjuntos.
+- Históricos derivados de su generación exacta en modo inmutable, sin reescribir
+  control o snapshots; límites visibles y contadores originales disponibles.
+- Pruebas sintéticas comunes para las tres fuentes y evidencia responsive. Revisión
+  privada de web y Job, sin ejecutar scraping ni alterar tráfico de producción.
+
 ## Sin publicar — 2026-11-15 (Job de revisión)
 
 - Wasi cierra anuncios ProductFruits reconocidos aunque el host no tenga altura,

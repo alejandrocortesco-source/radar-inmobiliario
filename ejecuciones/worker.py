@@ -21,6 +21,7 @@ from fincaraiz.__main__ import configuracion as fincaraiz_config
 from wasi.durable import EstadoGCS, ARCHIVOS
 from wasi.locking import bloqueo
 from .control import ControlGCS, IntegrityError, ACTIVE, now, select, projection, valid_id
+from .resultados import from_db
 
 
 def scraper_for(repo, folder, search):
@@ -36,20 +37,17 @@ def metrics(scraper):
     if not scraper.run_id:
         return {}
     summary = scraper.store.summary(scraper.run_id)
-    terminal = {'success', 'unchanged', 'partial', 'failed', 'blocked'}
-    processed = sum(n for s, n in summary['statuses'].items() if s in terminal)
     with scraper.store.connect() as db:
-        counts = dict(db.execute("SELECT classification,count(*) FROM jobs WHERE run_id=? AND status IN ('success','unchanged') GROUP BY classification", (scraper.run_id,)))
+        final = from_db(db, scraper.run_id)
         listing_count = db.execute("SELECT count(*) FROM events WHERE run_id=? AND kind='listing_incomplete'", (scraper.run_id,)).fetchone()[0]
         listing = db.execute("SELECT context_json FROM events WHERE run_id=? AND kind='listing_incomplete' ORDER BY id DESC LIMIT 1", (scraper.run_id,)).fetchall()
     from wasi.diagnostico import MESSAGES
     code = json.loads(listing[0][0]).get('code') if listing else None
     code = code if code in MESSAGES else ('listing_unverified' if listing else None)
     listing_error = MESSAGES.get(code, 'Listado incompleto: no se pudo verificar su cobertura.') if listing else None
-    return {'listing_error_count': listing_count, 'listing_error': listing_error, 'listing_code': code,
+    return {**final, 'listing_error_count': listing_count, 'listing_error': listing_error, 'listing_code': code,
             'listing_complete': bool(summary.get('listing_complete')), 'listing_pages': summary.get('pages'),
-            'technical_run': scraper.run_id, 'processed': processed,
-            'new': counts.get('new', 0), 'changed': counts.get('modified', 0), 'unchanged': counts.get('unchanged', 0),
+            'technical_run': scraper.run_id,
             'phase': 'Revisando anuncios' if summary.get('listing_complete') else 'Recorriendo resultados',
             'error_count': summary.get('errors'), 'portal_status': summary['status']}
 

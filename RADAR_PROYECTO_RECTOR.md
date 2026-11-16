@@ -28,6 +28,17 @@ La revisión comparte datos y bloqueo con producción. Diseño, métricas, permi
 límites y reversión: [Ejecuciones](consola/docs/EJECUCIONES.md). El resultado de
 pruebas/despliegue se documenta tras verificarlo, sin equiparar build con éxito.
 
+## Resultados finales de ejecución (16 de noviembre de 2026)
+
+El informe separa motivo inicial de relectura y resultado final. Nuevos, cambios de
+precio y sin cambios de precio se derivan de evidencia final fiable; un success
+sin comparación suficiente se muestra sin clasificación. Parciales, fallidos y
+bloqueados completan los procesados; pendientes quedan aparte. Reutilizados y
+releídos sin cambio son subconjuntos informativos, sin doble conteo. Se preservan
+los motivos originales y los datos de los snapshots. Los históricos solo se
+presentan corregidos cuando la generación confirmada aporta evidencia; cualquier
+limitación debe mostrarse. No cambia extracción, cobertura, ausencias ni persistencia.
+
 ## Acceso privado preparado para IAP (11 de noviembre de 2026)
 
 La versión funcional vigente es **0.11.0**: incorpora las funciones posteriores a `v0.10.0`, incluyendo matching manual, novedades, validación real de Gemini ya documentada y acceso privado. El incremento MINOR sigue [Git y versionado](GIT_WORKFLOW.md); la compatibilidad de acceso durante 0.x y el alcance están en [CHANGELOG](CHANGELOG.md). El versionado actual no vuelve a ejecutar pruebas reales del proveedor.

@@ -57,3 +57,5 @@ Los diagnósticos privados del equipo pertenecen a `.local/diagnosticos/`, no a 
 - [Metrocuadrado: reconocimiento de respuestas y Job de revisión](../consola/docs/METRO_RESPUESTAS_20261115.md).
 
 - [Wasi: anuncios ProductFruits recurrentes y revisión](../consola/docs/WASI_ANUNCIOS_RECURRENTES_20261115.md).
+
+- [Ejecuciones: clasificación final y conciliación de contadores](../consola/docs/RESULTADOS_FINALES_20261116.md).

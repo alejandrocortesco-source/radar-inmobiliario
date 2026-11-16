@@ -1,5 +1,6 @@
 """Página y API de control: no consultan el catálogo SQLite durante una captura."""
 import json
+import copy
 import os
 from uuid import uuid4
 from fastapi import APIRouter, Request
@@ -8,6 +9,7 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from .v06 import templates
 from ejecuciones.control import ACTIVE, Conflict, measurements, age, valid_id
 from ejecuciones.servicio import ServicioEjecuciones
+from ejecuciones.resultados import COUNT_KEYS, presentation
 
 PATH = '/v0.6/ejecuciones'
 LABELS = {'reconciling': 'Reconciliando cierre', 'launching': 'Solicitando Job', 'uncertain': 'Lanzamiento por confirmar', 'queued': 'Esperando Job',
@@ -59,6 +61,9 @@ def tracking(run):
 
 
 def context(doc, requested=None):
+    doc = copy.deepcopy(doc)
+    for r in doc['runs']:
+        r['searches'] = [presentation(b) for b in r['searches']]
     runs = sorted(doc['runs'], key=lambda r: r['created'], reverse=True)
     active = next((r for r in runs if r['status'] in ACTIVE), None)
     run = next((r for r in runs if r['id'] == requested), None) if requested else (active or (runs[0] if runs else None))
@@ -70,7 +75,7 @@ def context(doc, requested=None):
         last_label = 'Por verificar' if last_tracking and not last_tracking['confirmed'] else None
         searches.append(dict(b, token=json.dumps([b['fuente'], b['id_busqueda']], ensure_ascii=False),
                              measurement=measurements(doc, b), last=history or b.get('legacy_last'), last_label=last_label))
-    totals = {k: (sum(b[k] for b in run['searches']) if all(b.get(k) is not None for b in run['searches']) else None) for k in ('processed','new','changed','unchanged')} if run else {}
+    totals = {k: (sum(b[k] for b in run['searches']) if all(b.get(k) is not None for b in run['searches']) else None) for k in COUNT_KEYS} if run else {}
     return {'totals': totals, 'searches': searches, 'runs': runs, 'active': active, 'run': run,
             'labels': LABELS, 'duration': duration, 'age': age, 'tracking': tracking,
             'active_tracking': tracking(active), 'run_tracking': tracking(run),
@@ -137,7 +142,9 @@ def crear_router():
         if not os.getenv('RADAR_STATE_BUCKET'):
             return render(request, warning='El lanzamiento durable requiere configurar Cloud Run y Cloud Storage. No se ejecutará scraping desde la web local.')
         try:
-            doc, warning = ServicioEjecuciones().overview(refresh=True)
+            svc = ServicioEjecuciones()
+            doc, warning = svc.overview(refresh=True)
+            doc = svc.report(doc, request.query_params.get('run'))
             return render(request, doc=doc, warning=warning)
         except Exception:
             return render(request, 503, error='No se pudo consultar el registro durable. Vuelve a cargar la página; no se inició ninguna captura.')
@@ -177,7 +184,9 @@ def crear_router():
         try:
             if run is not None and not valid_id(run):
                 return JSONResponse({'detail': 'Identificador inválido.'}, 422)
-            doc, _ = ServicioEjecuciones().overview()
+            svc = ServicioEjecuciones()
+            doc, _ = svc.overview()
+            doc = svc.report(doc, run)
             ctx = context(doc, run)
             if run and ctx['run'] is None:
                 return JSONResponse({'detail': 'Ejecución no encontrada o fuera de retención.'}, 404)

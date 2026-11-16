@@ -7,6 +7,7 @@ from catalogo.persistencia.busquedas import BusquedasSQLite
 from wasi.durable import EstadoGCS
 from .control import ControlGCS, ACTIVE, Conflict, now, projection, select, reserve
 from .cloud_run import reconcile, cloud_configurado
+from .informes import SnapshotReports, project
 
 
 class ServicioEjecuciones:
@@ -15,6 +16,10 @@ class ServicioEjecuciones:
         self.cloud = cloud or cloud_configurado(os.getenv('RADAR_EXECUTION_JOB', 'radar-manual'))
         self.state_factory = state_factory or (lambda: EstadoGCS(os.environ['RADAR_STATE_BUCKET'], os.getenv('RADAR_STATE_OBJECT', 'radar/state.tar.gz')))
         self.data_dir = data_dir or os.getenv('RADAR_DATA_DIR', '/data')
+        self.reports = SnapshotReports(self.state_factory, self.data_dir)
+
+    def report(self, doc, requested=None):
+        return project(doc, self.reports, requested)
 
     def unlock(self, generation=None, token=None):
         # Solo generación anotada por el trabajador y tras Cloud Run terminal.

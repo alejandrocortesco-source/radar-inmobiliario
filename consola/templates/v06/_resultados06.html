@@ -1,0 +1,8 @@
+{% macro value(n) -%}{{n if n is not none else 'N/D'}}{%- endmacro %}
+{% macro balance(b) %}
+<small>Parciales: {{value(b.partial)}} · Fallidos: {{value(b.failed)}} · Bloqueados: {{value(b.blocked)}} · Sin clasificación final: {{value(b.unclassified)}}.</small>
+<small>Pendientes conocidos: {{value(b.pending)}} (fuera de procesados).</small>
+{% endmacro %}
+{% macro methods(b) %}
+<small>Dentro de sin cambios de precio: {{value(b.reused)}} fichas reutilizadas y {{value(b.reread_unchanged)}} releídas y confirmadas sin cambio de precio.{% if b.method_unknown %} Método no documentado: {{b.method_unknown}}.{% endif %} Son subconjuntos, no se suman de nuevo.</small>
+{% endmacro %}
