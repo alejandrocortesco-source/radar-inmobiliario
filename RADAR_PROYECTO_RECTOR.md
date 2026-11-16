@@ -21,6 +21,18 @@ La entrega queda desactivada. Como CreateJob no permite state=PAUSED, no se crea
 ahora el recurso Scheduler; su creación queda preparada para Activar posteriormente.
 Diseño, costos, pruebas, recursos y reversión: [Programación](consola/docs/PROGRAMACION.md).
 
+## Prueba operativa de programación — 16 de noviembre de 2026
+
+La autorización posterior permitió crear un Scheduler activo y una única ejecución
+real de las tres búsquedas existentes La Carolina. La prueba de las 08:15 Bogotá
+alcanzó el disparador autenticado, que respondió 422 antes de reservar; ninguna
+fuente o Job comenzó. La pausa desde Radar confirmó Desactivada y Scheduler PAUSED.
+Se conserva el calendario temporal lunes 08:15 y la selección original, sin nuevas
+búsquedas, Gemini ni tráfico de producción modificado. La validación operativa
+completa sigue pendiente; no reactivar por cuenta propia. Se identificó y reprodujo
+un defecto de contrato del header JobName. Corrección mínima propuesta, no aplicada:
+[diagnóstico y evidencia](consola/docs/PRUEBA_PROGRAMACION_20261116.md).
+
 ## Radar Central — ajuste del 13 de noviembre de 2026
 
 La solicitud posterior reemplaza el recuadro Agregar fuente de Inicio por Radar

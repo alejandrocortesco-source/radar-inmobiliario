@@ -283,3 +283,16 @@ posteriormente y verificar ausencia de reservas/trabajadores activos:
 
 Comprobar de nuevo digest del Job, tag privado y producción al 100% en su revisión
 conservada. Ninguna restauración de datos forma parte de revertir la presentación.
+
+
+## Prueba operativa posterior: arranque rechazado y pausa confirmada
+
+La solicitud del 16/11/2026 autorizó crear Scheduler activo y una sola captura
+real de las tres búsquedas La Carolina. Guardar/Activar desde UI funcionaron sin
+inicio inmediato y Scheduler disparó a las 08:15 Bogotá, pero el endpoint devolvió
+422 antes de reservar. No comenzaron scrapers ni un Job y no hay guardado nuevo.
+Radar quedó Desactivada y radar-weekly-review PAUSED desde la interfaz. Se conserva
+lunes 08:15 con esas tres búsquedas. No reactivar hasta corregir y validar el contrato
+del header JobName (ID corto documentado frente a ruta completa esperada).
+No se repitió la prueba ni se aplicó una corrección de runtime en esta tarea.
+Diagnóstico, propuesta mínima, límites y evidencia: [prueba operativa](PRUEBA_PROGRAMACION_20261116.md).
