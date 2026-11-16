@@ -124,6 +124,8 @@ def test_manual_conflict_is_permanently_skipped(program, execution):
     manual = start(execution)
     result = deliver(program,cfg,date)
     assert result['status'] == 'skipped' and 'curso' in result['error']
+    html=TestClient(app).get('/v0.6/ejecuciones?run='+result['id']).text
+    assert 'Automático' in html and 'Programada:' in html and 'No iniciado' in html and result['error'] in html
     program.control.patch(manual['id'],dict(status='failed',finished=now()))
     assert deliver(program,cfg,date)['status'] == 'skipped'
     assert program.service.cloud.launched == [manual['id']]
@@ -389,3 +391,41 @@ def test_schedule_cas_stale_form_and_pending_operation(program):
     with pytest.raises(RuntimeError):program.save(cfg['keys'],[1],'03:00','activate',cfg['revision'])
     with pytest.raises(Conflict):program.save(cfg['keys'],[1],'03:00','pause',cfg['revision'])
     assert not program.read()['active']
+
+
+@pytest.mark.parametrize('viewport',[(1440,900),(768,1024),(390,844)])
+def test_browser_active_dates_manual_enabled_errors_empty(program,chromium,viewport):
+    cfg,date=configure(program,True)
+    client=TestClient(app)
+    browser_context=chromium.new_context(viewport=dict(width=viewport[0],height=viewport[1]))
+    page=browser_context.new_page()
+    def routed(route):
+        req=route.request;url=urlsplit(req.url)
+        response=client.request(req.method,url.path+('?' + url.query if url.query else ''),content=req.post_data_buffer)
+        route.fulfill(status=response.status_code,headers={k:v for k,v in response.headers.items() if k.lower() not in {'content-length','content-encoding'}},body=response.content)
+    page.route('**/*',routed)
+    page.goto('http://127.0.0.1/v0.6/ejecuciones')
+    text=page.locator('#programacion').inner_text()
+    assert 'Activa' in text and 'Próximas ejecuciones' in text
+    assert page.locator('#programacion li').count()==5
+    page.locator('[data-search]').first.check()
+    assert page.locator('[data-start]').is_enabled()
+    assert not program.service.cloud.launched
+    out=Path('.tmp/programacion-20261116');out.mkdir(parents=True,exist_ok=True)
+    for name in ('activa','error','vacia'):
+        if name=='error':
+            program.scheduler.get=lambda: (_ for _ in ()).throw(TimeoutError('SECRET_NOT_EXPOSED'))
+            page.reload()
+            assert 'Por verificar' in page.locator('#programacion').inner_text()
+            assert page.locator('#programacion [role=alert]').count()==1
+            assert 'SECRET_NOT_EXPOSED' not in page.content()
+        if name=='vacia':
+            doc=program.control.read()[0];doc['searches']=[]
+            program.service.overview=lambda refresh=False:(doc,None)
+            page.reload()
+            assert 'Agrega una búsqueda' in page.locator('#programacion').inner_text()
+            assert 'eliminada o está inactiva' in page.locator('#programacion').inner_text()
+        assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+        page.screenshot(path=str(out/f'{name}-{viewport[0]}.png'),full_page=True)
+    assert not program.service.cloud.launched
+    browser_context.close()
