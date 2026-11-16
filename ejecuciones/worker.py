@@ -45,7 +45,9 @@ def metrics(scraper):
     code = json.loads(listing[0][0]).get('code') if listing else None
     code = code if code in MESSAGES else ('listing_unverified' if listing else None)
     listing_error = MESSAGES.get(code, 'Listado incompleto: no se pudo verificar su cobertura.') if listing else None
-    return {**final, 'listing_error_count': listing_count, 'listing_error': listing_error, 'listing_code': code,
+    diagnostics = getattr(getattr(scraper,'diagnostic',None),'records',[])
+    details = [r for r in diagnostics if r.get('outcome')=='failed'][-8:]
+    return {'wasi_diagnostics': details, **final, 'listing_error_count': listing_count, 'listing_error': listing_error, 'listing_code': code,
             'listing_complete': bool(summary.get('listing_complete')), 'listing_pages': summary.get('pages'),
             'technical_run': scraper.run_id,
             'phase': 'Revisando anuncios' if summary.get('listing_complete') else 'Recorriendo resultados',

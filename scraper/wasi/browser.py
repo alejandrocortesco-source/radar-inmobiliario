@@ -7,7 +7,7 @@ from urllib.parse import urlsplit
 from catalogo.fuentes.wasi import GEO, SELECTS, INPUTS, NUMERIC_INPUTS, TEXT_INPUTS, RED
 from metro.extraction import ExtractionError
 from .auth import acceso, resolver_sesion_en_uso, AuthBlocked
-from .diagnostico import WasiListingError
+from .diagnostico import WasiListingError, step, current
 from .overlays import dismiss_announcements, prepare_interaction, normal_click
 from .extraction import listado, whatsapp_limpio, publicacion_whatsapp
 from playwright.async_api import TimeoutError as BrowserTimeout, Error as BrowserError
@@ -44,10 +44,10 @@ async def cambio(page, selector, accion, timeout, *, target=None):
         await dismiss_announcements(page, timeout)
         await accion()
     else:
-        await normal_click(page, page.locator(target), timeout,
-                           changed=lambda: anterior.evaluate('e => !e.isConnected || e.__radarVersion > 0'))
+        await step('search_click' if target=='#advanced_search' else 'pagination_click','clic normal',normal_click(page, page.locator(target), timeout,
+                           changed=lambda: anterior.evaluate('e => !e.isConnected || e.__radarVersion > 0')),page,timeout,target)
     try:
-        await page.wait_for_function('e => !e.isConnected || e.__radarVersion > 0', arg=anterior, timeout=timeout)
+        await step('table_mutation','esperar renovación',page.wait_for_function('e => !e.isConnected || e.__radarVersion > 0', arg=anterior, timeout=timeout),page,timeout,selector)
         await page.locator(selector).wait_for(state='attached', timeout=timeout)
     except BrowserTimeout:
         raise ExtractionError('Wasi no confirmó la actualización de ' + selector) from None
@@ -91,7 +91,7 @@ async def aplicar(page, config, timeout, pace, _session_changes=0):
 
 
 async def preparar_buscar(page, timeout):
-    await prepare_interaction(page, page.locator('#advanced_search'), timeout)
+    await step('before_search','comprobar interacción',prepare_interaction(page, page.locator('#advanced_search'), timeout),page,timeout,'#advanced_search')
 
 
 async def _aplicar(page, config, timeout, pace, _session_changes=0):
@@ -110,10 +110,9 @@ async def _aplicar(page, config, timeout, pace, _session_changes=0):
                 await nodo.select_option('')
             continue
         hijo = GEO[GEO.index(campo)+1] if campo in GEO[:-1] else None
-        await seleccionar(page, campo, valor, config.get('etiquetas', {}).get(campo), timeout,
-                          filtros.get(hijo) if hijo else None)
+        await step('filter:'+campo,'seleccionar filtro',seleccionar(page, campo, valor, config.get('etiquetas', {}).get(campo), timeout, filtros.get(hijo) if hijo else None),page,timeout,control(campo),valor)
     for campo in INPUTS:
-        await page.locator(control(campo)).fill(filtros.get(campo, ''))
+        await step('filter:'+campo,'rellenar filtro',page.locator(control(campo)).fill(filtros.get(campo, '')),page,timeout,control(campo),filtros.get(campo,''))
     await page.locator(control('property_id')).fill('')
     if _session_changes and await page.locator('.modal:visible').filter(has_text='Tu usuario está siendo usado en otros dispositivos').count():
         raise AuthBlocked('auth_session_changed_again: otra sesión interfiere con la captura')
@@ -124,7 +123,7 @@ async def _aplicar(page, config, timeout, pace, _session_changes=0):
     await pace()
     await preparar_buscar(page, timeout)
     try:
-        await cambio(page, '#properties_table tbody', None, timeout, target='#advanced_search')
+        await step('table_refresh','Buscar y comprobar renovación',cambio(page, '#properties_table tbody', None, timeout, target='#advanced_search'),page,timeout,'#advanced_search')
     except BrowserError:
         raise WasiListingError('wasi_search_unconfirmed') from None
     await page.locator('#properties_table_processing').wait_for(state='hidden', timeout=timeout)
@@ -138,14 +137,14 @@ async def _aplicar(page, config, timeout, pace, _session_changes=0):
         if campo in NUMERIC_INPUTS:
             actual = re.sub(r'[.,\s]', '', actual)
         if actual != esperado:
-            raise ExtractionError('Filtros Wasi no confirmados: ' + campo)
-    resumen = await page.locator('#title_filter').inner_text()
+            raise WasiListingError('wasi_listing_unverified') from await _validation_failure(page,'filter_verify:'+campo,timeout,control(campo),esperado)
+    resumen = await step('summary_read','leer resumen',page.locator('#title_filter').inner_text(),page,timeout,'#title_filter')
     for campo in GEO:
         if filtros.get(campo) and config['etiquetas'][campo] not in resumen:
-            raise ExtractionError('Resumen de búsqueda Wasi no confirma ' + campo)
+            raise WasiListingError('wasi_listing_unverified') from await _validation_failure(page,'summary_verify:'+campo,timeout,'#title_filter')
     for campo in TEXT_INPUTS:
         if filtros.get(campo) and filtros[campo] not in resumen:
-            raise ExtractionError('Resumen de búsqueda Wasi no confirma ' + campo)
+            raise WasiListingError('wasi_listing_unverified') from await _validation_failure(page,'summary_verify:'+campo,timeout,'#title_filter')
     longitud = page.locator('select[name="properties_table_length"]')
     if await longitud.count():
         disponibles = await longitud.locator('option').evaluate_all('es=>es.map(e=>e.value).filter(v=>/^\\d+$/.test(v) && Number(v)>0)')
@@ -155,7 +154,7 @@ async def _aplicar(page, config, timeout, pace, _session_changes=0):
                 await pace()
                 await cambio(page, '#properties_table tbody', lambda: longitud.select_option(mayor, timeout=timeout), timeout)
                 await page.locator('#properties_table_processing').wait_for(state='hidden', timeout=timeout)
-    return await lote(page, timeout, active=1)
+    return await step('first_page','verificar tabla y paginador',lote(page, timeout, active=1),page,timeout,'#properties_table')
 
 
 async def _leer_tabla(page):
@@ -209,7 +208,7 @@ async def siguiente(page, previo, timeout, pace):
     await pace()
     await cambio(page, '#properties_table tbody', None, timeout, target='#properties_table_next')
     await page.locator('#properties_table_processing').wait_for(state='hidden', timeout=timeout)
-    actual = await lote(page, timeout, active=previo['active'] + 1, start=previo['end'] + 1)
+    actual = await step('next_page','verificar avance',lote(page, timeout, active=previo['active'] + 1, start=previo['end'] + 1),page,timeout,'#properties_table_next')
     if actual['active'] != previo['active'] + 1 or actual['start'] != previo['end'] + 1 or actual['total'] != previo['total']:
         raise ExtractionError('Paginación Wasi repetida, alterada o incompleta')
     return actual
@@ -222,7 +221,7 @@ async def ficha(page, codigo, timeout, pace):
             imagenes.append(request.url)
     page.on('request', observar)
     try:
-        datos = await _ficha(page, codigo, timeout, pace)
+        datos = await step('detail','leer ficha',_ficha(page, codigo, timeout, pace),page,timeout)
         datos['photos'].extend(imagenes)
         return datos
     finally:
@@ -312,3 +311,12 @@ async def contactos(page, codigo, timeout, pace):
             'advertiser_address': datos['labs'].get('Ubicación:'), 'whatsapp': whatsapp_limpio(datos.get('whatsapp')),
             'public_url': publicacion_whatsapp(datos.get('whatsapp'), codigo),
             'name': datos.get('name'), 'agent': datos.get('agent', True)}
+
+
+async def _validation_failure(page,stage,timeout,selector,expected=None):
+    async def fail():
+        raise ExtractionError('Condición de validación no satisfecha')
+    try:
+        await step(stage,'comparar condición',fail(),page,timeout,selector,expected)
+    except ExtractionError as exc:
+        return exc

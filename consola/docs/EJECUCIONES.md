@@ -303,3 +303,6 @@ La reconciliación sigue siendo oportunista al consultar/iniciar o recibir la
 siguiente ocurrencia. Una reserva HTTP incierta jamás vuelve a solicitar jobs.run.
 La cuenta del disparador solo accede al control y al lock exactos; no tiene acceso
 al snapshot ni a secretos. La entrega no crea horarios activos ni ejecuta scraping.
+
+
+Diagnóstico por etapas de Wasi, límites y evidencia: [instrumentación del 16/11](WASI_DIAGNOSTICO_20261116.md).

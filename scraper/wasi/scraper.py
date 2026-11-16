@@ -12,7 +12,7 @@ from metro.scraper import Scraper, Config
 from metro.storage import Store
 from metro.prices import listing_price
 from metro.extraction import ExtractionError, Restricted
-from .diagnostico import WasiListingError
+from .diagnostico import WasiListingError, Diagnostic, current, step, failed
 from .auth import autenticar, acceso
 from .browser import aplicar, lote, siguiente, ficha, contactos
 from .extraction import normalizar
@@ -65,6 +65,15 @@ class WasiScraper(Scraper):
             original = json.loads(self.store.run(config.resume)['config_json'])
             config.searches = original['searches']
         self.contact_cache = {}
+        self.diagnostic = Diagnostic(self)
+
+
+    async def run(self):
+        token=current.set(self.diagnostic)
+        try:
+            return await super().run()
+        finally:
+            current.reset(token)
 
     async def prepare_context(self, context):
         # Fotorama elimina imágenes fallidas y puede mezclar la galería anterior.
@@ -77,7 +86,7 @@ class WasiScraper(Scraper):
                 await route.fallback()
         await context.route('**/*', imagen_local)
         try:
-            estado = await autenticar(context, self.cfg.timeout)
+            estado = await step('authentication','login y confirmación',autenticar(context, self.cfg.timeout),timeout=self.cfg.timeout)
         except WasiListingError as exc:
             self.event('listing_incomplete', {'code': exc.wasi_code, 'phase': 'authentication', 'error': str(exc)}, 'error')
             raise
@@ -85,23 +94,43 @@ class WasiScraper(Scraper):
 
     async def abrir(self, context, config):
         page = await context.new_page()
+        async def network(request):
+            try:
+                from urllib.parse import urlsplit
+                import re
+                u=urlsplit(request.url)
+                if u.hostname=='wasi.co' and '/ajax-inmuebles/' in u.path:
+                    response=await request.response()
+                    timing=request.timing
+                    self.diagnostic.network.append({'host':'wasi.co','path':re.sub(r'/[0-9]+', '/:id',u.path)[:180],
+                        'method':request.method,'status':response.status if response else None,'duration_ms':timing.get('responseEnd')})
+                    self.diagnostic.network=self.diagnostic.network[-12:]
+            except Exception:
+                pass
+        page.on('requestfinished',network)
         try:
             await self.pace()
-            response = await page.goto(RED, wait_until='domcontentloaded', timeout=self.cfg.timeout)
-            await acceso(page, response)
+            response = await step('network_access','abrir red',page.goto(RED, wait_until='domcontentloaded', timeout=self.cfg.timeout),page,self.cfg.timeout)
+            await step('network_authentication','confirmar sesión en red',acceso(page, response),page,self.cfg.timeout)
             await dismiss_announcements(page, self.cfg.timeout)
-            batch = await aplicar(page, config, self.cfg.timeout, self.pace)
+            batch = await step('apply_filters','aplicar filtros y obtener listado',aplicar(page, config, self.cfg.timeout, self.pace),page,self.cfg.timeout)
             return page, batch
-        except BaseException:
+        except BaseException as exc:
+            if isinstance(exc,Exception):
+                await failed('open_network',page,self.cfg.timeout,exc)
             await page.close()
             raise
 
     async def discover(self, context, source_url=None):
         try:
-            return await self._discover(context, source_url)
+            result = await self._discover(context, source_url)
+            self.diagnostic.finish(True)
+            return result
         except (sqlite3.Error, OSError, Restricted, WasiListingError):
+            self.diagnostic.finish(False)
             raise
         except Exception:
+            self.diagnostic.finish(False)
             raise WasiListingError('wasi_listing_unverified') from None
 
     async def _discover(self, context, source_url=None):
@@ -136,6 +165,10 @@ class WasiScraper(Scraper):
                     break
                 batch = await siguiente(page, batch, self.cfg.timeout, self.pace)
         finally:
+            import sys
+            exc=sys.exc_info()[1]
+            if isinstance(exc,Exception):
+                await failed('listing_coverage',page,self.cfg.timeout,exc)
             await page.close()
 
     async def process_details(self, context):
