@@ -1,6 +1,17 @@
-# Radar Inmobiliario — candidato local v0.14.0
+# Radar Inmobiliario — candidato local v0.14.1
 
 La especificación funcional del usuario de 3 de noviembre de 2026 gobierna esta entrega. El producto acompaña el trabajo de Mónica con unos 30 clientes activos. Debe permanecer sencillo y de bajo mantenimiento; el objetivo de operación inferior a US$10/mes está **pendiente de validación de consumo y alojamiento**, no es una garantía.
+
+## Aislamiento autorizado — v0.14.1 (16 de noviembre de 2026)
+
+Se preservan be020d6 y v0.14.0. La solicitud posterior autoriza commit/tag locales
+v0.14.1, builds y validación en proyecto temporal independiente, presupuesto máximo
+incremental US$3 y eliminación posterior. Sin push, producción ni scraping real.
+El perfil isolated exige destinos, almacenamiento e identidades completos y propios;
+OIDC firmado solo en ese perfil. Producción conserva IAP y sus destinos previstos.
+Solo se sustituye la entrada de captura por datos sintéticos; CAS, lock, SQLite,
+snapshot y llamadas entre componentes siguen siendo reales.
+Procedimiento: [validación aislada](deployment/ISOLATION_0141.md).
 
 ## Construcción controlada autorizada — 16 de noviembre de 2026
 

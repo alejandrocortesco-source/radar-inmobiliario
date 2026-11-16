@@ -10,9 +10,12 @@ from .cloud_run import PARENT
 
 class Scheduler:
     def __init__(self, session=None):
-        self.name = PARENT + '/jobs/radar-weekly-review'
+        from .entorno import settings
+        self.environment = settings()
+        self.parent = self.environment.parent
+        self.name = self.parent + '/jobs/radar-weekly-review'
         self.url = os.environ.get('RADAR_SCHEDULE_TARGET', '')
-        self.account = 'radar-scheduler@radar-inmobiliario-co.iam.gserviceaccount.com'
+        self.account = self.environment.caller
         if session is None:
             credentials, _ = google.auth.default(scopes=['https://www.googleapis.com/auth/cloud-platform'])
             session = AuthorizedSession(credentials)
@@ -55,7 +58,7 @@ class Scheduler:
                 self.request('PATCH', params={'updateMask':'description,schedule,timeZone,httpTarget,retryConfig,attemptDeadline'}, json=payload)
             else:
                 # Se crea solo ante Activar explícito; el gate CAS permanece cerrado.
-                response = self.session.request('POST', 'https://cloudscheduler.googleapis.com/v1/'+PARENT+'/jobs', json=payload, timeout=12)
+                response = self.session.request('POST', 'https://cloudscheduler.googleapis.com/v1/'+self.parent+'/jobs', json=payload, timeout=12)
                 response.raise_for_status()
             remote = self.get()
             if not self.matches(remote or {}, cfg):

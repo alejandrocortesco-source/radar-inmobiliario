@@ -49,6 +49,8 @@ def prune(doc):
 
 class ControlGCS:
     def __init__(self, bucket=None, objeto=None, client=None):
+        from .entorno import settings
+        settings()
         if client is None:
             from google.cloud import storage
             client = storage.Client()

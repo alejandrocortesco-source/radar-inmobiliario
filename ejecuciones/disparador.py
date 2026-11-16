@@ -19,11 +19,13 @@ app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
 
 
 def authenticate(header):
+    from .entorno import settings
+    environment = settings()
     target = os.environ.get('RADAR_SCHEDULE_TARGET')
     if not target or not header or not header.startswith('Bearer '):
         raise ValueError('Credencial requerida')
     claims = verify_oauth2_token(header[7:], GoogleRequest(), audience=target)
-    if claims.get('email') != 'radar-scheduler@radar-inmobiliario-co.iam.gserviceaccount.com' or claims.get('email_verified') is not True:
+    if claims.get('email') != environment.caller or claims.get('email_verified') is not True:
         raise ValueError('Identidad no permitida')
 
 

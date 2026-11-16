@@ -25,6 +25,10 @@ from .resultados import from_db
 
 
 def scraper_for(repo, folder, search):
+    from .entorno import settings
+    if settings().isolated:
+        from .datos_sinteticos import SyntheticScraper
+        return SyntheticScraper(folder,search)
     source, key = search['fuente'], search['id_busqueda']
     if source == 'metrocuadrado':
         return Scraper(Config(db=str(folder / 'metro.sqlite'), url=key, urls=[key], concurrency=1))

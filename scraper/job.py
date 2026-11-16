@@ -83,6 +83,9 @@ def main():
     parser.add_argument('--initialize-state', action='store_true', help='Subir bases locales al objeto durable si aún no existe')
     args = parser.parse_args()
     try:
+        from ejecuciones.entorno import settings
+        if settings().isolated and not args.execution:
+            raise ValueError('El entorno aislado solo permite ejecuciones reservadas')
         if args.schedule:
             print(json.dumps(horario(os.getenv('RADAR_DAYS', 'MON,THU'))))
             return

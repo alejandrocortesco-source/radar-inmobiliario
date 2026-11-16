@@ -47,6 +47,8 @@ def restaurar(contenido, carpeta):
 
 class EstadoGCS:
     def __init__(self, bucket, objeto='radar/state.tar.gz', client=None):
+        from ejecuciones.entorno import settings
+        settings()
         if client is None:
             from google.cloud import storage
             client = storage.Client()  # ADC: identidad del Job, sin claves JSON.

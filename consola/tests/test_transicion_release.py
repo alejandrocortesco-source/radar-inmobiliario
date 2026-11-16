@@ -107,7 +107,7 @@ def test_origin_remains_strict_for_each_revision(monkeypatch):
 def test_release_is_deterministic_and_verified(tmp_path):
     first,m=prepare(tmp_path);before=first.read_bytes();second,n=prepare(tmp_path)
     assert first==second and before==second.read_bytes() and m==n and verify(first)==m
-    assert m['version']=='0.14.0' and not any(name.startswith(('.tmp/','.local/')) for name in m['files'])
+    assert m['version']=='0.14.1' and not any(name.startswith(('.tmp/','.local/')) for name in m['files'])
 
 
 def test_first_conversion_refuses_live_old_worker(transition,execution):

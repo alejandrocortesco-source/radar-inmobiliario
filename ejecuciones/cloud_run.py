@@ -13,10 +13,12 @@ PARENT = 'projects/radar-inmobiliario-co/locations/us-central1'
 
 class CloudRun:
     def __init__(self, job=None, session=None):
+        from .entorno import settings
+        self.environment = settings()
         self.job = job or os.getenv('RADAR_EXECUTION_JOB', 'radar-manual')
         if not re.fullmatch(r'radar-manual(?:-review)?', self.job):
             raise ValueError('Job manual no permitido')
-        self.name = PARENT + '/jobs/' + self.job
+        self.name = self.environment.parent + '/jobs/' + self.job
         if session is None:
             credentials, _ = google.auth.default(scopes=['https://www.googleapis.com/auth/cloud-platform'])
             session = AuthorizedSession(credentials)

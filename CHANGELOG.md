@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.14.1 — candidato aislable
+
+- Destinos e identidades compartidos por entorno, con rechazo de configuración aislada incompleta.
+- Entrada sintética limitada a proyectos de prueba; RPC, autenticación y GCS reales.
+- OIDC de cuenta de servicio solo para perfil aislado; producción conserva IAP estricto.
+- v0.14.0 y su commit se conservan. Sin push ni despliegue productivo.
+
+
 ## 0.14.0 — candidato local, sin desplegar
 
 - Programación múltiple, selector por portal y presentación Carbon con estados verificados.

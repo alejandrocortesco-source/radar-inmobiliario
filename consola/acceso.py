@@ -106,6 +106,19 @@ class AccesoRadar:
                     or not loopback(server[0]) or not host_ok):
                 return await rechazo(403, 'El modo local requiere loopback.')
             origin = f"{scope['scheme']}://{host}"
+        elif mode == 'oidc':
+            try:
+                from ejecuciones.entorno import settings
+                from google.oauth2.id_token import verify_oauth2_token
+                from google.auth.transport.requests import Request as GoogleRequest
+                if not settings().isolated:raise ValueError()
+                origin=os.environ['RADAR_PUBLIC_ORIGIN']
+                header=request.headers.get('authorization','')
+                if not header.startswith('Bearer '):raise ValueError()
+                claims=await run_in_threadpool(verify_oauth2_token,header[7:],GoogleRequest(),audience=origin)
+                if claims.get('email')!=os.environ['RADAR_WEB_CALLER'] or claims.get('email_verified') is not True:raise ValueError()
+            except Exception:
+                return await rechazo(401,'Credencial de validación requerida.')
         elif mode == 'iap':
             audience = os.environ.get('RADAR_IAP_AUDIENCE', '')
             origin = os.environ.get('RADAR_PUBLIC_ORIGIN', '')

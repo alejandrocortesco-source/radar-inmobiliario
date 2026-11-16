@@ -10,7 +10,7 @@ def prepare(output=None):
     hashes={name:hashlib.sha256(data).hexdigest() for name,data in files.items()}
     tree=hashlib.sha256(json.dumps(hashes,sort_keys=True,separators=(',',':')).encode()).hexdigest()
     head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
-    manifest=dict(version='0.14.0',base_commit=head,source_tree=tree,files=hashes)
+    manifest=dict(version='0.14.1',base_commit=head,source_tree=tree,files=hashes)
     folder=Path(output or ROOT/'.tmp/releases')/tree/head[:12];folder.mkdir(parents=True,exist_ok=True)
     target=folder/'source.tar'
     if not target.exists():
