@@ -230,3 +230,20 @@ sin listado verificado no se confirman ausencias. Los nuevos informes agregan
 listing_error_count, listing_code, listing_pages y listing_complete, independientes
 de error_count por anuncio. Son campos aditivos, sin migración. Las ejecuciones
 históricas conservan sus mensajes originales, sin reescribir control ni catálogos.
+
+
+## Metrocuadrado: respuestas de paginación (15/11/2026)
+
+El listener acepta exclusivamente el hostname `www.metrocuadrado.com` y los paths
+`/rest-search/search` o `/api/rest-search/search`; los parámetros de consulta no
+cambian el reconocimiento. No acepta `/api/rest-search/search/seoelements` ni
+hosts parecidos. Sigue validando el JSON y exige cambio de página activa y de
+identificadores principales; HTTP 200 por sí solo no verifica el avance.
+Se conservan coincidencia con el DOM, checkpoint, fin del paginador y comparación
+de principales únicos con el total anunciado de esa captura. Los destacados no
+cuentan para dicho total y pueden repetirse. Una discrepancia conserva incompleto
+y no aplica ausencias/retiros. No se fijan 406 o 408 como total permanente.
+
+La corrección requiere actualizar la imagen del Job `radar-manual-review`, sin
+cambiar la web. No modifica datos ni el esquema de control. Preparación, pruebas,
+digest, comprobación manual y reversión: [informe de revisión](METRO_RESPUESTAS_20261115.md).

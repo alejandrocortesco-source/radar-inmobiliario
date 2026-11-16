@@ -53,3 +53,5 @@ Los diagnósticos privados del equipo pertenecen a `.local/diagnosticos/`, no a 
 - [Radar Central: diagnóstico y reconciliación del 13/11/2026](../consola/docs/RADAR_CENTRAL_RECONCILIACION_20261113.md).
 
 - [Wasi: superposiciones al buscar y revisión v0.12.3](../consola/docs/WASI_SUPERPOSICIONES_20261113.md).
+
+- [Metrocuadrado: reconocimiento de respuestas y Job de revisión](../consola/docs/METRO_RESPUESTAS_20261115.md).

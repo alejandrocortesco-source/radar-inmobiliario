@@ -22,6 +22,13 @@ log = logging.getLogger('metro')
 DEFAULT_URL = 'https://www.metrocuadrado.com/inmuebles/venta/bogota/la-carolina?search=form'
 
 
+def is_listing_response_url(url):
+    """Sólo los endpoints de listado verificados; la query no altera la ruta."""
+    parts = urlsplit(url)
+    return parts.hostname == 'www.metrocuadrado.com' and parts.path in (
+        '/rest-search/search', '/api/rest-search/search')
+
+
 @dataclass
 class Config:
     url: str = DEFAULT_URL
@@ -158,7 +165,7 @@ class Scraper:
         page = await context.new_page()
         captures = []
         async def capture(response):
-            if urlsplit(response.url).hostname == 'www.metrocuadrado.com' and urlsplit(response.url).path == '/rest-search/search':
+            if is_listing_response_url(response.url):
                 try:
                     data = await response.json()
                     if isinstance(data,dict) and isinstance(data.get('results'),list):

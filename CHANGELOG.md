@@ -1,5 +1,16 @@
 # Changelog
 
+## Sin publicar — 2026-11-15 (Job de revisión)
+
+- Metrocuadrado reconoce las dos rutas de listado verificadas, con hostname y path
+  exactos. Conserva estructura, página activa, identificadores principales y cobertura;
+  los destacados repetidos no impiden un avance real.
+- Pruebas Chromium aisladas de las dos rutas, respuestas ajenas o inválidas, falta
+  de avance y cobertura incompleta sin aplicación de ausencias.
+- Cambio compatible sin migración; la entrega se identifica por commit y digest.
+  Sin nuevo tag ni publicación en producción. La validación operativa queda pendiente
+  de una captura manual autorizada en Radar Central.
+
 ## 0.12.3 — 2026-11-13
 
 - Wasi reconoce el contenedor ProductFruits y permite un único cierre normal con
