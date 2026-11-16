@@ -35,6 +35,11 @@ con credenciales impersonadas: positivas en bucket propio, negativas en producti
    solo esos digests. No utilizar scripts bootstrap de producción.
 3. Configurar RADAR_ENV=isolated y todas las variables de entorno requeridas por
    settings, RADAR_AUTH_MODE=oidc. Secret ficticio sin credenciales de portales.
+   Registrar como custom audience en cada servicio únicamente su URL canónica
+   RADAR_PUBLIC_ORIGIN/RADAR_SCHEDULE_TARGET: `run services update NOMBRE
+   --add-custom-audiences=URL --project=TEMPORAL --region=us-central1`.
+   Cloud Run usa también una URL con hash como audiencia por defecto; no asumir que
+   acepta automáticamente la URL basada en número de proyecto.
 4. Sembrar snapshot sintético con búsquedas de tres fuentes. Llamar web autenticada
    usando token Google OIDC con audience URL web y Origin exacto. Authorization y
    X-Serverless-Authorization conservan token firmado para aplicación y plataforma.
