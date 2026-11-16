@@ -39,7 +39,7 @@ Los controles de credenciales, destino, sesión, OTP/CAPTCHA y acceso permanecen
 | Alcance | Límite |
 | --- | --- |
 | Anuncios consecutivos por intervención | 3 cierres / 6000 ms |
-| Acumulado por página (incluye sus navegaciones) | 12 cierres / 30000 ms de manejo |
+| Acumulado por pestaña del navegador (incluye su paginación y navegaciones) | 12 cierres / 30000 ms de manejo |
 | Cada cierre y espera de desaparición | Hasta 1500 ms, recortado por el tiempo restante |
 | Ensayo de interacción sin despacho | Hasta 1000 ms por intento |
 | Intentos de interacción normal | 3, dentro del timeout existente |
@@ -90,7 +90,7 @@ presupuesto de página/tiempo, CAPTCHA sin cierre, aparición tardía antes del 
 entre pointerdown/click y error posterior al despacho para Buscar y Siguiente.
 Verifica que ambas acciones se ejecutan una sola vez. También prueba anuncios
 nuevos tras login, al entrar a red y durante renovación/paginación, y dos capturas
-incompletas reales del simulador sin tocar ausencias existentes (antes del primer
+incompletas del simulador sin tocar ausencias existentes (antes del primer
 listado y tras guardar una página). El fixture anterior de Wasi se adapta a la
 estructura confirmada; conserva sus escenarios de filtros y vacío.
 
@@ -112,7 +112,7 @@ reconocido y se volvió a ejecutar todo scraper y la regresión compartida de
 ejecuciones/generaciones. Ambas pasan; el cierre persistentemente bloqueado sigue
 fallando de forma segura. La consola completa y catálogo se ejecutaron antes de
 este último ajuste local del manejador; no se presentan como repeticiones finales.
-La primera imagen de esta tarea no se ejecutó y se sustituye por la imagen final.
+La primera imagen de esta tarea no se ejecutó y fue sustituida por la imagen final.
 
 Única advertencia: deprecación conocida de BlockingPortal en Starlette/AnyIO.
 La consola incluye Chromium sintético en escritorio, tablet y móvil. No cambió
@@ -126,7 +126,54 @@ literalmente la corrección de rutas y sus verificaciones de cobertura. Sus prue
 de ambas rutas, JSON inválido, ausencia de avance, destacados repetidos y ausencias
 se ejecutaron de nuevo dentro de la regresión. No se modifica Fincaraíz.
 
-Build, digest y verificación posterior se completan al confirmar el despliegue.
+## Imagen final y componentes verificados
+
+Runtime final: `48b22a05bfd869168839e124d9a43ceed91384c8`, posterior al commit
+inicial de esta tarea `12543d2`. Ambos conservan `aa260cc` y el código de Metrocuadrado.
+Build final `f733b2da-4194-488f-9feb-949fb28d4621`, SUCCESS, 15/11/2026
+20:13:50–20:15:31 America/Bogota. Imagen construida:
+`us-central1-docker.pkg.dev/radar-inmobiliario-co/radar/jobs:48b22a05bfd8`.
+
+Imagen **efectiva final** de `radar-manual-review`:
+`us-central1-docker.pkg.dev/radar-inmobiliario-co/radar/jobs@sha256:f70659597246158745994c6fe5efd8a33c459166c546b11f837b570e4c28519d`.
+
+Digest idéntico en resultados Cloud Build, Artifact Registry y spec del Job,
+Ready=True y observedGeneration igual a generation. Fijado por digest inmutable.
+No se lanzó una nueva ejecución; no se infiere validación operativa por Ready.
+El build usa el commit completo mediante RADAR_SOURCE_SHA y etiqueta OCI. La
+etiqueta histórica source-sha del recurso Job se conserva y no identifica el
+runtime actual; usar digest y el commit fuente acreditados por este informe.
+
+Se construyó una imagen intermedia (`12543d2`, build
+`bf5b9f60-230c-4818-a621-00c051023075`, digest
+`sha256:5a758eece685637bc4724c25dbfcfb47b5a2ec58172f0ab323962b873888f19b`).
+Fue configurada y sustituida sin ejecutarla. No es la imagen final para repetir.
+Las dos actualizaciones afectaron solo a la imagen del mismo Job y su nonce
+interno generado por Cloud Run, sin crear Jobs adicionales.
+
+Comparación final contra el estado original de la tarea:
+
+- Spec del Job idéntico salvo imagen/nonce. Se conservan cuenta de servicio,
+  referencias de secretos, argumentos, entorno, una tarea/paralelismo 1,
+  1 CPU/2 GiB, cero reintentos automáticos y timeout 10800 s.
+- Web no reconstruida ni desplegada: spec, anotaciones de acceso y tráfico iguales.
+  Producción permanece 100% en radar-verify-20261111. Tag privado conserva
+  radar-wasi-overlay-20261113 sin porcentaje de tráfico de producción.
+- Todos los demás Jobs tienen la misma spec. Lista de ejecuciones idéntica,
+  todas cerradas: ninguna captura ni sesión diagnóstica nueva.
+- Snapshot/control conservan exactamente las generaciones y MD5 del estado previo.
+  El lock operativo continúa ausente (404). No se sustituyó ni restauró ningún dato.
+- No se añadieron recursos permanentes, identidades, secretos o permisos. Único
+  impacto adicional: dos builds/imágenes y sus fuentes/logs en recursos existentes.
+  No se cambia Scheduler, Gemini ni autenticación.
+
+Evidencia local excluida: `.tmp/wasi-recurrent-20261115/verification.json`,
+`build.json`, `registry-image.json`, descripciones antes/después, logs de pruebas
+y archivos `*-intermediate.json`. No se publican datos de control ni secretos.
+
+**Wasi queda preparado para revisión, sin validación operativa nueva.** Solo la
+captura real manual posterior con cobertura y guardado durable confirmados
+permitirá acreditarla.
 
 ## Repetición manual autorizada al usuario
 
@@ -185,3 +232,8 @@ no hay publicación Git ni cambios en el proyecto original. Archivos de esta tar
 - `scraper/docs/WASI.md`, `consola/docs/EJECUCIONES.md`, informe histórico de
   superposiciones y este informe: contratos, límites, pruebas y reversión.
 - `CHANGELOG.md` y `docs/README.md`: registro e índice.
+
+
+Cierre de Git: rama conservada, sin conflictos. El último commit documental solo
+registra este despliegue y no cambia el runtime de la imagen. Se comprueba árbol
+limpio; no hay push, merge ni tags Git. Los artefactos de `.tmp/` quedan excluidos.

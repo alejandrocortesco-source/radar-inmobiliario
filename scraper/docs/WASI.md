@@ -188,7 +188,7 @@ Se verifica la desaparición del diálogo y que no persista su fondo bloqueante,
 y se ensaya la interacción normal con el control de destino.
 
 Máximo tres cierres consecutivos y seis segundos por intervención, doce cierres
-y treinta segundos acumulados por página. Cada interacción admite hasta tres
+y treinta segundos acumulados por pestaña del navegador (incluye su paginación). Cada interacción admite hasta tres
 intentos dentro de su timeout; solo se reintenta si no se despachó el clic y se
 cerró un anuncio reconocido. Un despacho observado nunca se repite para compensar
 un timeout posterior: se exige la renovación del tbody y las verificaciones

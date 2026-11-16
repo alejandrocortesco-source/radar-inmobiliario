@@ -255,7 +255,7 @@ El cierre único descrito para v0.12.3 es histórico y queda sustituido por el
 manejo acotado del diálogo de anuncio y Close dialog, sin requerir :visible al
 host. No depende del texto comercial. Admite anuncios consecutivos y tardíos,
 comprueba diálogo/fondo e interacción y evita repetir Buscar/Siguiente ya
-despachados. Límite de tres cierres por intervención, doce por página y tiempo
+despachados. Límite de tres cierres por intervención, doce por pestaña del navegador y tiempo
 acumulado acotado. No cambia autenticación, filtros, cobertura ni ausencias.
 
 Los mensajes y códigos fijos del Job llegan por el control existente; la web no
