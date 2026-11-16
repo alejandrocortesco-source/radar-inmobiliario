@@ -26,6 +26,7 @@
 </form>
 <details><summary>Criterios de carga y duración</summary><p class="caption">Orientación relativa, sin cálculo de facturación. Se usan hasta cinco ejecuciones completas y guardadas de la misma búsqueda: liviana si todas duran menos de 3 min y procesan menos de 100 anuncios; moderada desde 3 min o 100 anuncios; pesada desde 15 min o 500 anuncios. Sin mediciones: por estimar. Un rango exige tres ejecuciones comparables; depende del portal y del volumen.</p></details>
 </section>
+{% include '_programacion06.html' %}
 <p class="caption" data-poll-message role="status"></p>
 <div data-execution-report data-active-run="{{active.id if active else ''}}" data-report-run="{{run.id if run else ''}}">{% include '_ejecucion06.html' %}</div>
 <section class="tile execution-section" aria-labelledby="history-title"><h2 id="history-title">Historial y mantenimiento</h2><p class="caption">Hasta 30 días, 100 registros terminados y 2 MB de registro de control. Las ejecuciones activas se conservan. Esta limpieza no borra el catálogo.</p><div data-execution-history>{% include '_ejecuciones_historial06.html' %}</div></section>

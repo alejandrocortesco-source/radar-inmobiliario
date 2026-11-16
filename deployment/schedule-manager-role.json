@@ -1,0 +1,6 @@
+{
+  "title": "Radar schedule manager",
+  "description": "Configure the single Radar weekly schedule; no run, delete or IAM management.",
+  "stage": "GA",
+  "includedPermissions": ["cloudscheduler.jobs.get", "cloudscheduler.jobs.fullView", "cloudscheduler.jobs.create", "cloudscheduler.jobs.update", "cloudscheduler.jobs.pause", "cloudscheduler.jobs.enable"]
+}

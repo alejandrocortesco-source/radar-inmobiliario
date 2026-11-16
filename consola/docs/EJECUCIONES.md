@@ -1,4 +1,4 @@
-# Radar Central — ejecución manual v0.12.3
+# Radar Central — ejecuciones v0.13.0
 
 Implementación en el clon independiente `Radar-CloudRun-20261111/repo`, rama
 `codex/ejecuciones-manuales`, por autorización del 13 de noviembre de 2026.
@@ -291,3 +291,15 @@ requiere actualización. El informe distingue cierre ambiguo, fondo persistente,
 límite agotado, control bloqueado y despacho incierto. No se copian textos,
 trazas, HTML o datos de la cuenta. Históricos y esquema permanecen intactos.
 Detalles y digest: [anuncios recurrentes](WASI_ANUNCIOS_RECURRENTES_20261115.md).
+
+
+## Programación general (16/11/2026)
+
+Además del inicio Manual existe un único calendario semanal con búsquedas
+explícitas y hora compartida. Conserva el mismo worker, control, bloqueo y resultados.
+El disparador no descarga snapshots ni ejecuta scrapers. Ver [Programación](PROGRAMACION.md)
+para el gate de configuración, omisiones, autenticación, recuperación y reversión.
+La reconciliación sigue siendo oportunista al consultar/iniciar o recibir la
+siguiente ocurrencia. Una reserva HTTP incierta jamás vuelve a solicitar jobs.run.
+La cuenta del disparador solo accede al control y al lock exactos; no tiene acceso
+al snapshot ni a secretos. La entrega no crea horarios activos ni ejecuta scraping.

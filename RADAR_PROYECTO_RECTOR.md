@@ -2,6 +2,25 @@
 
 La especificación funcional del usuario de 3 de noviembre de 2026 gobierna esta entrega. El producto acompaña el trabajo de Mónica con unos 30 clientes activos. Debe permanecer sencillo y de bajo mantenimiento; el objetivo de operación inferior a US$10/mes está **pendiente de validación de consumo y alojamiento**, no es una garantía.
 
+## Programación semanal — 16 de noviembre de 2026
+
+Solicitud vigente exclusivamente en Radar-CloudRun-20261111/repo y la rama
+codex/ejecuciones-manuales. v0.13.0 añade un calendario general en Radar Central:
+búsquedas explícitas, días lunes a domingo y HH:MM de America/Bogota. Guardar no
+captura; activar solo habilita ocurrencias futuras y pausar impide nuevos inicios,
+sin cancelar un Job ya reclamado. Manual continúa disponible con el mismo bloqueo.
+Cloud Scheduler invoca un disparador Cloud Run interno autenticado por OIDC;
+este reserva en el control GCS existente y solicita el mismo Job secuencial. Sin
+cron local, temporizadores web, cola indefinida, reintentos completos ni Gemini.
+Deduplicación por Job/revisión/hora prevista, CAS, recibos independientes de la
+retención del historial y revalidación autoritativa en el Job. Fechas tardías >15 min,
+configuraciones sustituidas y pausadas se omiten con motivo; no recupera atrasos.
+La sincronización incierta bloquea el inicio y requiere guardar/pausar explícitamente.
+Se autoriza solo revisión privada, sin tráfico de producción ni scraping real.
+La entrega queda desactivada. Como CreateJob no permite state=PAUSED, no se crea
+ahora el recurso Scheduler; su creación queda preparada para Activar posteriormente.
+Diseño, costos, pruebas, recursos y reversión: [Programación](consola/docs/PROGRAMACION.md).
+
 ## Radar Central — ajuste del 13 de noviembre de 2026
 
 La solicitud posterior reemplaza el recuadro Agregar fuente de Inicio por Radar

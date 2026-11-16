@@ -59,3 +59,5 @@ Los diagnósticos privados del equipo pertenecen a `.local/diagnosticos/`, no a 
 - [Wasi: anuncios ProductFruits recurrentes y revisión](../consola/docs/WASI_ANUNCIOS_RECURRENTES_20261115.md).
 
 - [Ejecuciones: clasificación final y conciliación de contadores](../consola/docs/RESULTADOS_FINALES_20261116.md).
+
+- [Programación semanal y revisión privada v0.13.0](../consola/docs/PROGRAMACION.md).

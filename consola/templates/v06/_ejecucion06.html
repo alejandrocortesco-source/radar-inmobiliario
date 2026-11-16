@@ -2,6 +2,8 @@
 {% if run %}
 <section class="tile execution-section" aria-labelledby="report-title"><div class="tile-heading"><h2 id="report-title">{{run_tracking.title if run_tracking else 'Informe final · ' + labels.get(run.status,run.status)}}</h2><a href="/v0.6/ejecuciones?run={{run.id}}">Enlace a esta ejecución</a></div>
 <details class="execution-reference"><summary>Detalle técnico</summary><p class="caption">Ejecución {{run.id}} · Job {{run.job}}{% if run.worker %} / {{run.worker}}{% endif %}{% if run.operation %}<br>Operación: {{run.operation}}{% endif %}</p></details>
+<p>Origen: <strong>{{'Automático' if run.origin == 'automatic' else 'Manual'}}</strong>{% if run.scheduled_at %} · Programada: {{run.scheduled_at|fecha}} · Inicio real: {{run.started|fecha if run.started else 'No iniciado'}} (Bogotá){% endif %}</p>
+{% if run.schedule_warning %}<p class="notice">{{run.schedule_warning}}</p>{% endif %}
 <dl class="need-facts"><div><dt>Inicio / solicitud</dt><dd>{{(run.started or run.created)|fecha}}</dd></div><div><dt>Fin</dt><dd>{{run.finished|fecha if run.finished else 'Pendiente'}}</dd></div><div><dt>{{'Duración' if run.finished else 'Tiempo transcurrido'}}</dt><dd>{{duration((age(run.started or run.created) - age(run.finished)) if run.finished else age(run.started or run.created))}}</dd></div><div><dt>Última actualización · Bogotá</dt><dd>{{run.updated|fecha}}</dd></div></dl>
 {% if run.verification is defined %}<p class="caption">Estado de Cloud Run comprobado: {{run.verification.checked|fecha}} (Bogotá).</p>{% endif %}
 <p class="execution-progress">{{run.searches|selectattr('status','in',['completed','extracted','partial','failed','interrupted'])|list|length}} de {{run.searches|length}} búsquedas terminadas.</p>

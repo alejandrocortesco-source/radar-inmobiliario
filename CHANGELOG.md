@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.13.0 — 2026-11-16 (revisión privada)
+
+- Programación general de búsquedas por días y hora de Bogotá, con guardado,
+  activación futura, pausa, próximas fechas y estimación semanal de lotes/capturas.
+- Scheduler con OIDC hacia disparador interno, CAS en GCS, recibos de ocurrencias,
+  omisión de conflictos y recuperación conservadora. Mismo Job durable, fuentes,
+  métricas finales, cobertura y bloqueo que Manual; sin Gemini ni reintentos completos.
+- Sincronización verificable y registro acotado de cambios; incertidumbre bloquea
+  inicios y conserva configuración anterior para corrección explícita.
+- Origen Manual/Automático, hora prevista/real y motivos de omisión en historial.
+- Sin migración SQLite, alteración de snapshots históricos ni producción. Recurso
+  Scheduler diferido hasta activación explícita; entrega desactivada.
+
 ## Sin publicar — 2026-11-16 (informes de revisión)
 
 - Clasificación final compartida del informe, separada del motivo inicial de

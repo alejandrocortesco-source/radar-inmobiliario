@@ -1,0 +1,22 @@
+{% if schedule %}
+<section class="tile execution-section" id="programacion" aria-labelledby="schedule-title">
+<div class="tile-heading"><h2 id="schedule-title">Programación</h2><span class="tag {{'verified' if schedule.active else 'verify'}}">{{'Activa' if schedule.active else 'Desactivada'}}{% if schedule.uncertain %} · Por verificar{% endif %}</span></div>
+<p class="caption">Un horario compartido para las búsquedas elegidas. Zona horaria: Bogotá, Colombia · America/Bogota.</p>
+{% if request.query_params.get('programacion') == 'guardada' %}<p role="status" class="notice">Configuración guardada. No se inició scraping.</p>{% endif %}
+{% if schedule.error %}<p role="alert" class="notice">{{schedule.error}}</p>{% endif %}
+{% for warning in schedule.warnings %}<p role="status" class="notice">{{warning}}</p>{% endfor %}
+<form method="post" action="/v0.6/ejecuciones/programacion" class="schedule-form">
+<input type="hidden" name="revision" value="{{schedule.config.revision}}">
+<fieldset><legend>Búsquedas incluidas</legend>
+{% for b in searches %}<label class="execution-check"><input type="checkbox" name="schedule_search" value="{{b.token}}" {% if (b.fuente,b.id_busqueda) in schedule.selected %}checked{% endif %} {% if not b.activa %}disabled{% endif %}>{{b.nombre}} · {{b.fuente}}{% if not b.activa %} · Inactiva{% endif %}</label>{% else %}<p class="empty">Agrega una búsqueda para configurar la programación.</p>{% endfor %}
+</fieldset>
+<fieldset><legend>Días de la semana</legend><div class="schedule-days">{% for day,name in schedule.days %}<label class="execution-check"><input type="checkbox" name="days" value="{{day}}" {% if day in schedule.config.days %}checked{% endif %}>{{name}}</label>{% endfor %}</div></fieldset>
+<label for="schedule-time">Hora de inicio · 24 horas</label><input id="schedule-time" name="time" type="text" inputmode="numeric" pattern="([01][0-9]|2[0-3]):[0-5][0-9]" maxlength="5" placeholder="00:30" value="{{schedule.config.time}}" required aria-describedby="schedule-time-help"><p id="schedule-time-help" class="caption">HH:MM, desde 00:00 hasta 23:59, hora de Bogotá.</p>
+<p><strong>Horario guardado:</strong> {{schedule.summary}}.</p>
+<p class="caption">{{schedule.weekly}} ejecuciones de lote por semana · hasta {{schedule.search_weekly}} capturas de búsquedas por semana. Se omiten búsquedas inactivas o eliminadas. Las nuevas no se añaden automáticamente.</p>
+{% if schedule.next %}<h3>Próximas ejecuciones · Bogotá</h3><ul>{% for date in schedule.next %}<li>{{date|fecha}}</li>{% endfor %}</ul>{% else %}<p class="caption">Sin próximas ejecuciones confirmadas mientras esté desactivada o por verificar.</p>{% endif %}
+<div class="capture-actions"><button name="action" value="save" type="submit">Guardar</button><button name="action" value="activate" type="submit" class="secondary">Activar</button><button name="action" value="pause" type="submit" class="secondary" formnovalidate>Pausar</button></div>
+<p class="caption">Guardar no inicia scraping. Activar comienza en la próxima fecha futura, sin recuperar fechas anteriores. Pausar impide nuevos inicios automáticos y no cancela una ejecución ya iniciada. La ejecución manual permanece disponible y comparte el bloqueo; un horario ocupado se omite, sin cola.</p>
+<p class="notice">Aumentar búsquedas o frecuencia puede aumentar el consumo de Google Cloud. El scraping se factura aparte de la programación; no hay estimación de consumo sin mediciones suficientes.</p>
+</form></section>
+{% endif %}

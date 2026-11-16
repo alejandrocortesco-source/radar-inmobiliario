@@ -77,6 +77,11 @@ def run_manual(folder, run_id, control=None, state_factory=None, make_scraper=sc
         claimed = False
         r = next((r for r in doc['runs'] if r['id'] == run_id), None)
         if r and r['status'] in {'launching', 'queued', 'uncertain'} and not r.get('worker'):
+            if r.get('origin') == 'automatic':
+                cfg = doc.get('schedule', {})
+                if not cfg.get('enabled') or cfg.get('pending') or cfg.get('revision') != r.get('schedule_revision'):
+                    r.update(status='skipped', finished=now(), updated=now(), phase='Omitida: programación pausada o sustituida antes del inicio.', error='Programación pausada o sustituida antes del inicio.')
+                    return
             r.update(worker=worker, status='running', started=now(), updated=now(), phase='Recuperando snapshot')
             claimed = True
     control.change(claim)
@@ -148,7 +153,7 @@ def run_manual(folder, run_id, control=None, state_factory=None, make_scraper=sc
                     stack.enter_context(state)
                     break
                 except PreconditionFailed:
-                    if attempt == 12:
+                    if attempt == 12 or control.get(run_id).get('origin') == 'automatic':
                         raise
                     patch(phase='Esperando el bloqueo compartido')
                     time.sleep(5)
@@ -157,7 +162,18 @@ def run_manual(folder, run_id, control=None, state_factory=None, make_scraper=sc
             for name in ('metro.sqlite', 'wasi.sqlite', 'fincaraiz.sqlite'):
                 stack.enter_context(bloqueo(folder / name))
             repo = BusquedasSQLite(folder / 'metro-consola.sqlite')
-            select(projection(repo), [[b['fuente'], b['id_busqueda']] for b in rows])
+            current = projection(repo)
+            if control.get(run_id).get('origin') == 'automatic':
+                available = {(b['fuente'], b['id_busqueda']) for b in current if b['activa']}
+                omitted = [b for b in rows if (b['fuente'], b['id_busqueda']) not in available]
+                rows = [b for b in rows if (b['fuente'], b['id_busqueda']) in available]
+                if omitted:
+                    patch(searches=rows, schedule_warning=f'{len(omitted)} búsquedas eliminadas o inactivas omitidas antes de capturar.')
+                if not rows:
+                    patch(status='skipped', searches=[], finished=now(), phase='Omitida: ninguna búsqueda seleccionada sigue activa.', error='Ninguna búsqueda seleccionada sigue activa.')
+                    return False
+            else:
+                select(current, [[b['fuente'], b['id_busqueda']] for b in rows])
             root = None
             async def controlled():
                 nonlocal root
@@ -181,6 +197,9 @@ def run_manual(folder, run_id, control=None, state_factory=None, make_scraper=sc
         patch(status=outcome, searches=rows, finished=now(), phase='Guardado remoto confirmado', persisted=True)
         return True
     except BaseException as exc:
+        if isinstance(exc, PreconditionFailed) and state is not None and state.lock_generacion is None and control.get(run_id).get('origin') == 'automatic':
+            patch(status='skipped', finished=now(), phase='Omitida por ejecución en curso o catálogo ocupado.', error='Omitida por ejecución en curso o catálogo ocupado.')
+            return False
         # Ninguna excepción del SDK/portal se copia al registro: puede contener secretos.
         # El último snapshot confirmado se conserva; no se guarda después de perder el lock.
         interrupted = isinstance(exc, (KeyboardInterrupt, asyncio.CancelledError))

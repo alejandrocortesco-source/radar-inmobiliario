@@ -12,7 +12,7 @@ from ejecuciones.servicio import ServicioEjecuciones
 from ejecuciones.resultados import COUNT_KEYS, presentation
 
 PATH = '/v0.6/ejecuciones'
-LABELS = {'reconciling': 'Reconciliando cierre', 'launching': 'Solicitando Job', 'uncertain': 'Lanzamiento por confirmar', 'queued': 'Esperando Job',
+LABELS = {'skipped': 'Omitida', 'reconciling': 'Reconciliando cierre', 'launching': 'Solicitando Job', 'uncertain': 'Lanzamiento por confirmar', 'queued': 'Esperando Job',
           'running': 'En ejecución', 'saving': 'Confirmando guardado', 'completed': 'Completada', 'partial': 'Parcial',
           'failed': 'Fallida', 'interrupted': 'Interrumpida', 'pending': 'Pendiente', 'not_run': 'No ejecutada',
           'extracted': 'Extracción terminada; guardado final pendiente'}
@@ -131,11 +131,11 @@ def resumen_dashboard(catalogo):
 def crear_router():
     router = APIRouter(prefix=PATH, include_in_schema=False)
 
-    def render(request, status=200, error=None, doc=None, warning=None):
+    def render(request, status=200, error=None, doc=None, warning=None, schedule=None):
         return templates.TemplateResponse(request=request, name='ejecuciones06.html', status_code=status,
             context={**context(doc or {'runs': [], 'searches': []}, request.query_params.get('run')),
                      'error': error, 'warning': warning, 'request_id': str(uuid4()),
-                     'configured': bool(os.getenv('RADAR_STATE_BUCKET'))})
+                     'schedule': schedule, 'configured': bool(os.getenv('RADAR_STATE_BUCKET'))})
 
     @router.get('')
     def page(request: Request):
@@ -145,7 +145,12 @@ def crear_router():
             svc = ServicioEjecuciones()
             doc, warning = svc.overview(refresh=True)
             doc = svc.report(doc, request.query_params.get('run'))
-            return render(request, doc=doc, warning=warning)
+            schedule = None
+            if os.getenv('RADAR_SCHEDULE_TARGET'):
+                from ejecuciones.programacion import Programacion
+                from ejecuciones.scheduler import Scheduler
+                schedule = Programacion(svc, Scheduler()).read(doc)
+            return render(request, doc=doc, warning=warning, schedule=schedule)
         except Exception:
             return render(request, 503, error='No se pudo consultar el registro durable. Vuelve a cargar la página; no se inició ninguna captura.')
 
@@ -178,6 +183,36 @@ def crear_router():
             return JSONResponse({'detail': str(exc) if isinstance(exc, ValueError) else 'Solicitud inválida.'}, 409 if isinstance(exc, Conflict) else 422)
         except Exception:
             return JSONResponse({'detail': 'No se pudo confirmar la operación. Consulta el seguimiento antes de repetirla.'}, 503)
+
+    @router.post('/programacion')
+    async def schedule_update(request: Request):
+        from ejecuciones.programacion import Programacion
+        from ejecuciones.scheduler import Scheduler
+        if not os.getenv('RADAR_SCHEDULE_TARGET'):
+            return JSONResponse({'detail': 'Programación no configurada.'}, 503)
+        try:
+            raw = await request.body()
+            if len(raw) > 65536:
+                raise ValueError('Configuración demasiado grande.')
+            from urllib.parse import parse_qs
+            data = parse_qs(raw.decode(), keep_blank_values=True)
+            keys = [json.loads(v) for v in data.get('schedule_search', [])]
+            days = [int(v) for v in data.get('days', [])]
+            action = data.get('action', ['save'])[0]
+            expected = data.get('revision', [''])[0]
+            svc = ServicioEjecuciones()
+            program = Programacion(svc, Scheduler())
+            await run_in_threadpool(lambda: program.save(keys, days, data.get('time', [''])[0], action, expected))
+            return RedirectResponse(PATH + '?programacion=guardada#programacion', 303)
+        except (ValueError, TypeError, KeyError, json.JSONDecodeError) as exc:
+            message = str(exc) if isinstance(exc, ValueError) else 'Configuración inválida.'
+            status = 409 if isinstance(exc, Conflict) else 422
+        except Exception:
+            message, status = 'No se confirmó Scheduler. No se confirma la programación activa. Recarga y vuelve a guardar o pausa para recuperar el estado.', 503
+        svc = ServicioEjecuciones()
+        doc = svc.control.read()[0]
+        schedule = Programacion(svc, Scheduler()).read(doc)
+        return render(request, status, error=message, doc=doc, schedule=schedule)
 
     @router.get('/estado')
     def status(request: Request, run: str | None = None):

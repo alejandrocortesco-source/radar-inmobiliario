@@ -9,3 +9,5 @@
 .form-tile#agregar-fuente>p{margin:8px 0 16px}
 
 .radar-recent .tag:not(.verify):not(.verified){background:var(--soft);color:var(--muted)}
+
+.schedule-form fieldset{border:1px solid var(--line);padding:16px;margin:20px 0;min-width:0}.schedule-form legend{padding:0 8px;font-weight:600}.schedule-form .execution-check{display:flex;margin:12px 0;overflow-wrap:anywhere}.schedule-form input[type=checkbox]{flex-shrink:0}.schedule-days{display:flex;gap:12px 24px;flex-wrap:wrap}.schedule-form #schedule-time{display:block;width:180px;max-width:100%;margin:8px 0}.schedule-form .capture-actions{display:flex;flex-wrap:wrap;gap:12px}.schedule-form .execution-check input:focus-visible{outline:2px solid var(--accent);outline-offset:3px}

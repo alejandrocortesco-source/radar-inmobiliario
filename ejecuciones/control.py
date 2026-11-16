@@ -8,7 +8,7 @@ from uuid import UUID
 from google.api_core.exceptions import NotFound, PreconditionFailed
 
 ACTIVE = {'launching', 'uncertain', 'queued', 'running', 'saving', 'reconciling'}
-TERMINAL = {'completed', 'partial', 'failed', 'interrupted'}
+TERMINAL = {'completed', 'partial', 'failed', 'interrupted', 'skipped'}
 SOURCES = {'metrocuadrado', 'wasi', 'fincaraiz'}
 MAX_HISTORY = 100
 RETENTION_DAYS = 30
@@ -143,18 +143,20 @@ def select(rows, keys):
     return [lookup[k] for k in unique]
 
 
-def reserve(control, request_id, selected):
+def reserve(control, request_id, selected, *, automatic=None):
     if not valid_id(request_id):
         raise ValueError('Identificador de solicitud inválido. Recarga la página.')
     def mutate(doc):
         prior = next((r for r in doc['runs'] if r['request_id'] == request_id), None)
         keys = [(b['fuente'], b['id_busqueda']) for b in selected]
+        if automatic and not prior and request_id in doc.get('schedule_receipts', {}):
+            return {'id': request_id, 'status': 'skipped', 'error': 'Ocurrencia ya reservada; informe fuera de retención.'}, False
         if prior:
-            if [(b['fuente'], b['id_busqueda']) for b in prior['searches']] != keys:
+            if automatic is None and [(b['fuente'], b['id_busqueda']) for b in prior['searches']] != keys:
                 raise Conflict('Esta solicitud ya se utilizó para otra selección.')
             return prior, False
         active = next((r for r in doc['runs'] if r['status'] in ACTIVE), None)
-        if active:
+        if active and automatic is None:
             raise Conflict('Ya existe una ejecución incompatible: ' + active['id'] + '. Consulta su seguimiento.')
         r = {'id': request_id, 'request_id': request_id, 'created': now(), 'updated': now(),
              'started': None, 'finished': None, 'status': 'launching', 'phase': 'Solicitando Job',
@@ -162,8 +164,22 @@ def reserve(control, request_id, selected):
              'job': os.getenv('RADAR_EXECUTION_JOB', 'radar-manual'), 'reconciled': None, 'error': None,
              'searches': [dict({k:v for k,v in b.items() if k not in {'baseline','legacy_last'}}, status='pending', started=None, finished=None, duration=None,
                                processed=None, new=None, changed=None, unchanged=None, error=None) for b in selected]}
+        r['origin'] = 'automatic' if automatic else 'manual'
+        if automatic:
+            from .programacion import occurrence_reason
+            reason = occurrence_reason(doc, automatic) or ('Omitida por ejecución en curso.' if active else None)
+            r.update(scheduled_at=automatic['scheduled_at'], schedule_revision=automatic['revision'], scheduler_job=automatic['job'], schedule_warning=automatic.get('warning'))
+            reason = reason or automatic.get('reason')
+            if reason:
+                r.update(status='skipped', phase=reason, error=reason, finished=now())
         doc['runs'].append(r)
-        return r, True
+        if automatic:
+            receipts = doc.setdefault('schedule_receipts', {})
+            receipts[request_id] = now()
+            for key, value in list(receipts.items()):
+                if age(value) > 2 * 86400:
+                    del receipts[key]
+        return r, r['status'] == 'launching'
     return control.change(mutate)
 
 

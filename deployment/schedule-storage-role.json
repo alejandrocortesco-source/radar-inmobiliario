@@ -1,0 +1,6 @@
+{
+  "title": "Radar schedule control storage",
+  "description": "CAS execution control and observe/recover shared lock; scoped to two exact objects.",
+  "stage": "GA",
+  "includedPermissions": ["storage.objects.get", "storage.objects.create", "storage.objects.delete"]
+}
