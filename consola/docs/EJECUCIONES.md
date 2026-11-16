@@ -247,3 +247,19 @@ y no aplica ausencias/retiros. No se fijan 406 o 408 como total permanente.
 La corrección requiere actualizar la imagen del Job `radar-manual-review`, sin
 cambiar la web. No modifica datos ni el esquema de control. Preparación, pruebas,
 digest, comprobación manual y reversión: [informe de revisión](METRO_RESPUESTAS_20261115.md).
+
+
+## Wasi: anuncios recurrentes (15/11/2026)
+
+El cierre único descrito para v0.12.3 es histórico y queda sustituido por el
+manejo acotado del diálogo de anuncio y Close dialog, sin requerir :visible al
+host. No depende del texto comercial. Admite anuncios consecutivos y tardíos,
+comprueba diálogo/fondo e interacción y evita repetir Buscar/Siguiente ya
+despachados. Límite de tres cierres por intervención, doce por página y tiempo
+acumulado acotado. No cambia autenticación, filtros, cobertura ni ausencias.
+
+Los mensajes y códigos fijos del Job llegan por el control existente; la web no
+requiere actualización. El informe distingue cierre ambiguo, fondo persistente,
+límite agotado, control bloqueado y despacho incierto. No se copian textos,
+trazas, HTML o datos de la cuenta. Históricos y esquema permanecen intactos.
+Detalles y digest: [anuncios recurrentes](WASI_ANUNCIOS_RECURRENTES_20261115.md).

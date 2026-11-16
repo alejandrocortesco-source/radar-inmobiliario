@@ -16,6 +16,7 @@ from .diagnostico import WasiListingError
 from .auth import autenticar, acceso
 from .browser import aplicar, lote, siguiente, ficha, contactos
 from .extraction import normalizar
+from .overlays import dismiss_announcements, normal_click
 
 
 def identidad_tecnica(valor):
@@ -75,7 +76,11 @@ class WasiScraper(Scraper):
             else:
                 await route.fallback()
         await context.route('**/*', imagen_local)
-        estado = await autenticar(context, self.cfg.timeout)
+        try:
+            estado = await autenticar(context, self.cfg.timeout)
+        except WasiListingError as exc:
+            self.event('listing_incomplete', {'code': exc.wasi_code, 'phase': 'authentication', 'error': str(exc)}, 'error')
+            raise
         self.event('wasi_auth', {'state': estado})
 
     async def abrir(self, context, config):
@@ -84,6 +89,7 @@ class WasiScraper(Scraper):
             await self.pace()
             response = await page.goto(RED, wait_until='domcontentloaded', timeout=self.cfg.timeout)
             await acceso(page, response)
+            await dismiss_announcements(page, self.cfg.timeout)
             batch = await aplicar(page, config, self.cfg.timeout, self.pace)
             return page, batch
         except BaseException:
@@ -187,8 +193,8 @@ class WasiScraper(Scraper):
                                 self.store.result(self.run_id, item['id'], 'failed', error='wasi_' + fase + '_' + type(exc).__name__)
                                 self.event('wasi_detail_error', {'id': item['id'], 'phase': fase, 'step': getattr(exc, 'wasi_step', None), 'error_type': type(exc).__name__}, 'error')
                                 # Cierra modales de lectura antes del próximo intento.
-                                for close in await page.locator('.modal:visible .top_close a, .modal:visible button.close').all():
-                                    await close.click(timeout=self.cfg.timeout)
+                                for close in await page.locator('.modal:visible:has(.property-details-panels) .top_close a, #modal_company_details_network:visible button.close').all():
+                                    await normal_click(page, close, self.cfg.timeout)
                         pending.pop(item['id'])
                     if not batch['next'] or not pending:
                         break

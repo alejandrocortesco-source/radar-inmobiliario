@@ -11,6 +11,9 @@ from metro.scraper import check_access
 from catalogo.fuentes.wasi import RED
 from playwright.async_api import Error as BrowserError
 
+from .overlays import dismiss_announcements
+from .diagnostico import WasiListingError
+
 LOGIN = 'https://wasi.co/login-usuario.htm'
 
 
@@ -63,6 +66,8 @@ async def autenticar(context, timeout=45000):
         await page.locator('#advanced_search, #login-form').first.wait_for(state='attached', timeout=timeout)
         if await page.locator('#advanced_search').count():
             await page.locator('#id_ciudad').wait_for(state='attached', timeout=timeout)
+            await acceso(page)
+            await dismiss_announcements(page, timeout)
             return 'session_reused'
         fase = 'read_configuration'
         usuario, password = secreto('WASI_USER'), secreto('WASI_PASSWORD')
@@ -102,12 +107,14 @@ async def autenticar(context, timeout=45000):
             await asyncio.sleep(.2)
         else:
             raise AuthBlocked('auth_failed: acceso no confirmado después del envío de credenciales')
+        await dismiss_announcements(page, timeout)
         fase = 'verify_network'
         response = await page.goto(RED, wait_until='domcontentloaded', timeout=timeout)
         await acceso(page, response)
         await page.locator('#advanced_search').wait_for(state='visible', timeout=timeout)
+        await dismiss_announcements(page, timeout)
         return 'authenticated'
-    except AuthBlocked:
+    except (AuthBlocked, WasiListingError):
         raise
     except Restricted:
         raise AuthBlocked('auth_blocked: CAPTCHA o restricción; no se confirmó acceso') from None

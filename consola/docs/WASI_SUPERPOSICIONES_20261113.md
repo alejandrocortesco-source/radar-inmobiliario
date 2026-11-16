@@ -137,3 +137,14 @@ Presentación: consola/templates/v06/_ejecucion06.html y base06.html. Pruebas:
 scraper/tests/test_wasi.py, fixtures/wasi_network.html y consola/tests/test_ejecuciones.py.
 Versión/documentación: scraper/metro/__init__.py, README.md, CHANGELOG.md,
 consola/docs/EJECUCIONES.md, docs/README.md y este informe.
+
+
+## Actualización posterior: 15/11/2026
+
+Este informe conserva la implementación histórica de cierre único. El diagnóstico
+visual posterior confirmó host externo de altura cero y diálogo/cierre visibles;
+la corrección actual no filtra el host por :visible y gestiona anuncios recurrentes.
+La preparación de esa nueva imagen conserva la corrección actual de Metrocuadrado,
+sin restaurar las imágenes antiguas descritas arriba. Véase [entrega vigente de
+anuncios recurrentes](WASI_ANUNCIOS_RECURRENTES_20261115.md). No acredita una nueva
+validación operativa de Wasi ni reescribe los resultados históricos.

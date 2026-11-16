@@ -175,3 +175,27 @@ La inspección real también encontró IDs duplicados en modales ocultos (por ej
 ## Normalización e identificación supervisada vigente
 
 La localidad explícita de Wasi se trata como calificador del barrio cuando coincide con el catálogo controlado; se conserva la evidencia y no se infieren barrios de la búsqueda. Una captura exitosa alimenta la capa común de identificación y después matching. Candidatos, decisiones y asociaciones están en la base auxiliar, no en `wasi.sqlite`. [Operación y límites](../../docs/IDENTIFICACION.md).
+
+
+## Anuncios recurrentes ProductFruits (15/11/2026)
+
+Se reconocen los diálogos `.pfruits-announcement-popup-v3[role="dialog"]` dentro
+de `.pfruits-announcement-popup-container`, bajo las raíces ProductFruits
+observadas. No se exige visibilidad al host de altura cero. Solo se pulsa un
+`button.modern-close-btn` único, visible y habilitado, con nombre accesible
+`Close dialog`. El contenido comercial es irrelevante y no se registra.
+Se verifica la desaparición del diálogo y que no persista su fondo bloqueante,
+y se ensaya la interacción normal con el control de destino.
+
+Máximo tres cierres consecutivos y seis segundos por intervención, doce cierres
+y treinta segundos acumulados por página. Cada interacción admite hasta tres
+intentos dentro de su timeout; solo se reintenta si no se despachó el clic y se
+cerró un anuncio reconocido. Un despacho observado nunca se repite para compensar
+un timeout posterior: se exige la renovación del tbody y las verificaciones
+existentes. Estado incierto, desconocido o límite agotado conserva incompleto.
+
+Se integra al finalizar el login, acceder a la red, preparar filtros/Buscar,
+renovar listados, paginar y realizar las interacciones de lectura de fichas.
+Se mantienen controles de sesión/seguridad y la protección de ausencias/retiros.
+No es un cierre genérico de modales ni una garantía ante futuras estructuras.
+Pruebas, revisión y límites: [entrega](../../consola/docs/WASI_ANUNCIOS_RECURRENTES_20261115.md).

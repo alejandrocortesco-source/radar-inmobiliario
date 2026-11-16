@@ -2,6 +2,15 @@
 
 ## Sin publicar — 2026-11-15 (Job de revisión)
 
+- Wasi cierra anuncios ProductFruits reconocidos aunque el host no tenga altura,
+  usando el diálogo y el control normal Close dialog. Maneja apariciones tardías y
+  consecutivas con límites de cierres y tiempo, sin botones comerciales ni clics forzados.
+- Evita doble despacho de Buscar/Siguiente; conserva verificaciones de listado,
+  filtros y cobertura. Una ventana desconocida, ambigua o persistente conserva
+  incompleto con diagnóstico fijo y no aplica ausencias.
+- La nueva imagen del Job se construye desde el estado actual, conservando la
+  corrección de paginación Metrocuadrado. No modifica web ni producción.
+
 - Metrocuadrado reconoce las dos rutas de listado verificadas, con hostname y path
   exactos. Conserva estructura, página activa, identificadores principales y cobertura;
   los destacados repetidos no impiden un avance real.

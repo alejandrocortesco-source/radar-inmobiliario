@@ -8,6 +8,7 @@ from catalogo.fuentes.wasi import GEO, SELECTS, INPUTS, NUMERIC_INPUTS, TEXT_INP
 from metro.extraction import ExtractionError
 from .auth import acceso, resolver_sesion_en_uso, AuthBlocked
 from .diagnostico import WasiListingError
+from .overlays import dismiss_announcements, prepare_interaction, normal_click
 from .extraction import listado, whatsapp_limpio, publicacion_whatsapp
 from playwright.async_api import TimeoutError as BrowserTimeout, Error as BrowserError
 
@@ -28,7 +29,7 @@ async def _paso(nombre, operacion):
         raise
 
 
-async def cambio(page, selector, accion, timeout):
+async def cambio(page, selector, accion, timeout, *, target=None):
     # DataTables reemplaza las filas incluso al aplicar los mismos filtros.
     # Observar mutaciones evita confundir los resultados anteriores con el nuevo
     # resultado cuando la URL y la página activa no cambian.
@@ -39,7 +40,12 @@ async def cambio(page, selector, accion, timeout):
       e.__radarObserver = new MutationObserver(() => e.__radarVersion++);
       e.__radarObserver.observe(e, {childList:true,subtree:true,characterData:true});
     }''')
-    await accion()
+    if target is None:
+        await dismiss_announcements(page, timeout)
+        await accion()
+    else:
+        await normal_click(page, page.locator(target), timeout,
+                           changed=lambda: anterior.evaluate('e => !e.isConnected || e.__radarVersion > 0'))
     try:
         await page.wait_for_function('e => !e.isConnected || e.__radarVersion > 0', arg=anterior, timeout=timeout)
         await page.locator(selector).wait_for(state='attached', timeout=timeout)
@@ -85,35 +91,11 @@ async def aplicar(page, config, timeout, pace, _session_changes=0):
 
 
 async def preparar_buscar(page, timeout):
-    """Una sola ventana reconocida, un cierre normal, sin pulsar Buscar todavía."""
-    button = page.locator('#advanced_search')
-    limit = min(timeout, 2000)
-    try:
-        await button.scroll_into_view_if_needed(timeout=limit)
-        await button.click(trial=True, timeout=limit)
-        return
-    except BrowserTimeout:
-        pass
-    # Identifica el interceptor actual; no interpreta ni almacena su contenido.
-    recognized = await button.evaluate("""e => {
-      const r=e.getBoundingClientRect();const top=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);
-      return !!top?.closest('.productfruits--container');
-    }""")
-    if not recognized:
-        raise WasiListingError('wasi_search_unconfirmed')
-    hosts = page.locator('.productfruits--container:visible')
-    closes = hosts.get_by_role('button', name=re.compile(r'^(?:close|cerrar)(?: (?:dialog|window|ventana|diálogo))?$', re.I))
-    visible = [c for c in await closes.all() if await c.is_visible()]
-    if len(visible) != 1:
-        raise WasiListingError('wasi_search_overlay')
-    try:
-        await visible[0].click(timeout=limit)
-        await button.click(trial=True, timeout=limit)
-    except BrowserError:
-        raise WasiListingError('wasi_overlay_unclosable') from None
+    await prepare_interaction(page, page.locator('#advanced_search'), timeout)
 
 
 async def _aplicar(page, config, timeout, pace, _session_changes=0):
+    await dismiss_announcements(page, timeout)
     filtros = config['filtros']
     for campo in SELECTS:
         valor = filtros.get(campo, '')
@@ -142,7 +124,7 @@ async def _aplicar(page, config, timeout, pace, _session_changes=0):
     await pace()
     await preparar_buscar(page, timeout)
     try:
-        await cambio(page, '#properties_table tbody', lambda: page.locator('#advanced_search').click(timeout=min(timeout, 5000)), timeout)
+        await cambio(page, '#properties_table tbody', None, timeout, target='#advanced_search')
     except BrowserError:
         raise WasiListingError('wasi_search_unconfirmed') from None
     await page.locator('#properties_table_processing').wait_for(state='hidden', timeout=timeout)
@@ -194,6 +176,7 @@ async def _leer_tabla(page):
 
 
 async def lote(page, timeout=45000, *, active=None, start=None):
+    await preparar_buscar(page, timeout)
     limite = time.monotonic() + timeout / 1000
     ultimo = {}
     while time.monotonic() < limite:
@@ -212,6 +195,7 @@ async def lote(page, timeout=45000, *, active=None, start=None):
             correcto = ((not total and not raw['rows'] and inicio == fin == 0) or
                         (total > 0 and raw['next'] is not None and len(raw['rows']) == fin-inicio+1 and inicio > 0 and fin <= total))
             if correcto and (active is None or pagina == active) and (start is None or inicio == start):
+                await preparar_buscar(page, timeout)
                 links = [listado(r) for r in raw['rows']]
                 if len({l['id'] for l in links}) != len(links):
                     raise ExtractionError('Códigos repetidos dentro de la página Wasi')
@@ -223,7 +207,7 @@ async def lote(page, timeout=45000, *, active=None, start=None):
 
 async def siguiente(page, previo, timeout, pace):
     await pace()
-    await cambio(page, '#properties_table tbody', lambda: page.locator('#properties_table_next').click(timeout=timeout), timeout)
+    await cambio(page, '#properties_table tbody', None, timeout, target='#properties_table_next')
     await page.locator('#properties_table_processing').wait_for(state='hidden', timeout=timeout)
     actual = await lote(page, timeout, active=previo['active'] + 1, start=previo['end'] + 1)
     if actual['active'] != previo['active'] + 1 or actual['start'] != previo['end'] + 1 or actual['total'] != previo['total']:
@@ -256,7 +240,7 @@ async def _ficha(page, codigo, timeout, pace):
     # atribuir los campos de la ficha anterior al nuevo código.
     coincide = lambda r: urlsplit(r.url).hostname == 'wasi.co' and urlsplit(r.url).path == '/usuario/inmuebles/' + codigo
     async with page.expect_request_finished(coincide, timeout=timeout), page.expect_response(coincide, timeout=timeout) as respuesta:
-        await _paso('title_link', row.locator('td:nth-child(4) a[onclick^="show_property_details"]').first.click(timeout=timeout))
+        await _paso('title_link', normal_click(page, row.locator('td:nth-child(4) a[onclick^="show_property_details"]').first, timeout))
     response = await respuesta.value
     if response.status != 200:
         raise ExtractionError('Wasi no completó la carga de la ficha')
@@ -287,7 +271,7 @@ async def _ficha(page, codigo, timeout, pace):
     datos['gallery_frames'] = cantidad
     for i in range(cantidad):
         if i:
-            await _paso('gallery_next', panel.locator('.fotorama__arr--next').click(timeout=timeout))
+            await _paso('gallery_next', normal_click(page, panel.locator('.fotorama__arr--next'), timeout))
         await _paso('gallery_active', page.wait_for_function('''n=>[...document.querySelectorAll('.modal')].find(m=>getComputedStyle(m).display!=='none')?.querySelectorAll('.fotorama__nav__frame')[n]?.classList.contains('fotorama__active')''', arg=i, timeout=timeout))
         await _paso('gallery_image', page.wait_for_function('''n=>{
           const m=[...document.querySelectorAll('.modal')].find(m=>getComputedStyle(m).display!=='none');
@@ -297,7 +281,7 @@ async def _ficha(page, codigo, timeout, pace):
           return !!(thumb?.complete && thumb.naturalWidth && stage?.complete && stage.naturalWidth && key(thumb.src)===key(stage.src));
         }''', arg=i, timeout=timeout))
         datos['photos'].extend(await panel.locator('.fotorama__stage img[src]').evaluate_all('es=>es.map(e=>e.src).filter(s=>s.startsWith("https://image.wasi.co/"))'))
-    await page.locator('.modal:visible .top_close a').click(timeout=timeout)
+    await normal_click(page, page.locator('.modal:visible:has(.property-details-panels) .top_close a'), timeout)
     await panel.wait_for(state='hidden', timeout=timeout)
     return datos
 
@@ -308,7 +292,7 @@ async def contactos(page, codigo, timeout, pace):
     # requestfinished conserva la espera de descarga completa. Response.finished
     # en Playwright 1.55 deja una tarea que falla al cerrar el navegador.
     async with page.expect_request_finished(coincide, timeout=timeout), page.expect_response(coincide, timeout=timeout) as respuesta:
-        await page.locator(f'#properties_table tbody tr[id="{codigo}"] a[onclick^="openModalDetailsPropertyNetwork"]').click(timeout=timeout)
+        await normal_click(page, page.locator(f'#properties_table tbody tr[id="{codigo}"] a[onclick^="openModalDetailsPropertyNetwork"]'), timeout)
     response = await respuesta.value
     if response.status != 200:
         raise ExtractionError('Wasi no completó la carga del contacto')
@@ -322,7 +306,7 @@ async def contactos(page, codigo, timeout, pace):
         const label=l.querySelector('.lab-tt')?.textContent;
         return [label,phone && /Teléfono/.test(label) ? phone.textContent.trim() : text?.innerText.trim()];})),
       whatsapp:e.querySelector('a.whatsapp_link')?.getAttribute('href')})''')
-    await page.locator('#modal_company_details_network .close').click(timeout=timeout)
+    await normal_click(page, page.locator('#modal_company_details_network .close'), timeout)
     await panel.wait_for(state='hidden', timeout=timeout)
     return {'phone': datos['labs'].get('Teléfono móvil:'), 'local_phone': datos['labs'].get('Teléfono fijo:'),
             'advertiser_address': datos['labs'].get('Ubicación:'), 'whatsapp': whatsapp_limpio(datos.get('whatsapp')),

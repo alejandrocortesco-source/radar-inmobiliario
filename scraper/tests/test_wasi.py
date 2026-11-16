@@ -373,10 +373,13 @@ def test_superposicion_buscar_acotada_y_verificacion(mode):
                   const r=search.getBoundingClientRect();const overlay=document.createElement('div');
                   overlay.className=mode==='unknown'?'unknown-window':'productfruits--container';
                   overlay.style=`position:absolute;left:${r.left+scrollX}px;top:${r.top+scrollY}px;width:${r.width+40}px;height:${r.height+40}px;z-index:99999;background:white`;
+                  const backdrop=document.createElement('div');backdrop.className='pfruits-announcement-popup-container';
+                  const dialog=document.createElement('div');dialog.className='pfruits-announcement-popup-v3';dialog.setAttribute('role','dialog');
+                  backdrop.append(dialog);overlay.append(backdrop);
                   if(mode!=='no_control'){
-                    const close=document.createElement('button');close.setAttribute('aria-label','Cerrar');close.textContent='×';
-                    close.onclick=()=>{closeCount++;if(mode!=='stuck')overlay.remove();};overlay.append(close);
-                    if(mode==='ambiguous')overlay.append(close.cloneNode(true));
+                    const close=document.createElement('button');close.className='modern-close-btn';close.setAttribute('aria-label','Close dialog');close.textContent='×';
+                    close.onclick=()=>{closeCount++;if(mode!=='stuck')overlay.remove();};dialog.append(close);
+                    if(mode==='ambiguous')dialog.append(close.cloneNode(true));
                   }
                   document.body.append(overlay);
                 }""",mode)
@@ -392,7 +395,7 @@ def test_superposicion_buscar_acotada_y_verificacion(mode):
                         assert isinstance(caught.value,WasiListingError)
                         assert 'Call log' not in str(caught.value)
                         assert await page.evaluate('searchCount')==0
-                        assert await page.locator('div').filter(has=page.get_by_role('button',name='Cerrar',exact=True)).count() or mode=='no_control'
+                        assert await page.locator('div').filter(has=page.get_by_role('button',name='Close dialog',exact=True)).count() or mode=='no_control'
                     assert await page.evaluate('closeCount')<=1
             finally:
                 await browser.close()
