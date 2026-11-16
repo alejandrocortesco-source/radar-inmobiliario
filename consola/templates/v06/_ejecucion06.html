@@ -1,6 +1,7 @@
-{% from '_resultados06.html' import value, balance, methods %}
+{% from 'v06/_estado_ejecucion.html' import estado %}{% from '_resultados06.html' import value, balance, methods %}
 {% if run %}
 <section class="tile execution-section" aria-labelledby="report-title"><div class="tile-heading"><h2 id="report-title">{{run_tracking.title if run_tracking else 'Informe final · ' + labels.get(run.status,run.status)}}</h2><a href="/v0.6/ejecuciones?run={{run.id}}">Enlace a esta ejecución</a></div>
+<p>{{estado(run,labels)}}</p>
 <details class="execution-reference"><summary>Detalle técnico</summary><p class="caption">Ejecución {{run.id}} · Job {{run.job}}{% if run.worker %} / {{run.worker}}{% endif %}{% if run.operation %}<br>Operación: {{run.operation}}{% endif %}</p></details>
 <p>Origen: <strong>{{'Automático' if run.origin == 'automatic' else 'Manual'}}</strong>{% if run.scheduled_at %} · Programada: {{run.scheduled_at|fecha}} · Inicio real: {{run.started|fecha if run.started else 'No iniciado'}} (Bogotá){% endif %}</p>
 {% for b in run.searches if b.wasi_diagnostics %}<div class="notice"><strong>Diagnóstico Wasi</strong>{% for d in b.wasi_diagnostics %}<p>Etapa: {{d.stage}} · {{d.message}} · {{'Advertencia recuperada' if d.recovered or b.status == 'completed' else 'Afectó el resultado'}}</p><details><summary>Detalle técnico saneado</summary><pre style="white-space:pre-wrap;overflow-wrap:anywhere">{{d|tojson(indent=2)}}</pre></details>{% endfor %}</div>{% endfor %}

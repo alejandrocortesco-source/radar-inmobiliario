@@ -69,11 +69,11 @@ class ControlGCS:
         except NotFound:
             return empty(), 0
         doc = json.loads(raw)
-        if doc.get('version') != 1 or not isinstance(doc.get('runs'), list):
+        if doc.get('version') not in (1, 2) or not isinstance(doc.get('runs'), list):
             raise IntegrityError('Registro de ejecuciones incompatible')
         return doc, generation
 
-    def change(self, mutate, *, idle_only=False):
+    def change(self, mutate, *, idle_only=False, transition=False):
         for attempt in range(8):
             try:
                 doc, generation = self.read()
@@ -81,11 +81,20 @@ class ControlGCS:
                     return None
                 before = copy.deepcopy(doc)
                 result = mutate(doc)
-                prune(doc)
+                if before.get('version') == 2 and not transition:
+                    pending = doc.get('schedule', {}).get('pending')
+                    prior_pending = before.get('schedule', {}).get('pending') or {}
+                    invalid_pending = pending and pending.get('desired', {}).get('mode') != 'multiple' and (pending.get('token'), pending.get('desired')) != (prior_pending.get('token'), prior_pending.get('desired'))
+                    if doc.get('version') != 2 or (before.get('schedule', {}).get('mode') == 'multiple' and (doc.get('schedule', {}).get('mode') != 'multiple' or invalid_pending)):
+                        raise IntegrityError('Un escritor incompatible intentó sustituir el coordinador múltiple')
+                if not transition:
+                    prune(doc)
                 if doc == before:
                     return copy.deepcopy(result)
                 raw = json.dumps(doc, ensure_ascii=False, separators=(',', ':'))
                 while len(raw.encode()) > 2_000_000:
+                    if transition:
+                        raise IntegrityError('La transición excede el tamaño permitido; no se elimina historial')
                     removable = [r for r in doc['runs'] if r['status'] in TERMINAL]
                     if not removable:
                         raise IntegrityError('Registro de mantenimiento demasiado grande')
@@ -173,6 +182,14 @@ def reserve(control, request_id, selected, *, automatic=None):
             if reason:
                 r.update(status='skipped', phase=reason, error=reason, finished=now())
         doc['runs'].append(r)
+        if automatic and automatic.get('schedule_id'):
+            plan = doc['schedules'][automatic['schedule_id']]
+            r.update(schedule_id=plan['id'], schedule_name=automatic.get('schedule_name', plan['name']))
+            if plan['revision'] == automatic['revision'] and not plan.get('deleted'):
+                plan['cursor'] = max(plan.get('cursor') or plan['effective_after'], automatic['scheduled_at'])
+                plan['last_run'] = dict(id=request_id, scheduled_at=automatic['scheduled_at'])
+                if plan['frequency'] == 'once':
+                    plan['consumed_at'] = automatic['scheduled_at']
         if automatic:
             receipts = doc.setdefault('schedule_receipts', {})
             receipts[request_id] = now()

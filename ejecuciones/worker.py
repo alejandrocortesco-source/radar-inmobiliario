@@ -81,6 +81,12 @@ def run_manual(folder, run_id, control=None, state_factory=None, make_scraper=sc
         if r and r['status'] in {'launching', 'queued', 'uncertain'} and not r.get('worker'):
             if r.get('origin') == 'automatic':
                 cfg = doc.get('schedule', {})
+                if r.get('schedule_id'):
+                    from .calendarios import plans
+                    proposed = doc.get('schedule', {}).get('pending', {}).get('schedules')
+                    cfg = (proposed if proposed is not None else plans(doc)).get(r['schedule_id'], {})
+                    if cfg.get('deleted'):
+                        cfg = dict(cfg, enabled=False)
                 if not cfg.get('enabled') or cfg.get('pending') or cfg.get('revision') != r.get('schedule_revision'):
                     r.update(status='skipped', finished=now(), updated=now(), phase='Omitida: programación pausada o sustituida antes del inicio.', error='Programación pausada o sustituida antes del inicio.')
                     return

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.14.0 — candidato local, sin desplegar
+
+- Programación múltiple, selector por portal y presentación Carbon con estados verificados.
+- Control versión 2 como barrera para escritores antiguos; reversión lógica con archivo de horarios y preservación de historial.
+- Despliegue sin tráfico por defecto, configuración completa y Origin específico por revisión.
+- No acredita despliegue ni activación automática.
+
+
 ## 0.13.1 — 2026-11-16 (revisión privada)
 
 - Conserva la programación automática semanal y el flujo durable compartido con ejecuciones manuales.

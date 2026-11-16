@@ -64,7 +64,11 @@ async def trigger(request: Request):
         run = await run_in_threadpool(lambda: Programacion(ServicioEjecuciones(), scheduler).deliver(job, revision, date))
         diagnostic['run_id'] = run['id']
         record('durable_' + run['status'], accepted=True)
-        return JSONResponse({'id':run['id'], 'status':run['status']}, 202)
+        response = {'id':run['id'], 'status':run['status']}
+        if 'occurrences' in run:
+            response['occurrences'] = [{'id':r['id'], 'status':r['status']} for r in run['occurrences']]
+            diagnostic['occurrences'] = len(run['occurrences'])
+        return JSONResponse(response, 202)
     except (ValueError, KeyError, TypeError) as exc:
         code = exc.code if isinstance(exc, InvalidOccurrence) else 'occurrence_validation_failed'
         record(code)

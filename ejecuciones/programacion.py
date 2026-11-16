@@ -24,6 +24,8 @@ def validate(keys, days, clock):
 
 
 def cron(config):
+    if config.get('mode') == 'multiple':
+        return '* * * * *'
     hour, minute = config['time'].split(':')
     return f"{int(minute)} {int(hour)} * * " + ','.join(str((d + 1) % 7) for d in config['days'])
 
@@ -62,6 +64,13 @@ def view(doc, cloud_state=None, error=None):
 
 def occurrence_reason(doc, occurrence, at=None):
     cfg = doc.get('schedule', DEFAULT)
+    if occurrence.get('schedule_id'):
+        from .calendarios import plans
+        if cfg.get('pending'):
+            return 'Omitida: sincronización pendiente.'
+        cfg = plans(doc).get(occurrence['schedule_id'], dict(DEFAULT))
+        if cfg.get('deleted'):
+            return 'Omitida: programación eliminada.'
     if not cfg['enabled'] or cfg.get('pending'):
         return 'Omitida: programación desactivada o sincronización pendiente.'
     if occurrence['revision'] != cfg['revision']:
@@ -75,6 +84,8 @@ def occurrence_reason(doc, occurrence, at=None):
     if not 0 <= (at-date).total_seconds() <= 900:
         return 'Omitida: entrega fuera del margen de 15 minutos.'
     local = date.astimezone(TZ)
+    if cfg.get('frequency') == 'once' and local.date().isoformat() != cfg.get('date'):
+        return 'Omitida: fecha ajena a la ejecución única.'
     if local.weekday() not in cfg['days'] or local.strftime('%H:%M') != cfg['time'] or local.second or local.microsecond:
         return 'Omitida: hora ajena al calendario vigente.'
     return None
@@ -131,6 +142,8 @@ class Programacion:
         if action not in {'save', 'activate', 'pause'}:
             raise ValueError('Acción de programación inválida.')
         initial = self.control.read()[0].get('schedule', DEFAULT)
+        if initial.get('mode') == 'multiple':
+            raise Conflict('Usa la gestión individual de programaciones.')
         if action == 'pause':
             values = {k: copy.deepcopy(initial[k]) for k in ('keys','days','time')}
         else:
@@ -139,6 +152,8 @@ class Programacion:
         token = str(uuid4())
         def begin(doc):
             old = doc.get('schedule', DEFAULT)
+            if old.get('mode') == 'multiple':
+                raise Conflict('Usa la gestión individual de programaciones.')
             if old['revision'] != expected:
                 raise Conflict('La programación cambió en otra ventana. Recarga antes de guardar.')
             pending = old.get('pending')
@@ -173,8 +188,15 @@ class Programacion:
     def deliver(self, job, revision, scheduled_at):
         job, _ = scheduler_identity(job, self.scheduler.name)
         scheduled_at = scheduled_time(scheduled_at)
+        document = self.control.read()[0]
+        if document.get('schedule', {}).get('mode') == 'multiple':
+            from .calendarios import Calendarios
+            return Calendarios(self.service, self.scheduler).tick(job, revision, scheduled_at, document)
         occurrence = dict(job=job, revision=revision, scheduled_at=scheduled_at)
         identity = str(uuid5(NAMESPACE_URL, job+'|'+revision+'|'+scheduled_at))
+        return self.submit(identity, occurrence, self.control.read()[0].get('schedule', DEFAULT))
+
+    def submit(self, identity, occurrence, config):
         doc = self.control.read()[0]
         prior = next((r for r in doc['runs'] if r['id'] == identity), None)
         if prior:
@@ -184,7 +206,7 @@ class Programacion:
         # autoritativa antes de tocar portales, igual que Manual. Nunca deja un lock
         # de snapshot huérfano si el proceso HTTP muere después de reservar.
         lookup = {(b['fuente'], b['id_busqueda']): b for b in doc.get('searches', [])}
-        selected = [lookup.get(tuple(k), dict(fuente=k[0], id_busqueda=k[1], nombre=k[1], url='', activa=True)) for k in doc.get('schedule', DEFAULT)['keys']]
+        selected = [lookup.get(tuple(k), dict(fuente=k[0], id_busqueda=k[1], nombre=k[1], url='', activa=True)) for k in config['keys']]
         if not reason:
             from .cloud_run import reconcile
             from google.api_core.exceptions import NotFound

@@ -1,0 +1,3 @@
+{% macro estado(r, labels) -%}
+{% if r.status in ['running','saving'] and r.verification is defined and r.verification.state == 'active' %}<span class="run-state" role="status"><span class="radar-spinner" aria-hidden="true"></span>En ejecución</span>{% else %}<span>{{'Por verificar' if r.status in ['running','saving','launching','uncertain','queued','reconciling'] and (r.verification is not defined or r.verification.state != 'active') else labels.get(r.status,r.status)}}</span>{% endif %}
+{%- endmacro %}

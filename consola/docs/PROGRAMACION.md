@@ -1,5 +1,7 @@
 # Programación general de Radar Central — v0.13.0
 
+> Evolución local posterior, sin desplegar: [programación múltiple](PROGRAMACION_MULTIPLE.md). Esta guía conserva la arquitectura y evidencia del calendario compartido desplegado.
+
 16/11/2026, America/Bogota. Clon y rama autorizados: Radar-CloudRun-20261111/repo,
 codex/ejecuciones-manuales. Base 28c2b22 limpia. No se reconstruye ningún scraper.
 

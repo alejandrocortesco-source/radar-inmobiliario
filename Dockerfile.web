@@ -1,5 +1,7 @@
 FROM mcr.microsoft.com/playwright/python:v1.55.0-noble
 ARG RADAR_SOURCE_SHA=unknown
+ARG RADAR_SOURCE_TREE=unknown
+LABEL org.opencontainers.image.source-tree=$RADAR_SOURCE_TREE
 LABEL org.opencontainers.image.revision=$RADAR_SOURCE_SHA
 WORKDIR /app
 COPY scraper/requirements.lock.txt scraper/requirements-cloud.txt ./

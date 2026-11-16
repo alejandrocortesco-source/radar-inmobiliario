@@ -9,6 +9,7 @@ from urllib.parse import urlsplit
 import httpx
 import pytest
 from fastapi.testclient import TestClient
+from playwright.sync_api import expect
 from test_ejecuciones import execution, A, B, fake_scrapers, run_manual, start
 from ejecuciones.control import now, Conflict
 from ejecuciones.programacion import validate, upcoming, cron, occurrence_reason, Programacion, DEFAULT, view
@@ -261,18 +262,19 @@ def test_browser_configuration_focus_errors_no_overflow(program,execution,chromi
         route.fulfill(status=res.status_code,headers={k:v for k,v in res.headers.items() if k.lower() not in {'content-length','content-encoding'}},body=res.content)
     page.route('**/*',routed)
     page.goto('http://127.0.0.1/v0.6/ejecuciones')
-    assert page.locator('#programacion').count()==1
-    assert page.locator('#programacion').inner_text().find('Desactivada')>=0
+    page.get_by_role('link',name='Gestionar programaciones').click()
+    assert not page.locator('#plan-editor').evaluate('(e)=>e.open')
     assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
-    page.locator('#schedule-time').focus()
-    assert page.locator('#schedule-time').evaluate('(e)=>e===document.activeElement')
+    page.get_by_role('link',name='Editar',exact=True).click()
+    page.locator('#plan-hour').wait_for(state='visible')
+    page.locator('#plan-hour').focus()
+    expect(page.locator('#plan-hour')).to_be_focused()
     page.get_by_role('checkbox',name='Martes',exact=True).check()
-    page.locator('#schedule-time').fill('00:00')
-    page.get_by_role('button',name='Guardar',exact=True).click()
-    page.locator('#programacion [role=status]').first.wait_for()
-    assert 'No se inició scraping' in page.locator('#programacion').inner_text()
+    page.locator('#plan-hour').select_option('0');page.locator('#plan-minute').select_option('0')
+    page.get_by_role('button',name='Guardar programación',exact=True).click()
+    page.get_by_text('Configuración guardada. No se inició scraping.',exact=True).wait_for()
     assert not program.service.cloud.launched
-    out=Path('.tmp/programacion-20261116');out.mkdir(parents=True,exist_ok=True)
+    out=Path('.tmp/multiple-20261116/screenshots');out.mkdir(parents=True,exist_ok=True)
     page.screenshot(path=str(out/f'programacion-{viewport[0]}.png'),full_page=True)
     context.close()
 
@@ -404,27 +406,23 @@ def test_browser_active_dates_manual_enabled_errors_empty(program,chromium,viewp
         response=client.request(req.method,url.path+('?' + url.query if url.query else ''),content=req.post_data_buffer)
         route.fulfill(status=response.status_code,headers={k:v for k,v in response.headers.items() if k.lower() not in {'content-length','content-encoding'}},body=response.content)
     page.route('**/*',routed)
-    page.goto('http://127.0.0.1/v0.6/ejecuciones')
-    text=page.locator('#programacion').inner_text()
-    assert 'Activa' in text and 'Próximas ejecuciones' in text
-    assert page.locator('#programacion li').count()==5
-    page.locator('[data-search]').first.check()
-    assert page.locator('[data-start]').is_enabled()
+    page.goto('http://127.0.0.1/v0.6/ejecuciones/programaciones')
+    assert page.locator('.plan-summary').inner_text().find('Activas')>=0
+    assert page.locator('#programacion').inner_text().find('Activa')>=0
+    assert not page.locator('#plan-editor').evaluate('(e)=>e.open')
     assert not program.service.cloud.launched
-    out=Path('.tmp/programacion-20261116');out.mkdir(parents=True,exist_ok=True)
+    out=Path('.tmp/multiple-20261116/screenshots');out.mkdir(parents=True,exist_ok=True)
     for name in ('activa','error','vacia'):
         if name=='error':
             program.scheduler.get=lambda: (_ for _ in ()).throw(TimeoutError('SECRET_NOT_EXPOSED'))
             page.reload()
-            assert 'Por verificar' in page.locator('#programacion').inner_text()
-            assert page.locator('#programacion [role=alert]').count()==1
+            assert page.get_by_role('alert').count()==1
             assert 'SECRET_NOT_EXPOSED' not in page.content()
         if name=='vacia':
             doc=program.control.read()[0];doc['searches']=[]
             program.service.overview=lambda refresh=False:(doc,None)
             page.reload()
-            assert 'Agrega una búsqueda' in page.locator('#programacion').inner_text()
-            assert 'eliminada o está inactiva' in page.locator('#programacion').inner_text()
+            assert 'Búsqueda no disponible' in page.locator('#programacion').inner_text()
         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
         page.screenshot(path=str(out/f'{name}-{viewport[0]}.png'),full_page=True)
     assert not program.service.cloud.launched

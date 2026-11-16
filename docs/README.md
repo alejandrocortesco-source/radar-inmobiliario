@@ -63,3 +63,5 @@ Los diagnósticos privados del equipo pertenecen a `.local/diagnosticos/`, no a 
 - [Programación semanal y revisión privada v0.13.0](../consola/docs/PROGRAMACION.md).
 
 - [Wasi: diagnóstico por etapas y única captura de revisión del 16/11/2026](../consola/docs/WASI_DIAGNOSTICO_20261116.md).
+
+- [Programación múltiple: código local, migración y revisión sintética](../consola/docs/PROGRAMACION_MULTIPLE.md).

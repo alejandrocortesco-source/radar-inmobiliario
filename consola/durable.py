@@ -40,7 +40,7 @@ class WebDurable:
 
     async def __call__(self, scope, receive, send):
         path = scope.get('path', '')
-        if scope['type'] != 'http' or path == '/health' or path in {'/v0.6/ejecuciones', '/v0.6/ejecuciones/estado', '/v0.6/ejecuciones/programacion'} or path.startswith(('/v0.4/static/', '/consola/static/')):
+        if scope['type'] != 'http' or path == '/health' or path in {'/v0.6/ejecuciones', '/v0.6/ejecuciones/estado', '/v0.6/ejecuciones/programacion', '/v0.6/ejecuciones/programaciones', '/v0.6/ejecuciones/programaciones/previsualizar'} or path.startswith(('/v0.4/static/', '/consola/static/')):
             return await self.app(scope, receive, send)
         async with self.local:
             estado = None

@@ -1,6 +1,30 @@
-# Radar Inmobiliario — documento rector v0.12.1
+# Radar Inmobiliario — candidato local v0.14.0
 
 La especificación funcional del usuario de 3 de noviembre de 2026 gobierna esta entrega. El producto acompaña el trabajo de Mónica con unos 30 clientes activos. Debe permanecer sencillo y de bajo mantenimiento; el objetivo de operación inferior a US$10/mes está **pendiente de validación de consumo y alojamiento**, no es una garantía.
+
+## Construcción controlada autorizada — 16 de noviembre de 2026
+
+La solicitud posterior autoriza commit local y tag anotado v0.14.0 en el clon Cloud,
+rama codex/ejecuciones-manuales, y construcción de imágenes con Cloud Build. No
+autoriza push, despliegue productivo, Scheduler ni scraping. Los recursos temporales
+de validación requieren presentar costo/aislamiento y autorización antes de crearlos.
+El manifiesto final incorpora el commit resuelto y la huella de contenido; no se
+reutiliza un tar de un commit anterior aunque el contenido fuente coincida.
+
+## Programación múltiple — código local, sin despliegue (16 de noviembre de 2026)
+
+La solicitud actual autoriza trabajar exclusivamente en Radar-CloudRun-20261111/repo,
+rama codex/ejecuciones-manuales, desde 7283bc4 (0.13.1), conservando cambios posteriores.
+Se implementa una colección aditiva de horarios diarios, semanales y únicos sobre
+el control GCS, CAS, reservas, recibos, trabajador y lock existentes. Un único Scheduler
+actúa como señal periódica; coincidencias se omiten con motivo, sin cola ni capturas
+simultáneas. La lectura del calendario anterior no escribe; la conversión conserva
+lunes 09:00 y selección previa. La interfaz independiente mantiene identidad Radar,
+formulario contraído y actividad con estados verificados. No se modifican producción,
+credenciales, scrapers ni matching; no se ejecutan capturas reales, despliegues,
+commit, push, merge ni tags. La versión del candidato local es 0.14.0, sin commit ni despliegue.
+Diseño, migración, condiciones de corte y revisión local: [Programación múltiple](consola/docs/PROGRAMACION_MULTIPLE.md).
+Resultados nuevos: [validación local](consola/docs/VALIDACION_PROGRAMACION_MULTIPLE.md).
 
 ## Programación semanal — 16 de noviembre de 2026
 

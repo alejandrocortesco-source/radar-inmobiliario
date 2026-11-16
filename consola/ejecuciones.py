@@ -214,6 +214,108 @@ def crear_router():
         schedule = Programacion(svc, Scheduler()).read(doc)
         return render(request, status, error=message, doc=doc, schedule=schedule)
 
+    def plan_form(data):
+        return dict(name=data.get('name', [''])[0], keys=[json.loads(v) for v in data.get('schedule_search', [])],
+                    frequency=data.get('frequency', ['weekly'])[0], days=[int(v) for v in data.get('days', [])],
+                    hour=data.get('hour', ['9'])[0], minute=data.get('minute', ['0'])[0],
+                    date=data.get('date', [''])[0], enabled=data.get('enabled', [''])[0]=='on',
+                    id=data.get('id', [''])[0], revision=data.get('revision', [''])[0])
+
+    def render_plans(request, status=200, error=None, fields=None, draft=None, preview=None):
+        from ejecuciones.calendarios import Calendarios, plans, LEGACY_ID
+        from ejecuciones.programacion import DAYS
+        from ejecuciones.scheduler import Scheduler
+        svc = ServicioEjecuciones()
+        doc, warning = svc.overview(refresh=True)
+        model = Calendarios(svc, Scheduler()).read(doc)
+        ctx = context(doc)
+        draft = draft or dict(name='', keys=[], frequency='weekly', days=[], hour='9', minute='0', date='', enabled=False, id='', revision='')
+        edit = request.query_params.get('editar')
+        if edit and not fields and not error:
+            p = plans(doc).get(edit)
+            if not p or p.get('deleted'):
+                return JSONResponse({'detail':'Programación no encontrada.'}, 404)
+            draft = dict(p, hour=str(int(p['time'][:2])), minute=str(int(p['time'][3:])))
+        history = request.query_params.get('historial')
+        if history:
+            ctx['runs'] = [r for r in ctx['runs'] if r.get('schedule_id')==history or (history==LEGACY_ID and r.get('origin')=='automatic' and not r.get('schedule_id'))]
+        lookup = {(b['fuente'],b['id_busqueda']):b['nombre'] for b in doc['searches']}
+        for p in model['items']:
+            p['search_names'] = [lookup.get(tuple(k), 'Búsqueda no disponible') for k in p['keys']]
+        selected = {tuple(k) for k in draft['keys']}
+        groups = []
+        for source, label in [('metrocuadrado','Metrocuadrado'),('wasi','Wasi'),('fincaraiz','Fincaraíz')]:
+            choices = [dict(b, selected=(b['fuente'],b['id_busqueda']) in selected, missing=False) for b in ctx['searches'] if b['fuente']==source]
+            known = {b['id_busqueda'] for b in choices}
+            for portal, key in selected:
+                if portal==source and key not in known:
+                    choices.append(dict(fuente=portal,id_busqueda=key,nombre='Búsqueda eliminada',activa=False,
+                        selected=True,missing=True,token=json.dumps([portal,key],ensure_ascii=False)))
+            groups.append(dict(source=source,label=label,choices=choices))
+        return templates.TemplateResponse(request=request, name='v06/programaciones06.html', status_code=status,
+            context={**ctx, 'model':model, 'draft':draft, 'field_errors':fields or {}, 'error':error,
+                     'warning':warning, 'preview':preview, 'editor_open':bool(edit or fields or error or request.query_params.get('nuevo')),
+                     'search_groups':groups, 'selected_keys':selected, 'weekdays':list(enumerate(DAYS))})
+
+    @router.get('/programaciones')
+    def schedules_page(request: Request):
+        if not os.getenv('RADAR_STATE_BUCKET') or not os.getenv('RADAR_SCHEDULE_TARGET'):
+            return JSONResponse({'detail':'Programación no configurada. Usa el entorno de demostración para revisar localmente.'}, 503)
+        try:
+            return render_plans(request)
+        except Exception:
+            return JSONResponse({'detail':'No se pudo consultar la programación. Vuelve a intentarlo.'}, 503)
+
+    @router.post('/programaciones/previsualizar')
+    async def schedules_preview(request: Request):
+        from urllib.parse import parse_qs
+        from ejecuciones.calendarios import validate_plan, next_dates, FieldError
+        from ejecuciones.control import now
+        try:
+            raw = await request.body()
+            if len(raw)>65536:
+                raise ValueError()
+            values = validate_plan(plan_form(parse_qs(raw.decode(), keep_blank_values=True)))
+            dates = next_dates(dict(values, enabled=True, effective_after=now()))
+            text = templates.env.filters['fecha'](dates[0]) if dates else 'Sin próxima fecha futura'
+            return JSONResponse({'next':text, 'summary':values['name']+' · '+values['time']+' · America/Bogota', 'errors':{}}, headers={'Cache-Control':'no-store'})
+        except FieldError as exc:
+            return JSONResponse({'errors':{exc.field:str(exc)}}, 422)
+        except (ValueError, KeyError, TypeError):
+            return JSONResponse({'errors':{'form':'Revisa los campos de la programación.'}}, 422)
+
+    @router.post('/programaciones')
+    async def schedules_update(request: Request):
+        from urllib.parse import parse_qs
+        from ejecuciones.calendarios import Calendarios, FieldError, validate_plan, next_dates
+        from ejecuciones.scheduler import Scheduler
+        from ejecuciones.control import now
+        if not os.getenv('RADAR_STATE_BUCKET') or not os.getenv('RADAR_SCHEDULE_TARGET'):
+            return JSONResponse({'detail':'Programación no configurada.'}, 503)
+        draft = None
+        try:
+            raw = await request.body()
+            if len(raw)>65536:
+                raise ValueError('Configuración demasiado grande.')
+            data = parse_qs(raw.decode(), keep_blank_values=True)
+            action = data.get('action', ['create'])[0]
+            draft = plan_form(data)
+            if action=='delete' and data.get('confirm', [''])[0]!='yes':
+                raise ValueError('Confirma la eliminación antes de continuar.')
+            if action=='preview':
+                values = validate_plan(draft)
+                dates = next_dates(dict(values, enabled=True, effective_after=now()))
+                return render_plans(request, draft=draft, fields={'preview':''}, preview=dates[0] if dates else None)
+            await run_in_threadpool(lambda: Calendarios(ServicioEjecuciones(), Scheduler()).change(action, draft['id'] or None,
+                draft, draft['revision'], data.get('collection_revision', [None])[0]))
+            return RedirectResponse(PATH+'/programaciones?guardada=1', 303)
+        except FieldError as exc:
+            return render_plans(request, 422, fields={exc.field:str(exc)}, draft=draft)
+        except (ValueError, TypeError, KeyError) as exc:
+            return render_plans(request, 409 if isinstance(exc, Conflict) else 422, error=str(exc) if isinstance(exc, ValueError) else 'Revisa los datos enviados.', draft=draft)
+        except Exception:
+            return render_plans(request, 503, error='No se confirmó el guardado. Recarga para verificarlo antes de repetir.', draft=draft)
+
     @router.get('/estado')
     def status(request: Request, run: str | None = None):
         try:
@@ -229,7 +331,12 @@ def crear_router():
             html = templates.env.get_template('_ejecucion06.html').render(ctx)
             history = templates.env.get_template('_ejecuciones_historial06.html').render(ctx)
             notice = templates.env.get_template('_ejecucion_aviso06.html').render(ctx)
-            return JSONResponse({'active': ctx['active']['id'] if ctx['active'] else None, 'run': ctx['run'], 'html': html, 'history_html': history, 'notice_html': notice},
+            activity_ctx = dict(ctx)
+            history_filter = request.query_params.get('historial')
+            if history_filter:
+                from ejecuciones.calendarios import LEGACY_ID
+                activity_ctx['runs'] = [r for r in ctx['runs'] if r.get('schedule_id')==history_filter or (history_filter==LEGACY_ID and r.get('origin')=='automatic' and not r.get('schedule_id'))]
+            return JSONResponse({'active': ctx['active']['id'] if ctx['active'] else None, 'run': ctx['run'], 'html': html, 'history_html': history, 'notice_html': notice, 'activity_html': templates.env.get_template('v06/_actividad_programaciones.html').render(activity_ctx), 'running_count': sum(r['status'] in {'running','saving'} and r.get('verification', {}).get('state')=='active' for r in ctx['runs'])},
                                 headers={'Cache-Control': 'no-store'})
         except Exception:
             return JSONResponse({'detail': 'Seguimiento temporalmente no disponible; esto no significa que el Job haya fallado.'}, 503, headers={'Cache-Control': 'no-store'})
