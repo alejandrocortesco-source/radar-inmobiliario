@@ -106,6 +106,18 @@ async def dismiss_announcements(page, timeout):
                 return closed
     finally:
         budget.seconds += time.monotonic()-started
+        try:
+            from .diagnostico import current
+            diagnostic=current.get()
+            if closed and diagnostic and len([r for r in diagnostic.records if r.get('outcome')=='recovered'])<8:
+                record={'source':'wasi','radar_run':__import__('os').getenv('RADAR_RUN_ID'),
+                    'technical_run':diagnostic.scraper.run_id,'search':diagnostic.scraper.cfg.url,
+                    'stage':'recognized_popup','last_completed':diagnostic.last,'outcome':'recovered',
+                    'message':'Anuncio reconocido cerrado por el mecanismo existente.', 'code':'wasi_overlay_recovered',
+                    'recovered':True,'closed':closed,'duration_ms':round((time.monotonic()-started)*1000),'timeout_ms':min(timeout,HANDLING_MS)}
+                diagnostic.records.append(record);diagnostic.emit(record)
+        except Exception:
+            pass
 
 
 async def prepare_interaction(page, target, timeout):

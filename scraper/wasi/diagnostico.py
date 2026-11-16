@@ -75,6 +75,7 @@ class Diagnostic:
                         # Valores numéricos de filtros; texto libre solo igualdad/longitud.
                         safe=lambda x:x if re.fullmatch(r'[0-9]{0,12}',str(x)) else {'length':len(str(x))}
                         result['filter']={'expected':safe(expected),'actual':safe(actual),'equal':actual==expected}
+                    result['control']['options']=await node.evaluate("e=>[...(e.options||[])].slice(0,60).map(o=>o.value).filter(v=>/^[0-9]{0,12}$/.test(v))")
                     result['control']['hit']=await node.evaluate("""e=>{const r=e.getBoundingClientRect(),t=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return !t?'outside':t===e||e.contains(t)?'self':t.closest('.productfruits--container,.productfruits--container-root')?'productfruits':'other'}""")
             result['network']=self.network[-12:]
         except Exception as exc:

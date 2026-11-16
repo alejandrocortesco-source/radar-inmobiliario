@@ -112,7 +112,7 @@ async def _aplicar(page, config, timeout, pace, _session_changes=0):
         hijo = GEO[GEO.index(campo)+1] if campo in GEO[:-1] else None
         await step('filter:'+campo,'seleccionar filtro',seleccionar(page, campo, valor, config.get('etiquetas', {}).get(campo), timeout, filtros.get(hijo) if hijo else None),page,timeout,control(campo),valor)
     for campo in INPUTS:
-        await step('filter:'+campo,'rellenar filtro',page.locator(control(campo)).fill(filtros.get(campo, '')),page,timeout,control(campo),filtros.get(campo,''))
+        await step('filter:'+campo,'rellenar filtro',page.locator(control(campo)).fill(filtros.get(campo, '')),page,30000,control(campo),filtros.get(campo,''))
     await page.locator(control('property_id')).fill('')
     if _session_changes and await page.locator('.modal:visible').filter(has_text='Tu usuario está siendo usado en otros dispositivos').count():
         raise AuthBlocked('auth_session_changed_again: otra sesión interfiere con la captura')
@@ -138,7 +138,7 @@ async def _aplicar(page, config, timeout, pace, _session_changes=0):
             actual = re.sub(r'[.,\s]', '', actual)
         if actual != esperado:
             raise WasiListingError('wasi_listing_unverified') from await _validation_failure(page,'filter_verify:'+campo,timeout,control(campo),esperado)
-    resumen = await step('summary_read','leer resumen',page.locator('#title_filter').inner_text(),page,timeout,'#title_filter')
+    resumen = await step('summary_read','leer resumen',page.locator('#title_filter').inner_text(),page,30000,'#title_filter')
     for campo in GEO:
         if filtros.get(campo) and config['etiquetas'][campo] not in resumen:
             raise WasiListingError('wasi_listing_unverified') from await _validation_failure(page,'summary_verify:'+campo,timeout,'#title_filter')
