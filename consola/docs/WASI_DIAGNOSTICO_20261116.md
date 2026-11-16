@@ -106,7 +106,7 @@ activa, lunes 09:00 America/Bogota, las tres búsquedas originales, revisión
 Bogotá. No se guardó/editó/pausó/activó ni invocó Scheduler durante esta tarea.
 Producción continúa 100% en radar-verify-20261111; no se modificó IAM ni IAP.
 
-## Componentes efectivos
+## Componentes utilizados en la prueba
 
 Fuente de imágenes: commit `c5ab88a15d175ca5ea3ce84ccae884a23ba9c60a`.
 
@@ -164,4 +164,25 @@ memoria). La prueba sintética de popup ahora comprueba también esa conservaci�
 12 pruebas de diagnóstico aprobadas en 22,91 s después del ajuste. No cambia el
 cierre real anterior: allí no hubo advertencias ni errores. No se repite la captura.
 La imagen c5ab88a de la tabla anterior identifica la prueba real; el manifiesto
-final del Job se documenta a continuación después de construir esta mejora.
+final del Job después de esta mejora se detalla a continuación.
+
+
+## Manifiesto final de instrumentación
+
+Job radar-manual-review generación 10 Ready=True, imagen efectiva:
+`us-central1-docker.pkg.dev/radar-inmobiliario-co/radar/jobs@sha256:3e9d12c04aa7cefcc568e29fbaa147897e29fd739c81226ee33c5a5b112e8525`.
+Fuente b193cb1ec8961cb414da3a1f4033c8d1861db102; build regional
+c3fe4814-133b-4c2d-9b7d-249a449db8e8 SUCCESS. La web conserva la revisión
+radar-wasi-diag-c5ab88a y digest 625b93201edb523a9df7cc47bf95ec417cd6f1902bcb95173e693f0cba5f3d72;
+el último ajuste solo afecta al worker. Se comprobó el digest leyendo el recurso
+completo, no la etiqueta source-sha histórica del Job.
+
+No se ejecutó la imagen final de nuevo contra Wasi: el ajuste postcaptura solo
+conserva advertencias recuperadas en memoria/informe y pasó las 12 pruebas sintéticas.
+Contador de ejecuciones Job: 9 antes, 10 después; última y única nueva nbkjd,
+EXECUTION_SUCCEEDED. Scheduler sigue ENABLED lunes 09:00, próxima 23/11/2026,
+y el lock efectivo sigue ausente. La revisión final no escribió otro snapshot.
+El conjunto de pruebas de la tarea comprende 123 casos distintos aprobados
+(102 regresiones, 12 diagnósticos, 3 vistas y 6 de persistencia); las 12 de diagnóstico
+se repitieron tras el ajuste final. Única advertencia de pruebas: alias BlockingPortal
+deprecado de Starlette/AnyIO. Sin scraping adicional ni corrección funcional del portal.
