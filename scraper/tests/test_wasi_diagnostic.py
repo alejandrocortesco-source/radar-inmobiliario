@@ -56,3 +56,25 @@ def test_precise_stages_and_privacy(case):
    finally:
     current.reset(token);await browser.close()
  asyncio.run(run())
+
+
+def test_failed_private_upload_preserves_original(monkeypatch):
+ from google.cloud import storage
+ class Blob:
+  def upload_from_string(self,*a,**k):raise RuntimeError('SECRET_TOKEN')
+ class Bucket:
+  name='synthetic'
+  def blob(self,n):return Blob()
+ monkeypatch.setenv('CLOUD_RUN_JOB','synthetic')
+ monkeypatch.setenv('RADAR_STATE_BUCKET','synthetic')
+ monkeypatch.setattr(storage,'Client',lambda:SimpleNamespace(bucket=lambda n:Bucket()))
+ async def run():
+  records=[];scraper=SimpleNamespace(run_id=1,cfg=SimpleNamespace(url='wasi:test'),event=lambda k,r,*a:records.append(dict(r)))
+  diag=Diagnostic(scraper)
+  async def failure():raise ValueError('ORIGINAL_SECRET')
+  for i in range(10):
+   with pytest.raises(ValueError,match='ORIGINAL_SECRET'):
+    await diag.step('first_page','comprobar',failure(),None,100)
+  assert len(records)==8 and records[0]['artifact_error']=='RuntimeError'
+  assert 'SECRET_TOKEN' not in json.dumps(records) and 'ORIGINAL_SECRET' not in json.dumps(records)
+ asyncio.run(run())
