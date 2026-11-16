@@ -15,6 +15,11 @@ OIDC Google firmado para RADAR_WEB_CALLER; POST conserva Origin exacto.
 El trabajador isolated rechaza invocaciones sin --execution; el adaptador sustituye
 solo los datos de entrada y permite éxito/error sintético sin portales ni Chromium.
 
+La validación real detectó que una generación GCS puede desaparecer entre reload y
+la descarga fijada a esa generación. ControlGCS.read reintenta 404/412 de la descarga
+hasta ocho veces y después falla cerrado; solo 404 de metadatos significa objeto
+ausente. No se cambia la exclusión mutua ni la escritura CAS.
+
 ## Recursos y límites
 
 Proyecto sin organización/padre; bucket propio con soft delete deshabilitado,

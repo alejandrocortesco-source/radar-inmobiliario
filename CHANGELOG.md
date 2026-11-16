@@ -8,6 +8,8 @@
 - v0.14.0 y su commit se conservan. Sin push ni despliegue productivo.
 
 
+- Reintenta lecturas del control cuando una generación fue sustituida entre metadata y descarga; no interpreta esa carrera como registro vacío.
+
 ## 0.14.0 — candidato local, sin desplegar
 
 - Programación múltiple, selector por portal y presentación Carbon con estados verificados.

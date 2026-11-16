@@ -63,17 +63,25 @@ class ControlGCS:
         return self.bucket.blob(self.objeto)
 
     def read(self):
-        blob = self.blob
-        try:
-            blob.reload(timeout=10)
+        for attempt in range(8):
+            blob = self.blob
+            try:
+                blob.reload(timeout=10)
+            except NotFound:
+                return empty(), 0
             generation = int(blob.generation)
-            raw = blob.download_as_bytes(if_generation_match=generation, timeout=15)
-        except NotFound:
-            return empty(), 0
-        doc = json.loads(raw)
-        if doc.get('version') not in (1, 2) or not isinstance(doc.get('runs'), list):
-            raise IntegrityError('Registro de ejecuciones incompatible')
-        return doc, generation
+            try:
+                raw = blob.download_as_bytes(if_generation_match=generation, timeout=15)
+            except (NotFound, PreconditionFailed):
+                # Una generación sustituida puede desaparecer entre metadata y GET.
+                # No confundir esa carrera con un objeto de control inexistente.
+                time.sleep(.02 * (attempt + 1))
+                continue
+            doc = json.loads(raw)
+            if doc.get('version') not in (1, 2) or not isinstance(doc.get('runs'), list):
+                raise IntegrityError('Registro de ejecuciones incompatible')
+            return doc, generation
+        raise Conflict('El registro cambió durante la lectura. Vuelve a consultar.')
 
     def change(self, mutate, *, idle_only=False, transition=False):
         for attempt in range(8):
