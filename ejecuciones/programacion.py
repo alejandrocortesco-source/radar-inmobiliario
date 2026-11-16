@@ -80,6 +80,35 @@ def occurrence_reason(doc, occurrence, at=None):
     return None
 
 
+class InvalidOccurrence(ValueError):
+    def __init__(self, code):
+        self.code = code
+        super().__init__(code)
+
+
+def scheduler_identity(value, expected):
+    if value is None or value == '':
+        raise InvalidOccurrence('missing_job_header')
+    short = expected.rsplit('/', 1)[-1]
+    if value == expected:
+        return expected, 'full'
+    if value == short:
+        return expected, 'short'
+    raise InvalidOccurrence('unrecognized_job')
+
+
+def scheduled_time(value):
+    if not value:
+        raise InvalidOccurrence('missing_schedule_header')
+    try:
+        date = datetime.fromisoformat(value.replace('Z', '+00:00'))
+        if date.tzinfo is None:
+            raise ValueError()
+        return date.astimezone(timezone.utc).isoformat()
+    except (ValueError, TypeError, AttributeError):
+        raise InvalidOccurrence('invalid_schedule_time') from None
+
+
 class Programacion:
     def __init__(self, service, scheduler):
         self.service, self.control, self.scheduler = service, service.control, scheduler
@@ -142,12 +171,8 @@ class Programacion:
         return desired
 
     def deliver(self, job, revision, scheduled_at):
-        if job != self.scheduler.name:
-            raise ValueError('Job de Scheduler no permitido.')
-        date = datetime.fromisoformat(scheduled_at.replace('Z','+00:00'))
-        if date.tzinfo is None:
-            raise ValueError('Hora prevista inválida.')
-        scheduled_at = date.astimezone(timezone.utc).isoformat()
+        job, _ = scheduler_identity(job, self.scheduler.name)
+        scheduled_at = scheduled_time(scheduled_at)
         occurrence = dict(job=job, revision=revision, scheduled_at=scheduled_at)
         identity = str(uuid5(NAMESPACE_URL, job+'|'+revision+'|'+scheduled_at))
         doc = self.control.read()[0]

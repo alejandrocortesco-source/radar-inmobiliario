@@ -203,3 +203,6 @@ Cliente es la persona atendida; oportunidad es una necesidad concreta, con vario
 - El sistema de archivos efímero de Cloud Run no será el almacenamiento definitivo cuando se aborde el despliegue futuro. Sheets sigue siendo el objetivo previsto, sin migración integral en esta entrega.
 
 Referencias técnicas: `scraper/README.md`, `scraper/docs/INCREMENTAL.md`, `catalogo/README.md`, `oportunidades/README.md`, `consola/README.md` y `consola/docs/V06.md`. Este documento es la referencia de decisiones; los README explican la implementación real. Actualizarlo por decisiones aprobadas o hitos verificados, sin confundir rama y versión funcional.
+
+
+Corrección posterior autorizada del contrato JobName: [normalización exacta y diagnóstico](consola/docs/CORRECCION_SCHEDULER_ID_20261116.md). La validación operativa sigue pendiente; Scheduler permanece pausado.

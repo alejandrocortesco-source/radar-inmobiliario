@@ -296,3 +296,6 @@ lunes 08:15 con esas tres búsquedas. No reactivar hasta corregir y validar el c
 del header JobName (ID corto documentado frente a ruta completa esperada).
 No se repitió la prueba ni se aplicó una corrección de runtime en esta tarea.
 Diagnóstico, propuesta mínima, límites y evidencia: [prueba operativa](PRUEBA_PROGRAMACION_20261116.md).
+
+
+Corrección posterior autorizada del contrato JobName: [normalización exacta y diagnóstico](CORRECCION_SCHEDULER_ID_20261116.md). La validación operativa sigue pendiente; Scheduler permanece pausado.
