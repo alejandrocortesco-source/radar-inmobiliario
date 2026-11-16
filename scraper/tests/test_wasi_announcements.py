@@ -74,14 +74,14 @@ def test_visible_descendants_zero_height_and_fail_safe(mode, text, expected):
     asyncio.run(run())
 
 
-@pytest.mark.parametrize('count,expected', [(3, None), (4, 'wasi_overlay_limit')])
-def test_consecutive_announcements_are_bounded(count, expected):
+@pytest.mark.parametrize('count,expected,mode', [(3, None, 'normal'), (4, 'wasi_overlay_limit', 'normal'), (3, None, 'delayed-next'), (4, 'wasi_overlay_limit', 'delayed-next')])
+def test_consecutive_announcements_are_bounded(count, expected, mode):
     async def run():
         async with async_playwright() as p:
             browser = await p.chromium.launch()
             try:
                 page = await setup_page(browser)
-                await page.evaluate('remaining => addAnnouncement({remaining})', count)
+                await page.evaluate('arg => addAnnouncement(arg)', {'remaining':count, 'mode':mode})
                 if expected:
                     with pytest.raises(WasiListingError) as exc:
                         await overlays.dismiss_announcements(page, 6000)

@@ -18,6 +18,9 @@
       popupCounts.closed++;
       if(mode==='stuck')return;
       if(mode==='residual-background'){dialog.remove();return;}
+      if(mode==='delayed-next' && remaining>1){
+        dialog.remove();setTimeout(()=>{host.remove();addAnnouncement({mode,text:'Noticia posterior',remaining:remaining-1})},80);return;
+      }
       host.remove();
       if(remaining>1)addAnnouncement({mode,text:'Otra promoción posterior',remaining:remaining-1});
     };

@@ -83,9 +83,9 @@ de detenerse. No se reescribe el historial existente.
 ## Pruebas aisladas
 
 Toda la red interceptada, credenciales sintéticas y SQLite en `.tmp/`/tmp_path.
-Archivo nuevo `test_wasi_announcements.py`: 25 pruebas, incluidas altura cero,
+Archivo nuevo `test_wasi_announcements.py`: 27 pruebas, incluidas altura cero,
 dos textos, raíz hermana, ausencia, oculto, deshabilitado, ambiguo, ventana ajena,
-diálogo/fondo persistentes, tres anuncios consecutivos y límite al cuarto,
+diálogo/fondo persistentes, tres anuncios consecutivos y límite al cuarto (también con transición diferida y fondo compartido),
 presupuesto de página/tiempo, CAPTCHA sin cierre, aparición tardía antes del clic,
 entre pointerdown/click y error posterior al despacho para Buscar y Siguiente.
 Verifica que ambas acciones se ejecutan una sola vez. También prueba anuncios
@@ -98,11 +98,21 @@ Resultados nuevos de esta tarea (no se suman las repeticiones específicas):
 
 | Comprobación | Resultado |
 | --- | --- |
-| Nueva suite de anuncios Wasi | 25 aprobadas, incluidas en la suite completa |
-| Suite completa scraper, con Metrocuadrado y Fincaraíz | 169 aprobadas, 143,82 s |
+| Nueva suite de anuncios Wasi | 27 aprobadas, incluidas en la suite completa final |
+| Suite completa final scraper, con Metrocuadrado y Fincaraíz | 171 aprobadas, 136,61 s |
 | Suite completa consola y ejecuciones compartidas | 457 aprobadas, 277,21 s |
 | Suite completa catálogo | 249 aprobadas, 9,90 s |
+| Regresión final de ejecuciones y generaciones | 54 aprobadas, 20,33 s (subconjunto de consola) |
 | pip check, compileall wasi/ejecuciones y git diff --check | Correctos |
+
+La comprobación adicional de transición diferida detectó dos fallos de la primera
+implementación: interpretaba como residual el fondo que estaba cargando otro
+anuncio. Se añadió una espera acotada por desaparición del fondo **o** nuevo diálogo
+reconocido y se volvió a ejecutar todo scraper y la regresión compartida de
+ejecuciones/generaciones. Ambas pasan; el cierre persistentemente bloqueado sigue
+fallando de forma segura. La consola completa y catálogo se ejecutaron antes de
+este último ajuste local del manejador; no se presentan como repeticiones finales.
+La primera imagen de esta tarea no se ejecutó y se sustituye por la imagen final.
 
 Única advertencia: deprecación conocida de BlockingPortal en Starlette/AnyIO.
 La consola incluye Chromium sintético en escritorio, tablet y móvil. No cambió

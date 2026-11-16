@@ -92,12 +92,17 @@ async def dismiss_announcements(page, timeout):
             dialogs = await visible_nodes(page.locator(DIALOG))
             if not dialogs:
                 try:
-                    await page.wait_for_function("""selector => ![...document.querySelectorAll(selector)].some(e=>{
-                        const s=getComputedStyle(e), r=e.getBoundingClientRect();
-                        return !!r.width && !!r.height && s.display!=='none' && s.visibility!=='hidden' && s.pointerEvents!=='none';
-                    })""", arg=BACKDROP, timeout=max(1, min(CLOSE_MS, int((deadline-time.monotonic())*1000))))
+                    await page.wait_for_function("""({background,dialog}) => {
+                        const visible=e=>{const s=getComputedStyle(e),r=e.getBoundingClientRect();
+                            return !!r.width && !!r.height && s.display!=='none' && s.visibility!=='hidden';};
+                        return [...document.querySelectorAll(dialog)].some(visible) ||
+                            ![...document.querySelectorAll(background)].some(e=>visible(e) && getComputedStyle(e).pointerEvents!=='none');
+                    }""", arg={'background': BACKDROP, 'dialog': DIALOG},
+                        timeout=max(1, min(CLOSE_MS, int((deadline-time.monotonic())*1000))))
                 except BrowserTimeout:
                     raise WasiListingError('wasi_overlay_unclosable') from None
+                if await visible_nodes(page.locator(DIALOG)):
+                    continue  # El fondo pasó a otro anuncio reconocido durante la espera.
                 return closed
     finally:
         budget.seconds += time.monotonic()-started
