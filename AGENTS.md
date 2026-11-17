@@ -1,5 +1,17 @@
 # Radar Inmobiliario
 
+## Carpeta principal y comprobación obligatoria — 16 noviembre 2026
+
+- Única carpeta de trabajo principal: `C:\Users\Palex25\Documents\Boch-Lab\Radar-CloudRun-20261111\repo`. El directorio padre contiene herramientas, credenciales externas y respaldos; no es la raíz Git. Ejecutar comandos desde `repo` o usar `git -C` con esa ruta exacta.
+- `C:\Users\Palex25\Documents\Boch-Lab\Radar Inmobiliario` es un respaldo histórico, identificado por `RESPALDO_NO_USAR_COMO_PROYECTO.md`. No usarlo para desarrollo, despliegues ni sincronización cotidiana. Conservar sus datos, configuración y worktrees históricos; no sustituirlos por datos cloud ni por fixtures.
+- Antes de trabajar, comprobar `Get-Location`, `git rev-parse --show-toplevel`, `git status --short`, `git diff --cached --stat`, `git branch --show-current` y `git log -1 --oneline`. La raíz Git debe ser la principal indicada; una carpeta con el nombre Radar no basta.
+- Base desplegada: tag `v0.14.1`, commit `845912ee304938b584b4792296ad0fb257b78be1`. Verificar `git rev-parse 'v0.14.1^{commit}'` y que `git merge-base --is-ancestor v0.14.1 HEAD` termine correctamente. HEAD puede contener documentación posterior; no atribuirle por ello una imagen reconstruida ni otra versión activa.
+- La rama operativa de esta entrega y de su consolidación documental autorizada es `codex/ejecuciones-manuales`. Conservar `develop` y las ramas históricas. La política general de desarrollo en `develop` no autoriza integrar ni bajar a esa rama implícitamente: cualquier integración futura de la entrega debe revisarse por separado.
+- Consultar GitHub mediante `git fetch --no-tags origin` y comparación real de la rama correspondiente antes de publicar; no hacer merge, reset ni push de otras referencias como parte de esa comprobación. Los tags y referencias `refs/archive/20261116-secondary/` se conservan, sin publicación implícita.
+- Producción v0.14.1 usa control GCS formato 2. Mantener Scheduler y todas las programaciones pausados hasta autorización expresa posterior. No ejecutar scraping ni Jobs como prueba. Un rollback requiere el procedimiento lógico de `deployment/RELEASE_014.md` antes de restaurar escritores antiguos; nunca restaurar un control o snapshot completo antiguo.
+
+Resultado de organización, preservación y cierre de despliegue: [Consolidación local](docs/CONSOLIDACION_LOCAL_20261116.md). Las evidencias, datos y secretos permanecen fuera de Git.
+
 **Primera lectura:** `RADAR_PROYECTO_RECTOR.md` contiene las decisiones vigentes. Los README de los módulos documentan el código real; contrastar diferencias antes de asumir.
 
 **Organización de archivos:** consultar [el mapa y las reglas de ubicación](docs/ESTRUCTURA.md) y [el índice documental](docs/README.md). Conservar rutas operativas; no crear copias del proyecto por versión ni publicar documentos privados de `.local/`.
