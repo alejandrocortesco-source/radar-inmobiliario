@@ -1,6 +1,6 @@
 # Ejecutar tras aprobar acceso de radar-jobs a estos dos secretos exactos.
 $ErrorActionPreference='Stop'
-$cloud=Join-Path $PSScriptRoot '../../cloud.ps1'
+$cloud=Join-Path $PSScriptRoot '../.local/cloudrun-environment/cloud.ps1'
 $project='radar-inmobiliario-co'
 foreach($entry in @(@('wasi-user','Usuario.txt'),@('wasi-password','Password.txt'))) {
     $secret=$entry[0]

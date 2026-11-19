@@ -1,6 +1,6 @@
 param([ValidateSet('web','jobs')][string]$Target='web')
 $ErrorActionPreference='Stop'
-$cloud=Join-Path $PSScriptRoot '../../cloud.ps1'
+$cloud=Join-Path $PSScriptRoot '../.local/cloudrun-environment/cloud.ps1'
 Push-Location (Join-Path $PSScriptRoot '..')
 try {
     $sha=(git rev-parse HEAD).Trim()

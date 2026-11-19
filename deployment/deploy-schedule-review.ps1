@@ -6,7 +6,7 @@ param(
 )
 $ErrorActionPreference='Stop'
 throw 'Bootstrap histórico deshabilitado para 0.14.0: seguir deployment/RELEASE_014.md; no ejecutar cambios IAM/Scheduler implícitos.'
-$cloud=Join-Path $PSScriptRoot '../../cloud.ps1'
+$cloud=Join-Path $PSScriptRoot '../.local/cloudrun-environment/cloud.ps1'
 $project='radar-inmobiliario-co'
 $region='us-central1'
 foreach($item in @(@('web',$WebDigest),@('jobs',$JobsDigest))) {

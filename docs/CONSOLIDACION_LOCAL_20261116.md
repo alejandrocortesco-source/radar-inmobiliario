@@ -1,5 +1,8 @@
 # Consolidación y cierre v0.14.1 — 16 noviembre 2026
 
+
+> Consolidación local posterior autorizada: la carpeta operativa es ahora la raíz de `Radar Inmobiliario`, rama `codex/ejecuciones-manuales`, base `f0aa27c`. Se conservan `develop`, tags y worktrees. Las ubicaciones y autorizaciones CloudRun del texto siguiente son históricas. Los datos y herramientas privados se resuelven bajo `.local/`; no se autoriza actividad externa.
+
 La carpeta principal es `C:\Users\Palex25\Documents\Boch-Lab\Radar-CloudRun-20261111\repo`, rama `codex/ejecuciones-manuales`. Se conserva su ubicación para mantener el entorno activo, los scripts y las credenciales externas. El directorio padre no es un repositorio Git. La entrega funcional sigue siendo v0.14.1, commit `845912ee304938b584b4792296ad0fb257b78be1`; este cierre solo añade documentación, sin reconstrucción de imágenes.
 
 ## Producción verificada

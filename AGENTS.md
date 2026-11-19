@@ -1,26 +1,27 @@
 # Radar Inmobiliario
 
-## Carpeta principal y comprobación obligatoria — 16 noviembre 2026
+## Carpeta operativa después de la consolidación local
 
-- Única carpeta de trabajo principal: `C:\Users\Palex25\Documents\Boch-Lab\Radar-CloudRun-20261111\repo`. El directorio padre contiene herramientas, credenciales externas y respaldos; no es la raíz Git. Ejecutar comandos desde `repo` o usar `git -C` con esa ruta exacta.
-- `C:\Users\Palex25\Documents\Boch-Lab\Radar Inmobiliario` es un respaldo histórico, identificado por `RESPALDO_NO_USAR_COMO_PROYECTO.md`. No usarlo para desarrollo, despliegues ni sincronización cotidiana. Conservar sus datos, configuración y worktrees históricos; no sustituirlos por datos cloud ni por fixtures.
-- Antes de trabajar, comprobar `Get-Location`, `git rev-parse --show-toplevel`, `git status --short`, `git diff --cached --stat`, `git branch --show-current` y `git log -1 --oneline`. La raíz Git debe ser la principal indicada; una carpeta con el nombre Radar no basta.
-- Base desplegada: tag `v0.14.1`, commit `845912ee304938b584b4792296ad0fb257b78be1`. Verificar `git rev-parse 'v0.14.1^{commit}'` y que `git merge-base --is-ancestor v0.14.1 HEAD` termine correctamente. HEAD puede contener documentación posterior; no atribuirle por ello una imagen reconstruida ni otra versión activa.
-- La rama operativa de esta entrega y de su consolidación documental autorizada es `codex/ejecuciones-manuales`. Conservar `develop` y las ramas históricas. La política general de desarrollo en `develop` no autoriza integrar ni bajar a esa rama implícitamente: cualquier integración futura de la entrega debe revisarse por separado.
-- Consultar GitHub mediante `git fetch --no-tags origin` y comparación real de la rama correspondiente antes de publicar; no hacer merge, reset ni push de otras referencias como parte de esa comprobación. Los tags y referencias `refs/archive/20261116-secondary/` se conservan, sin publicación implícita.
-- Producción v0.14.1 usa control GCS formato 2. Mantener Scheduler y todas las programaciones pausados hasta autorización expresa posterior. No ejecutar scraping ni Jobs como prueba. Un rollback requiere el procedimiento lógico de `deployment/RELEASE_014.md` antes de restaurar escritores antiguos; nunca restaurar un control o snapshot completo antiguo.
+- La única carpeta operativa es la raíz de este repositorio, llamada `Radar Inmobiliario`. Comprobar siempre la raíz Git; no trabajar desde el entorno histórico CloudRun.
+- Esta consolidación local fue autorizada expresamente después de la auditoría. Conservar el `.git` existente, `develop`, las ramas históricas, todos los tags y los dos worktrees. No reemplazar `.git`, limpiar objetos ni reescribir historial.
+- La rama operativa es `codex/ejecuciones-manuales`, con base auditada `f0aa27c453498601165d8d61409dccbc3b30abb0`. Las instrucciones y rutas de consolidación pueden aparecer como cambios locales sobre esa base; no confundirlas con una versión desplegada nueva.
+- Antes de trabajar: `git rev-parse --show-toplevel`, `git status --short`, `git diff --cached --stat`, `git branch --show-current` y `git log -1 --oneline`.
+- Base desplegada: tag `v0.14.1`, commit `845912ee304938b584b4792296ad0fb257b78be1`. Verificar `git rev-parse 'v0.14.1^{commit}'` y `git merge-base --is-ancestor v0.14.1 HEAD`.
+- Python operativo: `.venv/Scripts/python.exe`, versión 3.13.14. El entorno 3.12 anterior se conserva íntegro en `.local/consolidacion-operativa-20261116/python312-original/` como recuperación histórica. Arranque local: `.local/iniciar-local.ps1`.
+- Artefactos privados en `.local/releases/`; herramientas, configuración cloud y respaldos históricos en `.local/cloudrun-environment/`. Ninguno pertenece a Git. Los scripts de deployment resuelven su wrapper desde esa ubicación relativa.
+- No depender de rutas del entorno histórico. No eliminar ese entorno hasta validar una nueva sesión desde esta carpeta. El respaldo completo externo y sus hashes se identifican en el informe privado de consolidación.
+- Scheduler y todas las programaciones permanecen pausados. No ejecutar Jobs, scraping real ni escrituras externas sin una autorización nueva. Esta consolidación no autoriza push, integración en main ni despliegue.
+- Producción usa control GCS formato 2. Cualquier rollback requiere el procedimiento lógico de `deployment/RELEASE_014.md`; nunca restaurar un control o snapshot completo antiguo.
 
-Resultado de organización, preservación y cierre de despliegue: [Consolidación local](docs/CONSOLIDACION_LOCAL_20261116.md). Las evidencias, datos y secretos permanecen fuera de Git.
+**Primera lectura:** `RADAR_PROYECTO_RECTOR.md`. Las autorizaciones y ubicaciones descritas en informes anteriores son históricas; esta entrada y la instrucción más reciente del usuario gobiernan la consolidación.
 
-**Primera lectura:** `RADAR_PROYECTO_RECTOR.md` contiene las decisiones vigentes. Los README de los módulos documentan el código real; contrastar diferencias antes de asumir.
-
-**Organización de archivos:** consultar [el mapa y las reglas de ubicación](docs/ESTRUCTURA.md) y [el índice documental](docs/README.md). Conservar rutas operativas; no crear copias del proyecto por versión ni publicar documentos privados de `.local/`.
+**Organización:** [estructura](docs/ESTRUCTURA.md) e [índice](docs/README.md). Evidencias, secretos y datos privados siempre fuera de Git.
 
 ## Alcance y conservación
 
 - Herramienta privada para Mónica, unos 30 clientes activos y presupuesto operativo objetivo inferior a 10 USD/mes, sujeto a medición. Priorizar simplicidad, mantenimiento y reutilización.
 
-- La especificación funcional vigente está en `RADAR_PROYECTO_RECTOR.md`. Seguir la política única de [Git y versionado](GIT_WORKFLOW.md): todo desarrollo y commit nuevo se realiza en `develop`. v0.8 se identifica mediante el tag `v0.8.0`; las rutas existentes se conservan.
+- La especificación funcional vigente está en `RADAR_PROYECTO_RECTOR.md`. Seguir la política única de [Git y versionado](GIT_WORKFLOW.md): la rama de esta consolidación local es `codex/ejecuciones-manuales`; conservar `develop` sin integraciones implícitas. v0.8 se identifica mediante el tag `v0.8.0`; las rutas existentes se conservan.
 - Reutilizar scraper, catálogo, identidades, historial, clientes, oportunidades y matching determinista. No reconstruirlos para un cambio visual.
 - FastAPI, Jinja2, CSS y JavaScript nativo. Sin React, Carbon instalado, Firestore ni infraestructura adicional.
 - El dashboard tiene **exactamente cuatro secciones**: oportunidades recientes, estado del catálogo, Radar Central y nuevo cliente. La actividad pertenece a las dos primeras; no existe una quinta sección.

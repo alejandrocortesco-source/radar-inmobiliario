@@ -1,5 +1,8 @@
 # Mapa de archivos y conservación
 
+
+> Consolidación local posterior autorizada: la carpeta operativa es ahora la raíz de `Radar Inmobiliario`, rama `codex/ejecuciones-manuales`, base `f0aa27c`. Se conservan `develop`, tags y worktrees. Las ubicaciones y autorizaciones CloudRun del texto siguiente son históricas. Los datos y herramientas privados se resuelven bajo `.local/`; no se autoriza actividad externa.
+
 ## Estructura del proyecto
 
 Una sola carpeta de trabajo y un solo repositorio: no crear carpetas como copias v0.8 o v0.9. Las versiones se recuperan con Git según [su política](../GIT_WORKFLOW.md).

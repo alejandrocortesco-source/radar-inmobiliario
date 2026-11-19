@@ -1,6 +1,6 @@
 # Aplicar únicamente tras la aprobación específica del operador.
 $ErrorActionPreference = 'Stop'
-$cloud = Join-Path $PSScriptRoot '../../cloud.ps1'
+$cloud = Join-Path $PSScriptRoot '../.local/cloudrun-environment/cloud.ps1'
 $project = 'radar-inmobiliario-co'
 $region = 'us-central1'
 function Cloud { & $cloud @args; if ($LASTEXITCODE -ne 0) { throw 'Falló una operación de Google Cloud' } }

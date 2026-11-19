@@ -1,5 +1,8 @@
 # Radar Inmobiliario — candidato local v0.14.1
 
+
+> Consolidación local posterior autorizada: la carpeta operativa es ahora la raíz de `Radar Inmobiliario`, rama `codex/ejecuciones-manuales`, base `f0aa27c`. Se conservan `develop`, tags y worktrees. Las ubicaciones y autorizaciones CloudRun del texto siguiente son históricas. Los datos y herramientas privados se resuelven bajo `.local/`; no se autoriza actividad externa.
+
 La especificación funcional del usuario de 3 de noviembre de 2026 gobierna esta entrega. El producto acompaña el trabajo de Mónica con unos 30 clientes activos. Debe permanecer sencillo y de bajo mantenimiento; el objetivo de operación inferior a US$10/mes está **pendiente de validación de consumo y alojamiento**, no es una garantía.
 
 ## Aislamiento autorizado — v0.14.1 (16 de noviembre de 2026)

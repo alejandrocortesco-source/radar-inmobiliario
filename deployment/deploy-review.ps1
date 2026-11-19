@@ -8,7 +8,7 @@ $ErrorActionPreference='Stop'
 foreach($item in @(@('web',$WebDigest),@('jobs',$JobsDigest))) {
     if($item[1] -notmatch "^us-central1-docker.pkg.dev/radar-inmobiliario-co/radar/$($item[0])@sha256:[a-f0-9]{64}$") {throw 'Se requieren digests exactos de Radar'}
 }
-$cloud=Join-Path $PSScriptRoot '../../cloud.ps1'
+$cloud=Join-Path $PSScriptRoot '../.local/cloudrun-environment/cloud.ps1'
 $project='radar-inmobiliario-co'
 $region='us-central1'
 $job='radar-manual-review'

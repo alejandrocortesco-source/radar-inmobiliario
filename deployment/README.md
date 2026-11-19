@@ -1,3 +1,12 @@
+# Operación cloud desde la carpeta consolidada
+
+Los scripts se ejecutan desde este repositorio y resuelven el wrapper en
+`.local/cloudrun-environment/cloud.ps1`, que conserva sus herramientas y configuración
+en subcarpetas propias. Los respaldos iniciales están en
+`.local/cloudrun-environment/backups/`. No se requiere el entorno histórico.
+Estas rutas no autorizan builds, Jobs, Scheduler ni despliegues. El contenido
+siguiente documenta operaciones anteriores y conserva su contexto histórico.
+
 # Operación privada de Cloud Run desde copia independiente
 
 Este directorio pertenece exclusivamente al clon de despliegue. La solicitud inicial limitó los cambios al clon y Google Cloud. La solicitud
